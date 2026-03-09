@@ -4,27 +4,15 @@ import { useState, useRef, useCallback, useEffect } from "react";
 
 // CV data - placeholder texts for user guidance
 const initialCV = {
-  name: "Ad Soyad",
-  title: "Ünvan | Pozisyon",
+  name: "Full Name",
+  title: "Job Title | Position",
   phone: "+90 5XX XXX XX XX",
   email: "email@example.com",
-  location: "Şehir, Ülke",
-  linkedin: "linkedin.com/in/profiliniz",
+  location: "City, Country",
+  linkedin: "linkedin.com/in/yourprofile",
+  website: "",
 
-  summary:
-    "Kendinizi kısaca tanıtın. Kaç yıllık deneyiminiz olduğunu, uzmanlık alanlarınızı ve kariyer hedefinizi buraya yazın.",
-
-  experiences: [
-    {
-      company: "Şirket Adı",
-      date: "AA/YYYY – AA/YYYY",
-      position: "Pozisyon / Ünvan",
-      bullets: [
-        "Bu pozisyondaki en önemli başarınızı veya sorumluluğunuzu yazın.",
-        "Somut rakamlarla desteklenmiş bir başarınızı ekleyin.",
-      ],
-    },
-  ],
+  experiences: [],
 
   education: [
     {
@@ -49,7 +37,9 @@ const initialCV = {
 };
 
 // Reusable accordion section component
-function Section({ title, icon, isOpen, onToggle, children }) {
+function Section({ title, icon, isOpen, onToggle, tips, children }) {
+  const [tipsOpen, setTipsOpen] = useState(false);
+
   return (
     <div className="mx-4 my-3 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <button
@@ -75,7 +65,48 @@ function Section({ title, icon, isOpen, onToggle, children }) {
           <path d="m6 9 6 6 6-6"/>
         </svg>
       </button>
-      {isOpen && <div className="px-5 pb-5 border-t border-gray-100">{children}</div>}
+      {isOpen && (
+        <div className="px-5 pb-5 border-t border-gray-100">
+          {/* Tips and Recommendations */}
+          {tips && (
+            <div className="mt-4 mb-4 border border-gray-200 rounded-lg overflow-hidden">
+              <button
+                onClick={() => setTipsOpen(!tipsOpen)}
+                className="w-full flex justify-between items-center px-4 py-2.5 text-left hover:bg-gray-50 transition-colors"
+              >
+                <span className="text-sm font-medium text-gray-700">Tips and Recommendations</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={`text-gray-400 transition-transform duration-200 ${tipsOpen ? "rotate-180" : ""}`}
+                >
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </button>
+              {tipsOpen && (
+                <div className="px-4 pb-3 border-t border-gray-100">
+                  <ul className="mt-2 space-y-1.5">
+                    {tips.map((tip, i) => (
+                      <li key={i} className="text-xs text-gray-600 flex gap-2">
+                        <span className="text-gray-400">•</span>
+                        {tip}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -275,7 +306,7 @@ export default function Builder() {
               <div class="mb-12">
                 <div class="exp-header">
                   <span>${exp.company}</span>
-                  <span class="exp-date">${exp.date}</span>
+                  <span class="exp-date">${exp.startDate}${exp.startDate && exp.endDate ? " – " : ""}${exp.endDate}</span>
                 </div>
                 <div class="exp-position">${exp.position}</div>
                 <ul class="exp-bullets">
@@ -349,7 +380,7 @@ export default function Builder() {
 
   // Accordion open/close states
   const [openSections, setOpenSections] = useState({
-    personal: true,
+    personal: false,
     summary: false,
     experience: false,
     education: false,
@@ -388,10 +419,12 @@ export default function Builder() {
       experiences: [
         ...prev.experiences,
         {
-          company: "Şirket Adı",
-          date: "AA/YYYY – AA/YYYY",
-          position: "Pozisyon / Ünvan",
-          bullets: ["Başarınızı veya sorumluluğunuzu yazın."],
+          company: "",
+          position: "",
+          location: "",
+          startDate: "",
+          endDate: "",
+          bullets: [""],
         },
       ],
     }));
@@ -399,11 +432,26 @@ export default function Builder() {
 
   // Remove experience
   const removeExperience = (index) => {
-    if (cv.experiences.length <= 1) return;
     setCv((prev) => ({
       ...prev,
       experiences: prev.experiences.filter((_, i) => i !== index),
     }));
+  };
+
+  // Move experience up
+  const moveExperienceUp = (index) => {
+    if (index === 0) return;
+    const updated = [...cv.experiences];
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    setCv((prev) => ({ ...prev, experiences: updated }));
+  };
+
+  // Move experience down
+  const moveExperienceDown = (index) => {
+    if (index === cv.experiences.length - 1) return;
+    const updated = [...cv.experiences];
+    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+    setCv((prev) => ({ ...prev, experiences: updated }));
   };
 
   // Add bullet to experience
@@ -507,7 +555,7 @@ export default function Builder() {
 
   // Shared input style
   const inputStyle =
-    "w-full border border-gray-200 rounded-md bg-gray-50 px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-gray-900 transition-all";
+    "w-full border border-gray-200 rounded-md bg-gray-50 px-3 py-2.5 text-sm text-gray-400 placeholder:text-gray-400 focus:outline-none focus:border-gray-900 transition-all";
   const labelStyle = "block text-sm font-medium text-gray-500 mb-1.5";
 
   return (
@@ -570,6 +618,12 @@ export default function Builder() {
               <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
             </svg>
           }
+          tips={[
+            "Use city, country only; skip full street address.",
+            "Use one professional email address (e.g., firstname.lastname@...).",
+            "Provide a phone number with the correct country code.",
+            "Use relevant professional link (LinkedIn, GitHub, portfolio).",
+          ]}
           isOpen={openSections.personal}
           onToggle={() => toggleSection("personal")}
         >
@@ -622,12 +676,34 @@ export default function Builder() {
                 onChange={(e) => updateField("linkedin", e.target.value)}
               />
             </div>
+            <div>
+              <label className={labelStyle}>Website/Portfolio</label>
+              <input
+                className={inputStyle}
+                value={cv.website}
+                placeholder="Your portfolio or personal website URL"
+                onChange={(e) => updateField("website", e.target.value)}
+              />
+            </div>
           </div>
         </Section>
 
         {/* Professional Summary */}
         <Section
           title="Professional Summary"
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5"/>
+              <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
+            </svg>
+          }
+          tips={[
+            "Limit to 2–3 sentences (~40–60 words).",
+            "State current/target title and years of relevant experience.",
+            "Highlight 1–2 core competencies or technical strengths.",
+            "Reference one notable metric-based achievement.",
+            "Tailor wording to the specific role or industry.",
+          ]}
           isOpen={openSections.summary}
           onToggle={() => toggleSection("summary")}
         >
@@ -641,90 +717,175 @@ export default function Builder() {
         {/* Work Experience */}
         <Section
           title="Work Experience"
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M5 2a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2h3.5A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5H14a.5.5 0 0 1-1 0H3a.5.5 0 0 1-1 0h-.5A1.5 1.5 0 0 1 0 12.5v-9A1.5 1.5 0 0 1 1.5 2zm1 0h4a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1M1.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5H3V3zM15 12.5v-9a.5.5 0 0 0-.5-.5H13v10h1.5a.5.5 0 0 0 .5-.5m-3 .5V3H4v10z"/>
+            </svg>
+          }
+          tips={[
+            "List experiences in reverse chronological order (most recent first).",
+            "Use strong action verbs: Led, Developed, Implemented, Optimized.",
+            "Quantify achievements with numbers, percentages, or metrics.",
+            "Focus on impact and results, not just duties.",
+            "Keep each bullet point to 1–2 lines maximum.",
+          ]}
           isOpen={openSections.experience}
           onToggle={() => toggleSection("experience")}
         >
+          {/* Add Work Experience Button */}
+          <button
+            onClick={addExperience}
+            className="flex items-center gap-2 mb-4 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <span className="text-lg leading-none">+</span>
+            Add Work Experience
+          </button>
+
+          {/* Experience Cards */}
           {cv.experiences.map((exp, expIndex) => (
             <div
               key={expIndex}
-              className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 relative"
+              className="mb-5 p-5 bg-white border border-gray-200 rounded-xl relative"
             >
-              {/* Remove experience button */}
-              {cv.experiences.length > 1 && (
-                <button
-                  onClick={() => removeExperience(expIndex)}
-                  className="absolute top-2 right-2 text-red-400 hover:text-red-600 text-sm"
-                >
-                  ✕
-                </button>
-              )}
-              <div className="grid grid-cols-2 gap-2 mb-2">
-                <div>
-                  <label className={labelStyle}>Company</label>
+              {/* Company - Full Width with Reorder and Trash */}
+              <div className="mb-3">
+                <label className={labelStyle}>Company</label>
+                <div className="flex items-center gap-1">
                   <input
-                    className={inputStyle}
+                    className={inputStyle + " flex-1"}
+                    placeholder="Company Name"
                     value={exp.company}
                     onChange={(e) =>
                       updateExperience(expIndex, "company", e.target.value)
                     }
                   />
+                  {/* Reorder Buttons */}
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      onClick={() => moveExperienceUp(expIndex)}
+                      className={`p-1 transition-colors ${expIndex === 0 ? "text-gray-200 cursor-not-allowed" : "text-gray-400 hover:text-gray-700"}`}
+                      title="Move up"
+                      disabled={expIndex === 0}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 11a.5.5 0 0 0 .5-.5V6.707l1.146 1.147a.5.5 0 0 0 .708-.708l-2-2a.5.5 0 0 0-.708 0l-2 2a.5.5 0 1 0 .708.708L7.5 6.707V10.5a.5.5 0 0 0 .5.5"/>
+                        <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => moveExperienceDown(expIndex)}
+                      className={`p-1 transition-colors ${expIndex === cv.experiences.length - 1 ? "text-gray-200 cursor-not-allowed" : "text-gray-400 hover:text-gray-700"}`}
+                      title="Move down"
+                      disabled={expIndex === cv.experiences.length - 1}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 5a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 9.293V5.5A.5.5 0 0 1 8 5"/>
+                        <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+                      </svg>
+                    </button>
+                  </div>
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => removeExperience(expIndex)}
+                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    title="Delete"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                      <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                    </svg>
+                  </button>
                 </div>
+              </div>
+
+              {/* Role | Location */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
-                  <label className={labelStyle}>Date</label>
+                  <label className={labelStyle}>Role</label>
                   <input
                     className={inputStyle}
-                    value={exp.date}
+                    placeholder="Role"
+                    value={exp.position}
                     onChange={(e) =>
-                      updateExperience(expIndex, "date", e.target.value)
+                      updateExperience(expIndex, "position", e.target.value)
                     }
                   />
                 </div>
-              </div>
-              <div className="mb-2">
-                <label className={labelStyle}>Position</label>
-                <input
-                  className={inputStyle}
-                  value={exp.position}
-                  onChange={(e) =>
-                    updateExperience(expIndex, "position", e.target.value)
-                  }
-                />
-              </div>
-              {/* Bullet points */}
-              <label className={labelStyle}>Bullet Points</label>
-              {exp.bullets.map((bullet, bIndex) => (
-                <div key={bIndex} className="flex gap-1 mb-1">
+                <div>
+                  <label className={labelStyle}>Location</label>
                   <input
-                    className={inputStyle + " flex-1"}
-                    value={bullet}
+                    className={inputStyle}
+                    placeholder="Location"
+                    value={exp.location || ""}
                     onChange={(e) =>
-                      updateBullet(expIndex, bIndex, e.target.value)
+                      updateExperience(expIndex, "location", e.target.value)
                     }
                   />
-                  {exp.bullets.length > 1 && (
-                    <button
-                      onClick={() => removeBullet(expIndex, bIndex)}
-                      className="text-red-400 hover:text-red-600 px-2"
-                    >
-                      ✕
-                    </button>
-                  )}
                 </div>
-              ))}
-              <button
-                onClick={() => addBullet(expIndex)}
-                className="text-blue-600 text-xs mt-1 hover:underline"
-              >
-                + Add Bullet Point
-              </button>
+              </div>
+
+              {/* Start Date | End Date */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label className={labelStyle}>Start Date</label>
+                  <input
+                    className={inputStyle}
+                    placeholder="Start Date"
+                    value={exp.startDate || ""}
+                    onChange={(e) =>
+                      updateExperience(expIndex, "startDate", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className={labelStyle}>End Date</label>
+                  <input
+                    className={inputStyle}
+                    placeholder="End Date"
+                    value={exp.endDate || ""}
+                    onChange={(e) =>
+                      updateExperience(expIndex, "endDate", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Responsibilities */}
+              <div>
+                <label className={labelStyle}>Responsibilities</label>
+                {exp.bullets.map((bullet, bIndex) => (
+                  <div key={bIndex} className="flex gap-2 mb-2">
+                    <input
+                      className={inputStyle + " flex-1"}
+                      placeholder="New Responsibility"
+                      value={bullet}
+                      onChange={(e) =>
+                        updateBullet(expIndex, bIndex, e.target.value)
+                      }
+                    />
+                    {exp.bullets.length > 1 && (
+                      <button
+                        onClick={() => removeBullet(expIndex, bIndex)}
+                        className="text-gray-400 hover:text-red-500 px-1 transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                          <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  onClick={() => addBullet(expIndex)}
+                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mt-1 transition-colors"
+                >
+                  <span className="text-base leading-none">+</span>
+                  Add Responsibility
+                </button>
+              </div>
             </div>
           ))}
-          <button
-            onClick={addExperience}
-            className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600"
-          >
-            + Add Work Experience
-          </button>
         </Section>
 
         {/* Education */}
@@ -1057,7 +1218,7 @@ export default function Builder() {
               >
                 <span>{exp.company}</span>
                 <span style={{ fontWeight: "normal", color: "#555" }}>
-                  {exp.date}
+                  {exp.startDate}{exp.startDate && exp.endDate ? " – " : ""}{exp.endDate}
                 </span>
               </div>
               <p
@@ -1069,8 +1230,8 @@ export default function Builder() {
               >
                 {exp.position}
               </p>
-              <ul style={{ paddingLeft: "18px", fontSize: "10pt" }}>
-                {exp.bullets.map((bullet, i) => (
+              <ul style={{ paddingLeft: "18px", fontSize: "10pt", listStyleType: "disc" }}>
+                {exp.bullets.filter((b) => b.trim() !== "").map((bullet, i) => (
                   <li key={i} style={{ marginBottom: "2px" }}>
                     {bullet}
                   </li>
