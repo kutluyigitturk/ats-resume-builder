@@ -49,17 +49,33 @@ const initialCV = {
 };
 
 // Reusable accordion section component
-function Section({ title, isOpen, onToggle, children }) {
+function Section({ title, icon, isOpen, onToggle, children }) {
   return (
-    <div className="border-b border-gray-200">
+    <div className="mx-4 my-3 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full flex justify-between items-center py-3 px-4 hover:bg-gray-50 text-left"
+        className="w-full flex justify-between items-center py-4 px-5 hover:bg-gray-50 text-left transition-colors"
       >
-        <span className="font-semibold text-gray-700">{title}</span>
-        <span className="text-gray-400 text-lg">{isOpen ? "▲" : "▼"}</span>
+        <div className="flex items-center gap-3">
+          {icon && <span className="text-gray-500">{icon}</span>}
+          <span className="font-semibold text-gray-800 text-base">{title}</span>
+        </div>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        >
+          <path d="m6 9 6 6 6-6"/>
+        </svg>
       </button>
-      {isOpen && <div className="px-4 pb-4">{children}</div>}
+      {isOpen && <div className="px-5 pb-5 border-t border-gray-100">{children}</div>}
     </div>
   );
 }
@@ -80,6 +96,10 @@ export default function Builder() {
   // Zoom controls
   const zoomIn = () => setZoom((prev) => Math.min(prev + 10, 150));
   const zoomOut = () => setZoom((prev) => Math.max(prev - 10, 40));
+
+  // PDF file name state
+  const [pdfName, setPdfName] = useState("Untitled_CV");
+  const [editingName, setEditingName] = useState(false);
 
   // Resizable panel state
   const [panelWidth, setPanelWidth] = useState(384);
@@ -133,7 +153,7 @@ export default function Builder() {
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body {
-              font-family: Arial, sans-serif;
+              font-family: Inter, sans-serif;
               font-size: 11pt;
               line-height: 1.5;
               color: #333;
@@ -316,7 +336,7 @@ export default function Builder() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${cv.name.replace(/\s+/g, "_")}_CV.pdf`;
+      a.download = `${pdfName.replace(/\s+/g, "_")}.pdf`;
       a.click();
       window.URL.revokeObjectURL(url);
     } catch (error) {
@@ -487,27 +507,69 @@ export default function Builder() {
 
   // Shared input style
   const inputStyle =
-    "w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500";
-  const labelStyle = "block text-xs font-medium text-gray-500 mb-1";
+    "w-full border border-gray-200 rounded-md bg-gray-50 px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-gray-900 transition-all";
+  const labelStyle = "block text-sm font-medium text-gray-500 mb-1.5";
 
   return (
     <div className="min-h-screen bg-gray-200 flex">
       {/* ==================== LEFT PANEL - FORM ==================== */}
       <div
-        className="bg-white border-r border-gray-300 overflow-y-auto h-screen sticky top-0"
+        className="bg-gray-100 border-r border-gray-300 overflow-y-auto h-screen sticky top-0"
         style={{ width: `${panelWidth}px` }}
       >
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
-          <h1 className="text-lg font-bold text-gray-800">CV Builder</h1>
-          <p className="text-xs text-gray-500 mt-1">
-            Bilgilerinizi doldurun, sağ tarafta canlı önizleyin.
-          </p>
+        {/* Top Bar */}
+        <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Back Button */}
+            <button className="p-1 rounded-md hover:bg-gray-100 transition-colors text-gray-800">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                <path fillRule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/>
+              </svg>
+            </button>
+
+            {/* PDF Name */}
+            <div className="flex items-center gap-2">
+              {editingName ? (
+                <input
+                  autoFocus
+                  value={pdfName}
+                  onChange={(e) => setPdfName(e.target.value)}
+                  onBlur={() => setEditingName(false)}
+                  onKeyDown={(e) => e.key === "Enter" && setEditingName(false)}
+                  className="text-sm font-semibold text-gray-800 border-b border-gray-400 outline-none text-center px-1 py-0.5 bg-transparent"
+                />
+              ) : (
+                <span
+                  className="text-sm font-semibold text-gray-800 cursor-pointer"
+                  onClick={() => setEditingName(true)}
+                >
+                  {pdfName}
+                </span>
+              )}
+              <button
+                onClick={() => setEditingName(true)}
+                className="p-1 rounded-md hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+                  <path d="m15 5 4 4"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Spacer for symmetry */}
+            <div className="w-8"></div>
+          </div>
         </div>
 
         {/* Personal Information */}
         <Section
           title="Personal Information"
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+          }
           isOpen={openSections.personal}
           onToggle={() => toggleSection("personal")}
         >
@@ -907,7 +969,7 @@ export default function Builder() {
               width: "210mm",
               minHeight: "297mm",
               padding: "20mm 25mm",
-              fontFamily: "Arial, sans-serif",
+              fontFamily: "Inter, sans-serif",
               fontSize: "11pt",
               lineHeight: "1.5",
               color: "#333",
