@@ -16,18 +16,9 @@ const initialCV = {
 
   education: [],
 
-  skills: [
-    "Kategori: Beceri 1, Beceri 2, Beceri 3, Beceri 4",
-    "Kategori: Beceri 1, Beceri 2, Beceri 3",
-  ],
+  skills: [],
 
-  projects: [
-    {
-      name: "Proje Adı",
-      description:
-        "Projede ne yaptığınızı, hangi teknolojileri kullandığınızı ve sonuçlarını kısaca açıklayın.",
-    },
-  ],
+  projects: [],
 };
 
 // Reusable accordion section component
@@ -41,7 +32,7 @@ function Section({ title, icon, isOpen, onToggle, tips, children }) {
         className="w-full flex justify-between items-center py-4 px-5 hover:bg-gray-50 text-left transition-colors"
       >
         <div className="flex items-center gap-3">
-          {icon && <span className="text-gray-500">{icon}</span>}
+          {icon && <span style={{ color: "rgb(37, 99, 235)" }}>{icon}</span>}
           <span className="font-semibold text-gray-800 text-base">{title}</span>
         </div>
         <svg
@@ -327,17 +318,23 @@ export default function Builder() {
               .join("")}
 
             <div class="cv-section-title">Technical Skills</div>
-            <ul class="skills-list">
-              ${cv.skills.map((s) => `<li>${s}</li>`).join("")}
+            <ul class="skills-list" style="list-style-type: disc;">
+              ${cv.skills.filter((s) => s.category || s.items).map((s) => `<li><strong>${s.category}:</strong> ${s.items}</li>`).join("")}
             </ul>
 
             <div class="cv-section-title">Technical Projects and Research</div>
             ${cv.projects
+              .filter((p) => p.name)
               .map(
                 (p) => `
               <div class="mb-8">
-                <div class="project-name">${p.name}</div>
-                <div class="project-desc">• ${p.description}</div>
+                <div class="exp-header">
+                  <span class="project-name">${p.name}</span>
+                  <span class="exp-date">${p.startDate || ""}${p.startDate && p.endDate ? " – " : ""}${p.endDate || ""}</span>
+                </div>
+                <ul class="exp-bullets" style="list-style-type: disc;">
+                  ${p.bullets.filter((b) => b.trim() !== "").map((b) => `<li>${b}</li>`).join("")}
+                </ul>
               </div>
             `
               )
@@ -513,28 +510,50 @@ export default function Builder() {
     setCv((prev) => ({ ...prev, education: updated }));
   };
 
-  // Update skills
-  const updateSkill = (index, value) => {
+  // Update skill category
+  const updateSkillCategory = (index, value) => {
     const updated = [...cv.skills];
-    updated[index] = value;
+    updated[index] = { ...updated[index], category: value };
     setCv((prev) => ({ ...prev, skills: updated }));
   };
 
-  // Add skill
-  const addSkill = () => {
+  // Update skill items
+  const updateSkillItems = (index, value) => {
+    const updated = [...cv.skills];
+    updated[index] = { ...updated[index], items: value };
+    setCv((prev) => ({ ...prev, skills: updated }));
+  };
+
+  // Add skill category
+  const addSkillCategory = () => {
     setCv((prev) => ({
       ...prev,
-      skills: [...prev.skills, "Kategori: Beceri 1, Beceri 2"],
+      skills: [...prev.skills, { category: "", items: "" }],
     }));
   };
 
-  // Remove skill
-  const removeSkill = (index) => {
-    if (cv.skills.length <= 1) return;
+  // Remove skill category
+  const removeSkillCategory = (index) => {
     setCv((prev) => ({
       ...prev,
       skills: prev.skills.filter((_, i) => i !== index),
     }));
+  };
+
+  // Move skill category up
+  const moveSkillUp = (index) => {
+    if (index === 0) return;
+    const updated = [...cv.skills];
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    setCv((prev) => ({ ...prev, skills: updated }));
+  };
+
+  // Move skill category down
+  const moveSkillDown = (index) => {
+    if (index === cv.skills.length - 1) return;
+    const updated = [...cv.skills];
+    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+    setCv((prev) => ({ ...prev, skills: updated }));
   };
 
   // Update project fields
@@ -550,18 +569,57 @@ export default function Builder() {
       ...prev,
       projects: [
         ...prev.projects,
-        { name: "Proje Adı", description: "Proje açıklaması." },
+        { name: "", startDate: "", endDate: "", url: "", bullets: [""] },
       ],
     }));
   };
 
   // Remove project
   const removeProject = (index) => {
-    if (cv.projects.length <= 1) return;
     setCv((prev) => ({
       ...prev,
       projects: prev.projects.filter((_, i) => i !== index),
     }));
+  };
+
+  // Add project bullet
+  const addProjectBullet = (projIndex) => {
+    const updated = [...cv.projects];
+    updated[projIndex].bullets.push("");
+    setCv((prev) => ({ ...prev, projects: updated }));
+  };
+
+  // Update project bullet
+  const updateProjectBullet = (projIndex, bulletIndex, value) => {
+    const updated = [...cv.projects];
+    updated[projIndex].bullets[bulletIndex] = value;
+    setCv((prev) => ({ ...prev, projects: updated }));
+  };
+
+  // Remove project bullet
+  const removeProjectBullet = (projIndex, bulletIndex) => {
+    const updated = [...cv.projects];
+    if (updated[projIndex].bullets.length <= 1) return;
+    updated[projIndex].bullets = updated[projIndex].bullets.filter(
+      (_, i) => i !== bulletIndex
+    );
+    setCv((prev) => ({ ...prev, projects: updated }));
+  };
+
+  // Move project up
+  const moveProjectUp = (index) => {
+    if (index === 0) return;
+    const updated = [...cv.projects];
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    setCv((prev) => ({ ...prev, projects: updated }));
+  };
+
+  // Move project down
+  const moveProjectDown = (index) => {
+    if (index === cv.projects.length - 1) return;
+    const updated = [...cv.projects];
+    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+    setCv((prev) => ({ ...prev, projects: updated }));
   };
 
   // Shared input style
@@ -630,10 +688,9 @@ export default function Builder() {
             </svg>
           }
           tips={[
-            "Use city, country only; skip full street address.",
-            "Use one professional email address (e.g., firstname.lastname@...).",
-            "Provide a phone number with the correct country code.",
-            "Use relevant professional link (LinkedIn, GitHub, portfolio).",
+            "Prioritize skills named in the job posting.",
+            "Use standard terminology for applicant-tracking systems.",
+            "Group skills by category (e.g., Languages, Frameworks, Tools).",
           ]}
           isOpen={openSections.personal}
           onToggle={() => toggleSection("personal")}
@@ -1040,81 +1097,257 @@ export default function Builder() {
         {/* Technical Skills */}
         <Section
           title="Technical Skills"
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
+          }
+          tips={[
+            "Group skills by category (e.g., Languages, Frameworks, Tools).",
+            "List the most relevant skills first.",
+            "Include proficiency levels if appropriate (Expert, Advanced, etc.).",
+            "Match skills to keywords from the target job description.",
+          ]}
           isOpen={openSections.skills}
           onToggle={() => toggleSection("skills")}
         >
+          {/* Add Category Button */}
+          <button
+            onClick={addSkillCategory}
+            className="flex items-center gap-2 mb-4 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <span className="text-lg leading-none">+</span>
+            Add Category
+          </button>
+
+          {/* Skill Category Cards */}
           {cv.skills.map((skill, index) => (
-            <div key={index} className="flex gap-1 mb-2">
-              <input
-                className={inputStyle + " flex-1"}
-                value={skill}
-                onChange={(e) => updateSkill(index, e.target.value)}
-              />
-              {cv.skills.length > 1 && (
-                <button
-                  onClick={() => removeSkill(index)}
-                  className="text-red-400 hover:text-red-600 px-2"
-                >
-                  ✕
-                </button>
-              )}
+            <div
+              key={index}
+              className="mb-5 p-5 bg-white border border-gray-200 rounded-xl relative"
+            >
+              {/* Category Name */}
+              <div className="mb-3">
+                <label className={labelStyle}>Category</label>
+                <div className="flex items-center gap-1">
+                  <input
+                    className={inputStyle + " flex-1"}
+                    placeholder="e.g. Backend & Languages"
+                    value={skill.category}
+                    onChange={(e) => updateSkillCategory(index, e.target.value)}
+                  />
+                  {/* Reorder Buttons */}
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      onClick={() => moveSkillUp(index)}
+                      className={`p-1 transition-colors ${index === 0 ? "text-gray-200 cursor-not-allowed" : "text-gray-400 hover:text-gray-700"}`}
+                      title="Move up"
+                      disabled={index === 0}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 11a.5.5 0 0 0 .5-.5V6.707l1.146 1.147a.5.5 0 0 0 .708-.708l-2-2a.5.5 0 0 0-.708 0l-2 2a.5.5 0 1 0 .708.708L7.5 6.707V10.5a.5.5 0 0 0 .5.5"/>
+                        <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => moveSkillDown(index)}
+                      className={`p-1 transition-colors ${index === cv.skills.length - 1 ? "text-gray-200 cursor-not-allowed" : "text-gray-400 hover:text-gray-700"}`}
+                      title="Move down"
+                      disabled={index === cv.skills.length - 1}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 5a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 9.293V5.5A.5.5 0 0 1 8 5"/>
+                        <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+                      </svg>
+                    </button>
+                  </div>
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => removeSkillCategory(index)}
+                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    title="Delete"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                      <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Skills */}
+              <div>
+                <label className={labelStyle}>Skills</label>
+                <input
+                  className={inputStyle}
+                  placeholder="e.g. Python (Expert), SQL (Advanced), Java, C/C++"
+                  value={skill.items}
+                  onChange={(e) => updateSkillItems(index, e.target.value)}
+                />
+              </div>
             </div>
           ))}
-          <button
-            onClick={addSkill}
-            className="text-blue-600 text-xs mt-1 hover:underline"
-          >
-            + Add Skill Category
-          </button>
         </Section>
 
-        {/* Technical Projects */}
+        {/* Technical Projects and Research */}
         <Section
-          title="Technical Projects and Research"
+          title="Projects and Research"
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 19a5 5 0 0 1-5-5v8"/><path d="M9 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H20a2 2 0 0 1 2 2v5"/><circle cx="13" cy="12" r="2"/><circle cx="20" cy="19" r="2"/>
+            </svg>
+          }
+          tips={[
+            "Give each project a clear title and one-line purpose.",
+            "Summarize your contribution and the outcome in 1–2 bullets.",
+            "Note key technologies or methods used.",
+            "Link to code, demo, or portfolio when available.",
+            "Select projects that best match the target role's requirements.",
+          ]}
           isOpen={openSections.projects}
           onToggle={() => toggleSection("projects")}
         >
+          {/* Add Project Button */}
+          <button
+            onClick={addProject}
+            className="flex items-center gap-2 mb-4 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <span className="text-lg leading-none">+</span>
+            Add Project
+          </button>
+
+          {/* Project Cards */}
           {cv.projects.map((project, index) => (
             <div
               key={index}
-              className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 relative"
+              className="mb-5 p-5 bg-white border border-gray-200 rounded-xl relative"
             >
-              {cv.projects.length > 1 && (
-                <button
-                  onClick={() => removeProject(index)}
-                  className="absolute top-2 right-2 text-red-400 hover:text-red-600 text-sm"
-                >
-                  ✕
-                </button>
-              )}
-              <div className="mb-2">
-                <label className={labelStyle}>Project Name</label>
+              {/* Project Title */}
+              <div className="mb-3">
+                <label className={labelStyle}>Project Title</label>
+                <div className="flex items-center gap-1">
+                  <input
+                    className={inputStyle + " flex-1"}
+                    placeholder="New Project"
+                    value={project.name}
+                    onChange={(e) =>
+                      updateProject(index, "name", e.target.value)
+                    }
+                  />
+                  {/* Reorder Buttons */}
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      onClick={() => moveProjectUp(index)}
+                      className={`p-1 transition-colors ${index === 0 ? "text-gray-200 cursor-not-allowed" : "text-gray-400 hover:text-gray-700"}`}
+                      title="Move up"
+                      disabled={index === 0}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 11a.5.5 0 0 0 .5-.5V6.707l1.146 1.147a.5.5 0 0 0 .708-.708l-2-2a.5.5 0 0 0-.708 0l-2 2a.5.5 0 1 0 .708.708L7.5 6.707V10.5a.5.5 0 0 0 .5.5"/>
+                        <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => moveProjectDown(index)}
+                      className={`p-1 transition-colors ${index === cv.projects.length - 1 ? "text-gray-200 cursor-not-allowed" : "text-gray-400 hover:text-gray-700"}`}
+                      title="Move down"
+                      disabled={index === cv.projects.length - 1}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 5a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 9.293V5.5A.5.5 0 0 1 8 5"/>
+                        <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+                      </svg>
+                    </button>
+                  </div>
+                  {/* Delete Button */}
+                  <button
+                    onClick={() => removeProject(index)}
+                    className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                    title="Delete"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                      <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Start Date | End Date */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label className={labelStyle}>Start Date</label>
+                  <input
+                    className={inputStyle}
+                    placeholder="Start Date"
+                    value={project.startDate || ""}
+                    onChange={(e) =>
+                      updateProject(index, "startDate", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className={labelStyle}>End Date</label>
+                  <input
+                    className={inputStyle}
+                    placeholder="End Date"
+                    value={project.endDate || ""}
+                    onChange={(e) =>
+                      updateProject(index, "endDate", e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Project URL */}
+              <div className="mb-3">
+                <label className={labelStyle}>Project URL</label>
                 <input
                   className={inputStyle}
-                  value={project.name}
+                  placeholder="Project URL (optional)"
+                  value={project.url || ""}
                   onChange={(e) =>
-                    updateProject(index, "name", e.target.value)
+                    updateProject(index, "url", e.target.value)
                   }
                 />
               </div>
+
+              {/* Project Descriptions */}
               <div>
-                <label className={labelStyle}>Description</label>
-                <textarea
-                  className={inputStyle + " h-16 resize-none"}
-                  value={project.description}
-                  onChange={(e) =>
-                    updateProject(index, "description", e.target.value)
-                  }
-                />
+                <label className={labelStyle}>Project Descriptions</label>
+                {project.bullets.map((bullet, bIndex) => (
+                  <div key={bIndex} className="flex gap-2 mb-2">
+                    <input
+                      className={inputStyle + " flex-1"}
+                      placeholder="Project description"
+                      value={bullet}
+                      onChange={(e) =>
+                        updateProjectBullet(index, bIndex, e.target.value)
+                      }
+                    />
+                    {project.bullets.length > 1 && (
+                      <button
+                        onClick={() => removeProjectBullet(index, bIndex)}
+                        className="text-gray-400 hover:text-red-500 px-1 transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                          <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  onClick={() => addProjectBullet(index)}
+                  className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 mt-1 transition-colors"
+                >
+                  <span className="text-base leading-none">+</span>
+                  Add Description
+                </button>
               </div>
             </div>
           ))}
-          <button
-            onClick={addProject}
-            className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600"
-          >
-            + Add Project
-          </button>
         </Section>
       </div>
 
@@ -1376,10 +1609,11 @@ export default function Builder() {
           >
             Technical Skills
           </h2>
-          <ul style={{ paddingLeft: "18px", fontSize: "10pt" }}>
-            {cv.skills.map((skill, index) => (
-              <li key={index} style={{ marginBottom: "2px" }}>
-                {skill}
+          <ul style={{ paddingLeft: "18px", fontSize: "10pt", listStyleType: "disc" }}>
+            {cv.skills.filter((s) => s.category || s.items).map((skill, index) => (
+              <li key={index} style={{ marginBottom: "4px" }}>
+                {skill.category && <strong>{skill.category}: </strong>}
+                {skill.items}
               </li>
             ))}
           </ul>
@@ -1398,14 +1632,19 @@ export default function Builder() {
           >
             Technical Projects and Research
           </h2>
-          {cv.projects.map((project, index) => (
+          {cv.projects.filter((p) => p.name).map((project, index) => (
             <div key={index} style={{ marginBottom: "8px" }}>
-              <p style={{ fontWeight: "bold", fontSize: "10.5pt" }}>
-                {project.name}
-              </p>
-              <p style={{ fontSize: "10pt", paddingLeft: "18px" }}>
-                • {project.description}
-              </p>
+              <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", fontSize: "10.5pt" }}>
+                <span>{project.name}</span>
+                <span style={{ fontWeight: "normal", color: "#555" }}>
+                  {project.startDate}{project.startDate && project.endDate ? " – " : ""}{project.endDate}
+                </span>
+              </div>
+              <ul style={{ paddingLeft: "18px", fontSize: "10pt", listStyleType: "disc" }}>
+                {project.bullets.filter((b) => b.trim() !== "").map((bullet, i) => (
+                  <li key={i} style={{ marginBottom: "2px" }}>{bullet}</li>
+                ))}
+              </ul>
             </div>
           ))}
           </div>
