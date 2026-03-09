@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 // CV data - placeholder texts for user guidance
 const initialCV = {
@@ -73,6 +73,51 @@ export default function Builder() {
 
   // PDF download state
   const [downloading, setDownloading] = useState(false);
+
+  // Zoom level state (percentage)
+  const [zoom, setZoom] = useState(100);
+
+  // Zoom controls
+  const zoomIn = () => setZoom((prev) => Math.min(prev + 10, 150));
+  const zoomOut = () => setZoom((prev) => Math.max(prev - 10, 40));
+
+  // Resizable panel state
+  const [panelWidth, setPanelWidth] = useState(384);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Handle mouse drag for resizable panel
+  const handleMouseDown = useCallback((e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!isDragging) return;
+      const minWidth = window.innerWidth / 5;
+      const maxWidth = window.innerWidth / 2;
+      const newWidth = Math.min(Math.max(e.clientX, minWidth), maxWidth);
+      setPanelWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [isDragging]);
 
   // Generate and download PDF
   const handleDownloadPDF = async () => {
@@ -448,24 +493,16 @@ export default function Builder() {
   return (
     <div className="min-h-screen bg-gray-200 flex">
       {/* ==================== LEFT PANEL - FORM ==================== */}
-      <div className="w-96 bg-white border-r border-gray-300 overflow-y-auto h-screen sticky top-0">
+      <div
+        className="bg-white border-r border-gray-300 overflow-y-auto h-screen sticky top-0"
+        style={{ width: `${panelWidth}px` }}
+      >
         {/* Header */}
         <div className="p-4 border-b border-gray-200 bg-gray-50">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-lg font-bold text-gray-800">CV Builder</h1>
-              <p className="text-xs text-gray-500 mt-1">
-                Bilgilerinizi doldurun, sağ tarafta canlı önizleyin.
-              </p>
-            </div>
-            <button
-              onClick={handleDownloadPDF}
-              disabled={downloading}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:bg-gray-400"
-            >
-              {downloading ? "Oluşturuluyor..." : "PDF İndir"}
-            </button>
-          </div>
+          <h1 className="text-lg font-bold text-gray-800">CV Builder</h1>
+          <p className="text-xs text-gray-500 mt-1">
+            Bilgilerinizi doldurun, sağ tarafta canlı önizleyin.
+          </p>
         </div>
 
         {/* Personal Information */}
@@ -770,20 +807,114 @@ export default function Builder() {
         </Section>
       </div>
 
-      {/* ==================== RIGHT PANEL - LIVE PREVIEW ==================== */}
-      <div className="flex-1 flex justify-center items-start p-8 overflow-auto">
-        <div
-          className="bg-white shadow-lg"
-          style={{
-            width: "210mm",
-            minHeight: "297mm",
-            padding: "20mm 25mm",
-            fontFamily: "Arial, sans-serif",
-            fontSize: "11pt",
-            lineHeight: "1.5",
-            color: "#333",
-          }}
-        >
+      {/* Resizable Divider */}
+      <div
+        onMouseDown={handleMouseDown}
+        className="relative flex w-1 items-center justify-center bg-gray-300 cursor-col-resize"
+        style={{ height: "100vh", position: "sticky", top: 0 }}
+      >
+        <div className="absolute top-1/2 -translate-y-1/2 z-10 flex h-5 w-3 items-center justify-center rounded-sm border border-gray-400 bg-white">
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600">
+            <circle cx="9" cy="5" r="1"/>
+            <circle cx="9" cy="12" r="1"/>
+            <circle cx="9" cy="19" r="1"/>
+            <circle cx="15" cy="5" r="1"/>
+            <circle cx="15" cy="12" r="1"/>
+            <circle cx="15" cy="19" r="1"/>
+          </svg>
+        </div>
+      </div>
+
+      {/* ==================== RIGHT PANEL - TOOLBAR + LIVE PREVIEW ==================== */}
+      <div className="flex-1 flex flex-col overflow-auto">
+
+        {/* Toolbar */}
+        <div className="sticky top-0 z-10 bg-gray-200">
+          <div className="max-w-[200mm] mx-auto bg-white border-x border-b border-gray-300 rounded-b-lg px-6 py-3">
+            <div className="flex items-center justify-between">
+              {/* Left buttons */}
+              <div className="flex gap-2">
+                {/* Templates Button */}
+                <button className="inline-flex items-center gap-2 border border-gray-300 rounded-md bg-white px-4 py-2 text-gray-700 text-sm font-medium transition-all duration-200 hover:bg-gray-900 hover:text-white hover:border-gray-900">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M6 1H1v14h5zm9 0h-5v5h5zm0 9v5h-5v-5zM0 1a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1zm9 0a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1zm1 8a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h5a1 1 0 0 0 1-1v-5a1 1 0 0 0-1-1z"/>
+                  </svg>
+                  Templates
+                </button>
+
+                {/* Layout & Style Button */}
+                <button className="inline-flex items-center gap-2 border border-gray-300 rounded-md bg-white px-4 py-2 text-gray-700 text-sm font-medium transition-all duration-200 hover:bg-gray-900 hover:text-white hover:border-gray-900">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492M5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0"/>
+                    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115z"/>
+                  </svg>
+                  Layout & Style
+                </button>
+              </div>
+
+              {/* Right button */}
+              <button
+                onClick={handleDownloadPDF}
+                disabled={downloading}
+                className="inline-flex items-center gap-2 rounded-md bg-gray-900 px-4 py-2 text-white text-sm font-medium transition-all duration-200 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/>
+                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/>
+                </svg>
+                {downloading ? "Generating..." : "Download PDF"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Zoom Controls */}
+        <div className="flex justify-center" style={{ paddingTop: "15px", paddingBottom: "0px" }}>
+          <div className="inline-flex items-center gap-1 bg-white border border-gray-300 rounded-lg px-2 py-1">
+            {/* Zoom Out */}
+            <button
+              onClick={zoomOut}
+              className="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14"/>
+              </svg>
+            </button>
+
+            {/* Zoom Percentage */}
+            <span className="px-3 text-sm font-medium text-gray-700 select-none min-w-[48px] text-center">
+              {zoom}%
+            </span>
+
+            {/* Zoom In */}
+            <button
+              onClick={zoomIn}
+              className="p-1 rounded hover:bg-gray-100 text-gray-600 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14"/>
+                <path d="M12 5v14"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* CV Preview */}
+        <div className="flex-1 flex justify-center items-start px-8 pb-8" style={{ paddingTop: "30px" }}>
+          <div
+            className="bg-white shadow-lg"
+            style={{
+              width: "210mm",
+              minHeight: "297mm",
+              padding: "20mm 25mm",
+              fontFamily: "Arial, sans-serif",
+              fontSize: "11pt",
+              lineHeight: "1.5",
+              color: "#333",
+              transform: `scale(${zoom / 100})`,
+              transformOrigin: "top center",
+            }}
+          >
           {/* Header - Name */}
           <h1
             style={{
@@ -966,6 +1097,7 @@ export default function Builder() {
               </p>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </div>
