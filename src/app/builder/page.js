@@ -14,13 +14,7 @@ const initialCV = {
 
   experiences: [],
 
-  education: [
-    {
-      school: "Üniversite Adı",
-      degree: "Lisans / Yüksek Lisans, Bölüm Adı",
-      date: "AA/YYYY – AA/YYYY",
-    },
-  ],
+  education: [],
 
   skills: [
     "Kategori: Beceri 1, Beceri 2, Beceri 3, Beceri 4",
@@ -485,9 +479,11 @@ export default function Builder() {
       education: [
         ...prev.education,
         {
-          school: "Üniversite Adı",
-          degree: "Bölüm Adı",
-          date: "AA/YYYY – AA/YYYY",
+          school: "",
+          location: "",
+          degree: "",
+          date: "",
+          additionalInfo: "",
         },
       ],
     }));
@@ -495,11 +491,26 @@ export default function Builder() {
 
   // Remove education
   const removeEducation = (index) => {
-    if (cv.education.length <= 1) return;
     setCv((prev) => ({
       ...prev,
       education: prev.education.filter((_, i) => i !== index),
     }));
+  };
+
+  // Move education up
+  const moveEducationUp = (index) => {
+    if (index === 0) return;
+    const updated = [...cv.education];
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    setCv((prev) => ({ ...prev, education: updated }));
+  };
+
+  // Move education down
+  const moveEducationDown = (index) => {
+    if (index === cv.education.length - 1) return;
+    const updated = [...cv.education];
+    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+    setCv((prev) => ({ ...prev, education: updated }));
   };
 
   // Update skills
@@ -891,37 +902,106 @@ export default function Builder() {
         {/* Education */}
         <Section
           title="Education"
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0L14 7.14V13a1 1 0 0 0-1 1v2h3v-2a1 1 0 0 0-1-1V6.739l.686-.275a.5.5 0 0 0 .025-.917zM8 8.46 1.758 5.965 8 3.052l6.242 2.913z"/>
+              <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466zm-.068 1.873.22-.748 3.496 1.311a.5.5 0 0 0 .352 0l3.496-1.311.22.748L8 12.46z"/>
+            </svg>
+          }
+          tips={[
+            "Include relevant coursework.",
+            "Mention any academic honors.",
+            "List degrees in reverse chronological order.",
+          ]}
           isOpen={openSections.education}
           onToggle={() => toggleSection("education")}
         >
+          {/* Add Education Button */}
+          <button
+            onClick={addEducation}
+            className="flex items-center gap-2 mb-4 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <span className="text-lg leading-none">+</span>
+            Add Education
+          </button>
+
+          {/* Education Cards */}
           {cv.education.map((edu, index) => (
             <div
               key={index}
-              className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 relative"
+              className="mb-5 p-5 bg-white border border-gray-200 rounded-xl relative"
             >
-              {cv.education.length > 1 && (
-                <button
-                  onClick={() => removeEducation(index)}
-                  className="absolute top-2 right-2 text-red-400 hover:text-red-600 text-sm"
-                >
-                  ✕
-                </button>
-              )}
-              <div className="mb-2">
-                <label className={labelStyle}>School</label>
-                <input
-                  className={inputStyle}
-                  value={edu.school}
-                  onChange={(e) =>
-                    updateEducation(index, "school", e.target.value)
-                  }
-                />
+              {/* University | Location */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label className={labelStyle}>University</label>
+                  <input
+                    className={inputStyle}
+                    placeholder="University"
+                    value={edu.school}
+                    onChange={(e) =>
+                      updateEducation(index, "school", e.target.value)
+                    }
+                  />
+                </div>
+                <div>
+                  <label className={labelStyle}>Location</label>
+                  <div className="flex items-center gap-1">
+                    <input
+                      className={inputStyle + " flex-1"}
+                      placeholder="Location"
+                      value={edu.location || ""}
+                      onChange={(e) =>
+                        updateEducation(index, "location", e.target.value)
+                      }
+                    />
+                    {/* Reorder Buttons */}
+                    <div className="flex flex-col gap-0.5">
+                      <button
+                        onClick={() => moveEducationUp(index)}
+                        className={`p-1 transition-colors ${index === 0 ? "text-gray-200 cursor-not-allowed" : "text-gray-400 hover:text-gray-700"}`}
+                        title="Move up"
+                        disabled={index === 0}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M8 11a.5.5 0 0 0 .5-.5V6.707l1.146 1.147a.5.5 0 0 0 .708-.708l-2-2a.5.5 0 0 0-.708 0l-2 2a.5.5 0 1 0 .708.708L7.5 6.707V10.5a.5.5 0 0 0 .5.5"/>
+                          <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => moveEducationDown(index)}
+                        className={`p-1 transition-colors ${index === cv.education.length - 1 ? "text-gray-200 cursor-not-allowed" : "text-gray-400 hover:text-gray-700"}`}
+                        title="Move down"
+                        disabled={index === cv.education.length - 1}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M8 5a.5.5 0 0 1 .5.5v3.793l1.146-1.147a.5.5 0 0 1 .708.708l-2 2a.5.5 0 0 1-.708 0l-2-2a.5.5 0 1 1 .708-.708L7.5 9.293V5.5A.5.5 0 0 1 8 5"/>
+                          <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+                        </svg>
+                      </button>
+                    </div>
+                    {/* Delete Button */}
+                    <button
+                      onClick={() => removeEducation(index)}
+                      className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                      title="Delete"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
+
+              {/* Degree | Graduation Date */}
+              <div className="grid grid-cols-2 gap-3 mb-3">
                 <div>
                   <label className={labelStyle}>Degree</label>
                   <input
                     className={inputStyle}
+                    placeholder="Degree"
                     value={edu.degree}
                     onChange={(e) =>
                       updateEducation(index, "degree", e.target.value)
@@ -929,9 +1009,10 @@ export default function Builder() {
                   />
                 </div>
                 <div>
-                  <label className={labelStyle}>Date</label>
+                  <label className={labelStyle}>Graduation Date</label>
                   <input
                     className={inputStyle}
+                    placeholder="Graduation Date"
                     value={edu.date}
                     onChange={(e) =>
                       updateEducation(index, "date", e.target.value)
@@ -939,14 +1020,21 @@ export default function Builder() {
                   />
                 </div>
               </div>
+
+              {/* Additional Information */}
+              <div>
+                <label className={labelStyle}>Additional Information</label>
+                <textarea
+                  className={inputStyle + " h-20 resize-none"}
+                  placeholder="Additional information (honors, relevant coursework, etc.)"
+                  value={edu.additionalInfo || ""}
+                  onChange={(e) =>
+                    updateEducation(index, "additionalInfo", e.target.value)
+                  }
+                />
+              </div>
             </div>
           ))}
-          <button
-            onClick={addEducation}
-            className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600"
-          >
-            + Add Education
-          </button>
         </Section>
 
         {/* Technical Skills */}
