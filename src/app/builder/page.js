@@ -4,12 +4,12 @@ import { useState, useRef, useCallback, useEffect } from "react";
 
 // CV data - placeholder texts for user guidance
 const initialCV = {
-  name: "Full Name",
-  title: "Job Title | Position",
-  phone: "+90 5XX XXX XX XX",
-  email: "email@example.com",
-  location: "City, Country",
-  linkedin: "linkedin.com/in/yourprofile",
+  name: "",
+  title: "",
+  phone: "",
+  email: "",
+  location: "",
+  linkedin: "",
   website: "",
 
   experiences: [],
@@ -19,6 +19,8 @@ const initialCV = {
   skills: [],
 
   projects: [],
+
+  references: [],
 };
 
 // Reusable accordion section component
@@ -109,7 +111,7 @@ export default function Builder() {
   // Zoom level state (percentage)
   const [zoom, setZoom] = useState(100);
 
-  // Zoom controls
+    // Zoom controls
   const zoomIn = () => setZoom((prev) => Math.min(prev + 10, 150));
   const zoomOut = () => setZoom((prev) => Math.max(prev - 10, 40));
 
@@ -175,9 +177,8 @@ export default function Builder() {
               color: #333;
             }
             .cv-page {
-              width: 210mm;
+              width: 100%;
               min-height: 297mm;
-              padding: 20mm 25mm;
             }
             .cv-name {
               font-size: 22pt;
@@ -272,73 +273,96 @@ export default function Builder() {
             }
             .mb-12 { margin-bottom: 12px; }
             .mb-8 { margin-bottom: 8px; }
+
+            .exp-header, .edu-header, .project-name, .cv-section-title {
+              break-after: avoid;
+            }
+            .mb-12, .mb-8 {
+              break-inside: avoid;
+            }
+            @page {
+              size: A4;
+              margin: 12.7mm;
+            }
           </style>
         </head>
         <body>
           <div class="cv-page">
-            <div class="cv-name">${cv.name}</div>
-            <div class="cv-title">${cv.title}</div>
-            <div class="cv-contact">${cv.phone} | ${cv.email} | ${cv.location} | ${cv.linkedin}</div>
-            <hr class="cv-divider" />
+            ${cv.name.trim() !== "" ? `<div class="cv-name">${cv.name}</div>` : ""}
+            ${cv.title.trim() !== "" ? `<div class="cv-title">${cv.title}</div>` : ""}
+            ${[cv.phone, cv.email, cv.location, cv.linkedin].filter(v => v && v.trim() !== "").length > 0 ? `
+              <div class="cv-contact">${[cv.phone, cv.email, cv.location, cv.linkedin].filter(v => v && v.trim() !== "").join(" | ")}</div>
+              <hr class="cv-divider" />
+            ` : ""}
 
-            <div class="cv-section-title">Professional Summary</div>
-            <div class="cv-summary">${cv.summary}</div>
+            ${cv.summary && cv.summary.trim() !== "" ? `
+              <div class="cv-section-title">Professional Summary</div>
+              <div class="cv-summary">${cv.summary}</div>
+            ` : ""}
 
-            <div class="cv-section-title">Experience</div>
-            ${cv.experiences
-              .map(
-                (exp) => `
-              <div class="mb-12">
-                <div class="exp-header">
-                  <span>${exp.company}</span>
-                  <span class="exp-date">${exp.startDate}${exp.startDate && exp.endDate ? " – " : ""}${exp.endDate}</span>
+            ${cv.experiences.length > 0 && cv.experiences.some(exp => exp.company || exp.position) ? `
+              <div class="cv-section-title">Experience</div>
+              ${cv.experiences.filter(exp => exp.company || exp.position).map(exp => `
+                <div class="mb-12">
+                  <div class="exp-header">
+                    <span>${exp.company}</span>
+                    <span class="exp-date">${exp.startDate || ""}${exp.startDate && exp.endDate ? " – " : ""}${exp.endDate || ""}</span>
+                  </div>
+                  <div class="exp-position">${exp.position}</div>
+                  <ul class="exp-bullets" style="list-style-type: disc;">
+                    ${exp.bullets.filter(b => b.trim() !== "").map(b => `<li>${b}</li>`).join("")}
+                  </ul>
                 </div>
-                <div class="exp-position">${exp.position}</div>
-                <ul class="exp-bullets">
-                  ${exp.bullets.map((b) => `<li>${b}</li>`).join("")}
-                </ul>
-              </div>
-            `
-              )
-              .join("")}
+              `).join("")}
+            ` : ""}
 
-            <div class="cv-section-title">Education</div>
-            ${cv.education
-              .map(
-                (edu) => `
-              <div class="mb-8">
-                <div class="edu-header">
-                  <span>${edu.degree}</span>
-                  <span class="edu-date">${edu.date}</span>
+            ${cv.education.length > 0 && cv.education.some(edu => edu.school || edu.degree) ? `
+              <div class="cv-section-title">Education</div>
+              ${cv.education.filter(edu => edu.school || edu.degree).map(edu => `
+                <div class="mb-8">
+                  <div class="edu-header">
+                    <span>${edu.degree}</span>
+                    <span class="edu-date">${edu.date || ""}</span>
+                  </div>
+                  <div class="edu-school">${edu.school}</div>
                 </div>
-                <div class="edu-school">${edu.school}</div>
-              </div>
-            `
-              )
-              .join("")}
+              `).join("")}
+            ` : ""}
 
-            <div class="cv-section-title">Technical Skills</div>
-            <ul class="skills-list" style="list-style-type: disc;">
-              ${cv.skills.filter((s) => s.category || s.items).map((s) => `<li><strong>${s.category}:</strong> ${s.items}</li>`).join("")}
-            </ul>
+            ${cv.skills.length > 0 && cv.skills.some(s => s.category || s.items) ? `
+              <div class="cv-section-title">Technical Skills</div>
+              <ul class="skills-list" style="list-style-type: disc;">
+                ${cv.skills.filter(s => s.category || s.items).map(s => `<li><strong>${s.category}:</strong> ${s.items}</li>`).join("")}
+              </ul>
+            ` : ""}
 
-            <div class="cv-section-title">Technical Projects and Research</div>
-            ${cv.projects
-              .filter((p) => p.name)
-              .map(
-                (p) => `
-              <div class="mb-8">
-                <div class="exp-header">
-                  <span class="project-name">${p.name}</span>
-                  <span class="exp-date">${p.startDate || ""}${p.startDate && p.endDate ? " – " : ""}${p.endDate || ""}</span>
+            ${cv.projects.length > 0 && cv.projects.some(p => p.name) ? `
+              <div class="cv-section-title">Technical Projects and Research</div>
+              ${cv.projects.filter(p => p.name).map(p => `
+                <div class="mb-8">
+                  <div class="exp-header">
+                    <span class="project-name">${p.name}</span>
+                    <span class="exp-date">${p.startDate || ""}${p.startDate && p.endDate ? " – " : ""}${p.endDate || ""}</span>
+                  </div>
+                  <ul class="exp-bullets" style="list-style-type: disc;">
+                    ${p.bullets.filter(b => b.trim() !== "").map(b => `<li>${b}</li>`).join("")}
+                  </ul>
                 </div>
-                <ul class="exp-bullets" style="list-style-type: disc;">
-                  ${p.bullets.filter((b) => b.trim() !== "").map((b) => `<li>${b}</li>`).join("")}
-                </ul>
-              </div>
-            `
-              )
-              .join("")}
+              `).join("")}
+            ` : ""}
+
+            ${(cv.references.length > 0 || hideReferences) ? `
+              <div class="cv-section-title">References</div>
+              ${hideReferences
+                ? `<p style="font-size: 10pt; font-style: italic;">Available upon request</p>`
+                : cv.references.filter(r => r.name).map(r => `
+                    <div class="mb-8">
+                      <div style="font-weight: bold; font-size: 10.5pt;">${r.name}${r.company ? " — " + r.company : ""}</div>
+                      <div style="font-size: 10pt; color: #555;">${r.phone}${r.phone && r.email ? " | " : ""}${r.email}</div>
+                    </div>
+                  `).join("")
+              }
+            ` : ""}
           </div>
         </body>
         </html>
@@ -377,6 +401,7 @@ export default function Builder() {
     education: false,
     skills: false,
     projects: false,
+    references: false,
   });
 
   // Toggle accordion section
@@ -448,7 +473,7 @@ export default function Builder() {
   // Add bullet to experience
   const addBullet = (expIndex) => {
     const updated = [...cv.experiences];
-    updated[expIndex].bullets.push("Yeni madde ekleyin.");
+    updated[expIndex].bullets.push("");
     setCv((prev) => ({ ...prev, experiences: updated }));
   };
 
@@ -622,6 +647,35 @@ export default function Builder() {
     setCv((prev) => ({ ...prev, projects: updated }));
   };
 
+  // Add reference
+  const addReference = () => {
+    setCv((prev) => ({
+      ...prev,
+      references: [
+        ...prev.references,
+        { name: "", company: "", phone: "", email: "" },
+      ],
+    }));
+  };
+
+  // Remove reference
+  const removeReference = (index) => {
+    setCv((prev) => ({
+      ...prev,
+      references: prev.references.filter((_, i) => i !== index),
+    }));
+  };
+
+  // Update reference
+  const updateReference = (index, field, value) => {
+    const updated = [...cv.references];
+    updated[index] = { ...updated[index], [field]: value };
+    setCv((prev) => ({ ...prev, references: updated }));
+  };
+
+  // Show "Available upon request" toggle
+  const [hideReferences, setHideReferences] = useState(false);
+
   // Shared input style
   const inputStyle =
     "w-full border border-gray-200 rounded-md bg-gray-50 px-3 py-2.5 text-sm text-gray-400 placeholder:text-gray-400 focus:outline-none focus:border-gray-900 transition-all";
@@ -688,9 +742,10 @@ export default function Builder() {
             </svg>
           }
           tips={[
-            "Prioritize skills named in the job posting.",
-            "Use standard terminology for applicant-tracking systems.",
-            "Group skills by category (e.g., Languages, Frameworks, Tools).",
+            "Use city, country only; skip full street address.",
+            "Use one professional email address (e.g., firstname.lastname@...).",
+            "Provide a phone number with the correct country code.",
+            "Use relevant professional link (LinkedIn, GitHub, portfolio).",
           ]}
           isOpen={openSections.personal}
           onToggle={() => toggleSection("personal")}
@@ -700,6 +755,7 @@ export default function Builder() {
               <label className={labelStyle}>Name</label>
               <input
                 className={inputStyle}
+                placeholder="Full Name"
                 value={cv.name}
                 onChange={(e) => updateField("name", e.target.value)}
               />
@@ -708,6 +764,7 @@ export default function Builder() {
               <label className={labelStyle}>Job Title</label>
               <input
                 className={inputStyle}
+                placeholder="Job Title | Position"
                 value={cv.title}
                 onChange={(e) => updateField("title", e.target.value)}
               />
@@ -716,6 +773,7 @@ export default function Builder() {
               <label className={labelStyle}>Email</label>
               <input
                 className={inputStyle}
+                placeholder="email@example.com"
                 value={cv.email}
                 onChange={(e) => updateField("email", e.target.value)}
               />
@@ -724,6 +782,7 @@ export default function Builder() {
               <label className={labelStyle}>Phone</label>
               <input
                 className={inputStyle}
+                placeholder="+90 5XX XXX XX XX"
                 value={cv.phone}
                 onChange={(e) => updateField("phone", e.target.value)}
               />
@@ -732,6 +791,7 @@ export default function Builder() {
               <label className={labelStyle}>City</label>
               <input
                 className={inputStyle}
+                placeholder="City, Country"
                 value={cv.location}
                 onChange={(e) => updateField("location", e.target.value)}
               />
@@ -740,6 +800,7 @@ export default function Builder() {
               <label className={labelStyle}>LinkedIn</label>
               <input
                 className={inputStyle}
+                placeholder="linkedin.com/in/yourprofile"
                 value={cv.linkedin}
                 onChange={(e) => updateField("linkedin", e.target.value)}
               />
@@ -777,6 +838,7 @@ export default function Builder() {
         >
           <textarea
             className={inputStyle + " h-28 resize-none"}
+            placeholder="Briefly introduce yourself. Mention your years of experience, areas of expertise, and career objectives."
             value={cv.summary}
             onChange={(e) => updateField("summary", e.target.value)}
           />
@@ -1103,10 +1165,9 @@ export default function Builder() {
             </svg>
           }
           tips={[
+            "Prioritize skills named in the job posting.",
+            "Use standard terminology for applicant-tracking systems.",
             "Group skills by category (e.g., Languages, Frameworks, Tools).",
-            "List the most relevant skills first.",
-            "Include proficiency levels if appropriate (Expert, Advanced, etc.).",
-            "Match skills to keywords from the target job description.",
           ]}
           isOpen={openSections.skills}
           onToggle={() => toggleSection("skills")}
@@ -1349,6 +1410,123 @@ export default function Builder() {
             </div>
           ))}
         </Section>
+
+        {/* References */}
+        <Section
+          title="References"
+          icon={
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          }
+          isOpen={openSections.references}
+          onToggle={() => toggleSection("references")}
+        >
+          {/* Hide references toggle */}
+          <div className="flex items-center gap-3 mb-4 mt-3">
+            <button
+              onClick={() => setHideReferences(!hideReferences)}
+              className={`relative w-10 h-5 rounded-full transition-colors ${hideReferences ? "bg-blue-600" : "bg-gray-300"}`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${hideReferences ? "translate-x-5" : ""}`}
+              />
+            </button>
+            <span className="text-sm text-gray-600">
+              Hide references and show "Available upon request"
+            </span>
+          </div>
+
+          {!hideReferences && (
+            <>
+              {/* Add Reference Button */}
+              <button
+                onClick={addReference}
+                className="flex items-center gap-2 mb-4 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <span className="text-lg leading-none">+</span>
+                Add Reference
+              </button>
+
+              {/* Reference Cards */}
+              {cv.references.map((ref, index) => (
+                <div
+                  key={index}
+                  className="mb-5 p-5 bg-white border border-gray-200 rounded-xl relative"
+                >
+                  {/* Name | Company */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                      <label className={labelStyle}>Referent's Full Name</label>
+                      <input
+                        className={inputStyle}
+                        placeholder="e.g., John Smith"
+                        value={ref.name}
+                        onChange={(e) =>
+                          updateReference(index, "name", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className={labelStyle}>Company</label>
+                      <input
+                        className={inputStyle}
+                        placeholder="e.g., Tech Corp"
+                        value={ref.company}
+                        onChange={(e) =>
+                          updateReference(index, "company", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Phone | Email */}
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                      <label className={labelStyle}>Phone</label>
+                      <input
+                        className={inputStyle}
+                        placeholder="e.g., +1 (555) 123-4567"
+                        value={ref.phone}
+                        onChange={(e) =>
+                          updateReference(index, "phone", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div>
+                      <label className={labelStyle}>Email</label>
+                      <input
+                        className={inputStyle}
+                        placeholder="e.g., john@example.com"
+                        value={ref.email}
+                        onChange={(e) =>
+                          updateReference(index, "email", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  {/* Remove Button */}
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => removeReference(index)}
+                      className="flex items-center gap-1 text-sm text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                      </svg>
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+        </Section>
       </div>
 
       {/* Resizable Divider */}
@@ -1443,210 +1621,317 @@ export default function Builder() {
           </div>
         </div>
 
+        
         {/* CV Preview */}
-        <div className="flex-1 flex justify-center items-start px-8 pb-8" style={{ paddingTop: "30px" }}>
+        <div className="flex-1 flex justify-center items-start px-8 pb-8" style={{ paddingTop: "20px" }}>
           <div
-            className="bg-white shadow-lg"
             style={{
-              width: "210mm",
-              minHeight: "297mm",
-              padding: "20mm 25mm",
-              fontFamily: "Inter, sans-serif",
-              fontSize: "11pt",
-              lineHeight: "1.5",
-              color: "#333",
               transform: `scale(${zoom / 100})`,
               transformOrigin: "top center",
             }}
           >
+            <div
+              className="bg-white shadow-lg"
+              style={{
+                width: "210mm",
+                minHeight: "297mm",
+                padding: "12.7mm",
+                fontFamily: "Inter, sans-serif",
+                fontSize: "11pt",
+                lineHeight: "1.5",
+                color: "#333",
+              }}
+            >   
+        
           {/* Header - Name */}
-          <h1
-            style={{
-              fontSize: "22pt",
-              fontWeight: "bold",
-              textAlign: "center",
-              marginBottom: "2px",
-              color: "#000",
-            }}
-          >
-            {cv.name}
-          </h1>
+          {cv.name.trim() !== "" && (
+            <h1
+              style={{
+                fontSize: "22pt",
+                fontWeight: "bold",
+                textAlign: "center",
+                marginBottom: "2px",
+                color: "#000",
+              }}
+            >
+              {cv.name}
+            </h1>
+          )}
 
           {/* Header - Title */}
-          <p
-            style={{
-              textAlign: "center",
-              fontSize: "11pt",
-              color: "#444",
-              marginBottom: "8px",
-            }}
-          >
-            {cv.title}
-          </p>
+          {cv.title.trim() !== "" && (
+            <p
+              style={{
+                textAlign: "center",
+                fontSize: "11pt",
+                color: "#444",
+                marginBottom: "8px",
+              }}
+            >
+              {cv.title}
+            </p>
+          )}
 
           {/* Header - Contact Info */}
-          <p
-            style={{
-              textAlign: "center",
-              fontSize: "9pt",
-              color: "#555",
-              marginBottom: "16px",
-            }}
-          >
-            {cv.phone} | {cv.email} | {cv.location} | {cv.linkedin}
-          </p>
-
-          {/* Divider */}
-          <hr style={{ borderTop: "1.5px solid #000", marginBottom: "12px" }} />
-
-          {/* PROFESSIONAL SUMMARY */}
-          <h2
-            style={{
-              fontSize: "12pt",
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              borderBottom: "1px solid #999",
-              paddingBottom: "2px",
-              marginBottom: "6px",
-            }}
-          >
-            Professional Summary
-          </h2>
-          <p style={{ fontSize: "10pt", marginBottom: "14px" }}>{cv.summary}</p>
-
-          {/* EXPERIENCE */}
-          <h2
-            style={{
-              fontSize: "12pt",
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              borderBottom: "1px solid #999",
-              paddingBottom: "2px",
-              marginBottom: "6px",
-            }}
-          >
-            Experience
-          </h2>
-          {cv.experiences.map((exp, index) => (
-            <div key={index} style={{ marginBottom: "12px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontWeight: "bold",
-                  fontSize: "10.5pt",
-                }}
-              >
-                <span>{exp.company}</span>
-                <span style={{ fontWeight: "normal", color: "#555" }}>
-                  {exp.startDate}{exp.startDate && exp.endDate ? " – " : ""}{exp.endDate}
-                </span>
-              </div>
+          {(cv.phone || cv.email || cv.location || cv.linkedin).trim() !== "" && (
+            <>
               <p
                 style={{
-                  fontStyle: "italic",
-                  fontSize: "10pt",
-                  marginBottom: "4px",
+                  textAlign: "center",
+                  fontSize: "9pt",
+                  color: "#555",
+                  marginBottom: "16px",
                 }}
               >
-                {exp.position}
+                {[cv.phone, cv.email, cv.location, cv.linkedin]
+                  .filter((v) => v && v.trim() !== "")
+                  .join(" | ")}
               </p>
+              <hr style={{ borderTop: "1.5px solid #000", marginBottom: "12px" }} />
+            </>
+          )}
+
+          {/* PROFESSIONAL SUMMARY */}
+          {cv.summary && cv.summary.trim() !== "" && (
+            <>
+              <h2
+                style={{
+                  fontSize: "12pt",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                  borderBottom: "1px solid #999",
+                  paddingBottom: "2px",
+                  marginBottom: "6px",
+                }}
+              >
+                Professional Summary
+              </h2>
+              <p style={{ fontSize: "10pt", marginBottom: "14px" }}>{cv.summary}</p>
+            </>
+          )}
+
+          {/* EXPERIENCE */}
+          {cv.experiences.length > 0 && cv.experiences.some((exp) => exp.company || exp.position) && (
+            <>
+              <h2
+                style={{
+                  fontSize: "12pt",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                  borderBottom: "1px solid #999",
+                  paddingBottom: "2px",
+                  marginBottom: "6px",
+                }}
+              >
+                Experience
+              </h2>
+              {cv.experiences.filter((exp) => exp.company || exp.position).map((exp, index) => (
+                <div key={index} style={{ marginBottom: "12px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontWeight: "bold",
+                      fontSize: "10.5pt",
+                    }}
+                  >
+                    <span>{exp.company}</span>
+                    <span style={{ fontWeight: "normal", color: "#555" }}>
+                      {exp.startDate}{exp.startDate && exp.endDate ? " – " : ""}{exp.endDate}
+                    </span>
+                  </div>
+                  {exp.position && (
+                    <p
+                      style={{
+                        fontStyle: "italic",
+                        fontSize: "10pt",
+                        marginBottom: "4px",
+                      }}
+                    >
+                      {exp.position}
+                    </p>
+                  )}
+                  <ul style={{ paddingLeft: "18px", fontSize: "10pt", listStyleType: "disc" }}>
+                    {exp.bullets.filter((b) => b.trim() !== "").map((bullet, i) => (
+                      <li key={i} style={{ marginBottom: "2px" }}>
+                        {bullet}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* EDUCATION */}
+          {cv.education.length > 0 && cv.education.some((edu) => edu.school || edu.degree) && (
+            <>
+              <h2
+                style={{
+                  fontSize: "12pt",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                  borderBottom: "1px solid #999",
+                  paddingBottom: "2px",
+                  marginBottom: "6px",
+                }}
+              >
+                Education
+              </h2>
+              {cv.education.filter((edu) => edu.school || edu.degree).map((edu, index) => (
+                <div key={index} style={{ marginBottom: "8px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontWeight: "bold",
+                      fontSize: "10.5pt",
+                    }}
+                  >
+                    <span>{edu.degree}</span>
+                    <span style={{ fontWeight: "normal", color: "#555" }}>
+                      {edu.date}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: "10pt", fontStyle: "italic" }}>
+                    {edu.school}
+                  </p>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* TECHNICAL SKILLS */}
+          {cv.skills.length > 0 && cv.skills.some((s) => s.category || s.items) && (
+            <>
+              <h2
+                style={{
+                  fontSize: "12pt",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                  borderBottom: "1px solid #999",
+                  paddingBottom: "2px",
+                  marginBottom: "6px",
+                  marginTop: "14px",
+                }}
+              >
+                Technical Skills
+              </h2>
               <ul style={{ paddingLeft: "18px", fontSize: "10pt", listStyleType: "disc" }}>
-                {exp.bullets.filter((b) => b.trim() !== "").map((bullet, i) => (
-                  <li key={i} style={{ marginBottom: "2px" }}>
-                    {bullet}
+                {cv.skills.filter((s) => s.category || s.items).map((skill, index) => (
+                  <li key={index} style={{ marginBottom: "4px" }}>
+                    {skill.category && <strong>{skill.category}: </strong>}
+                    {skill.items}
                   </li>
                 ))}
               </ul>
-            </div>
-          ))}
-
-          {/* EDUCATION */}
-          <h2
-            style={{
-              fontSize: "12pt",
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              borderBottom: "1px solid #999",
-              paddingBottom: "2px",
-              marginBottom: "6px",
-            }}
-          >
-            Education
-          </h2>
-          {cv.education.map((edu, index) => (
-            <div key={index} style={{ marginBottom: "8px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontWeight: "bold",
-                  fontSize: "10.5pt",
-                }}
-              >
-                <span>{edu.degree}</span>
-                <span style={{ fontWeight: "normal", color: "#555" }}>
-                  {edu.date}
-                </span>
-              </div>
-              <p style={{ fontSize: "10pt", fontStyle: "italic" }}>
-                {edu.school}
-              </p>
-            </div>
-          ))}
-
-          {/* TECHNICAL SKILLS */}
-          <h2
-            style={{
-              fontSize: "12pt",
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              borderBottom: "1px solid #999",
-              paddingBottom: "2px",
-              marginBottom: "6px",
-              marginTop: "14px",
-            }}
-          >
-            Technical Skills
-          </h2>
-          <ul style={{ paddingLeft: "18px", fontSize: "10pt", listStyleType: "disc" }}>
-            {cv.skills.filter((s) => s.category || s.items).map((skill, index) => (
-              <li key={index} style={{ marginBottom: "4px" }}>
-                {skill.category && <strong>{skill.category}: </strong>}
-                {skill.items}
-              </li>
-            ))}
-          </ul>
+            </>
+          )}
 
           {/* TECHNICAL PROJECTS AND RESEARCH */}
-          <h2
-            style={{
-              fontSize: "12pt",
-              fontWeight: "bold",
-              textTransform: "uppercase",
-              borderBottom: "1px solid #999",
-              paddingBottom: "2px",
-              marginBottom: "6px",
-              marginTop: "14px",
-            }}
-          >
-            Technical Projects and Research
-          </h2>
-          {cv.projects.filter((p) => p.name).map((project, index) => (
-            <div key={index} style={{ marginBottom: "8px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", fontSize: "10.5pt" }}>
-                <span>{project.name}</span>
-                <span style={{ fontWeight: "normal", color: "#555" }}>
-                  {project.startDate}{project.startDate && project.endDate ? " – " : ""}{project.endDate}
-                </span>
+          {cv.projects.length > 0 && cv.projects.some((p) => p.name) && (
+            <>
+              <h2
+                style={{
+                  fontSize: "12pt",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                  borderBottom: "1px solid #999",
+                  paddingBottom: "2px",
+                  marginBottom: "6px",
+                  marginTop: "14px",
+                }}
+              >
+                Technical Projects and Research
+              </h2>
+              {cv.projects.filter((p) => p.name).map((project, index) => (
+                <div key={index} style={{ marginBottom: "8px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontWeight: "bold", fontSize: "10.5pt" }}>
+                    <span>{project.name}</span>
+                    <span style={{ fontWeight: "normal", color: "#555" }}>
+                      {project.startDate}{project.startDate && project.endDate ? " – " : ""}{project.endDate}
+                    </span>
+                  </div>
+                  <ul style={{ paddingLeft: "18px", fontSize: "10pt", listStyleType: "disc" }}>
+                    {project.bullets.filter((b) => b.trim() !== "").map((bullet, i) => (
+                      <li key={i} style={{ marginBottom: "2px" }}>{bullet}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* REFERENCES */}
+          {(cv.references.length > 0 || hideReferences) && (
+            <>
+              <h2
+                style={{
+                  fontSize: "12pt",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                  borderBottom: "1px solid #999",
+                  paddingBottom: "2px",
+                  marginBottom: "6px",
+                  marginTop: "14px",
+                }}
+              >
+                References
+              </h2>
+              {hideReferences ? (
+                <p style={{ fontSize: "10pt", fontStyle: "italic" }}>
+                  Available upon request
+                </p>
+              ) : (
+                cv.references.filter((r) => r.name).map((ref, index) => (
+                  <div key={index} style={{ marginBottom: "8px" }}>
+                    <div style={{ fontWeight: "bold", fontSize: "10.5pt" }}>
+                      {ref.name}{ref.company ? ` — ${ref.company}` : ""}
+                    </div>
+                    <div style={{ fontSize: "10pt", color: "#555" }}>
+                      {ref.phone}{ref.phone && ref.email ? " | " : ""}{ref.email}
+                    </div>
+                  </div>
+                ))
+              )}
+            </>
+          )}
+
+          {/* REFERENCES */}
+          {(cv.references.length > 0 || hideReferences) && (
+            <>
+              <h2
+                style={{
+                  fontSize: "12pt",
+                  fontWeight: "bold",
+                  textTransform: "uppercase",
+                  borderBottom: "1px solid #999",
+                  paddingBottom: "2px",
+                  marginBottom: "6px",
+                  marginTop: "14px",
+                }}
+              >
+                References
+              </h2>
+              {hideReferences ? (
+                <p style={{ fontSize: "10pt", fontStyle: "italic" }}>
+                  Available upon request
+                </p>
+              ) : (
+                cv.references.filter((r) => r.name).map((ref, index) => (
+                  <div key={index} style={{ marginBottom: "8px" }}>
+                    <div style={{ fontWeight: "bold", fontSize: "10.5pt" }}>
+                      {ref.name}{ref.company ? ` — ${ref.company}` : ""}
+                    </div>
+                    <div style={{ fontSize: "10pt", color: "#555" }}>
+                      {ref.phone}{ref.phone && ref.email ? " | " : ""}{ref.email}
+                    </div>
+                  </div>
+                ))
+              )}
+            </>
+          )}
               </div>
-              <ul style={{ paddingLeft: "18px", fontSize: "10pt", listStyleType: "disc" }}>
-                {project.bullets.filter((b) => b.trim() !== "").map((bullet, i) => (
-                  <li key={i} style={{ marginBottom: "2px" }}>{bullet}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
           </div>
         </div>
       </div>
