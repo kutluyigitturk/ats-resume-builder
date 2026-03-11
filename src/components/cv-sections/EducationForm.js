@@ -5,6 +5,7 @@ import FormInput from "@/components/ui/FormInput";
 import AddButton from "@/components/ui/AddButton";
 import ReorderableCard from "@/components/ui/ReorderableCard";
 import sectionTips from "@/data/sectionTips";
+import { labelStyle, inputStyle } from "@/lib/constants";
 import { GraduationCapIcon } from "@/icons";
 
 export default function EducationForm({
@@ -25,8 +26,6 @@ export default function EducationForm({
       isOpen={isOpen}
       onToggle={onToggle}
     >
-      <AddButton label="Add Education" onClick={() => addItem("education")} />
-
       {education.map((edu, index) => (
         <ReorderableCard
           key={edu.id ?? index}
@@ -36,46 +35,63 @@ export default function EducationForm({
           onMoveDown={() => moveItemDown("education", edu.id)}
           onRemove={() => removeItem("education", edu.id)}
         >
-          <div className="mb-3 pr-24">
-            <FormInput
-              label="School"
-              placeholder="School Name"
-              value={edu.school}
-              onChange={(v) => updateItem("education", edu.id, "school", v)}
-            />
-          </div>
+          <div className="pt-6">
+            <div className="grid grid-cols-2 gap-5 mb-4">
+              <FormInput
+                label="University"
+                placeholder="University Name"
+                value={edu.school}
+                onChange={(v) => updateItem("education", edu.id, "school", v)}
+              />
+              <FormInput
+                label="Location"
+                placeholder="Location"
+                value={edu.location}
+                onChange={(v) => updateItem("education", edu.id, "location", v)}
+              />
+            </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <FormInput
-              label="Degree"
-              placeholder="Degree"
-              value={edu.degree}
-              onChange={(v) => updateItem("education", edu.id, "degree", v)}
-            />
-            <FormInput
-              label="Location"
-              placeholder="Location"
-              value={edu.location}
-              onChange={(v) => updateItem("education", edu.id, "location", v)}
-            />
-          </div>
+            <div className="grid grid-cols-2 gap-5 mb-4">
+              <FormInput
+                label="Degree"
+                placeholder="Degree"
+                value={edu.degree}
+                onChange={(v) => updateItem("education", edu.id, "degree", v)}
+              />
 
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <FormInput
-              label="Date"
-              placeholder="Date"
-              value={edu.date}
-              onChange={(v) => updateItem("education", edu.id, "date", v)}
-            />
-            <FormInput
-              label="Additional Info"
-              placeholder="Additional Info"
-              value={edu.additionalInfo}
-              onChange={(v) => updateItem("education", edu.id, "additionalInfo", v)}
-            />
+              <div className="grid grid-cols-2 gap-3">
+                <FormInput
+                  label="Start Date"
+                  placeholder="MM/YYYY"
+                  value={edu.startDate}
+                  onChange={(v) => updateItem("education", edu.id, "startDate", v)}
+                />
+                <FormInput
+                  label="Graduation Date"
+                  placeholder="MM/YYYY"
+                  value={edu.endDate}
+                  onChange={(v) => updateItem("education", edu.id, "endDate", v)}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className={labelStyle}>Additional Information</label>
+              <textarea
+                rows={5}
+                placeholder="Additional Information"
+                value={edu.additionalInfo}
+                onChange={(e) =>
+                  updateItem("education", edu.id, "additionalInfo", e.target.value)
+                }
+                className={`${inputStyle} min-h-[140px] resize-y leading-6`}
+              />
+            </div>
           </div>
         </ReorderableCard>
       ))}
+
+      <AddButton label="Add Education" onClick={() => addItem("education")} />
     </Section>
   );
 }

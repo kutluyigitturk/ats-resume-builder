@@ -53,10 +53,10 @@ export default function Builder() {
 
   // ─── Render ─────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gray-200 flex">
+    <div className="h-screen bg-gray-200 flex overflow-hidden">
       {/* ==================== LEFT PANEL - FORM ==================== */}
       <div
-        className="bg-gray-100 border-r border-gray-300 overflow-y-auto h-screen sticky top-0"
+        className="bg-gray-100 border-r border-gray-300 overflow-y-auto h-screen"
         style={{ width: `${panelWidth}px` }}
       >
         <PdfNameEditor {...pdfExport} />
@@ -116,23 +116,23 @@ export default function Builder() {
       {/* Resizable Divider */}
       <ResizableDivider onMouseDown={handleMouseDown} />
 
-      {/* ==================== RIGHT PANEL - TOOLBAR + LIVE PREVIEW ==================== */}
-      <div className="flex-1 flex flex-col overflow-auto">
-        <div className="sticky top-0 z-10 bg-gray-200 pb-3">
+            {/* ==================== RIGHT PANEL - TOOLBAR + LIVE PREVIEW ==================== */}
+      <div className="flex-1 h-screen overflow-y-auto bg-gray-200">
+        <div className="sticky top-0 z-20 bg-gray-200 pb-[25px]">
           <div className="max-w-[200mm] mx-auto bg-white border-x border-b border-gray-300 rounded-b-lg px-6 py-3">
             <Toolbar
               downloading={pdfExport.downloading}
               onDownloadPDF={pdfExport.handleDownloadPDF}
             />
+          </div>
+
+          <div className="mt-[15px] flex justify-center">
             <ZoomControls zoom={zoom} setZoom={setZoom} />
           </div>
         </div>
 
         {/* CV Preview */}
-        <div
-          className="flex-1 flex justify-center items-start px-8 pb-8"
-          style={{ paddingTop: "20px" }}
-        >
+        <div className="flex justify-center items-start px-8 pb-8">
           <div style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}>
             <CVPreview cv={cv} hideReferences={hideReferences} />
           </div>

@@ -2,7 +2,7 @@ import { createId } from "@/lib/createId";
 
 // Shared style class strings used across all form components
 export const inputStyle =
-  "w-full border border-gray-200 rounded-md bg-gray-50 px-3 py-2.5 text-sm text-gray-400 placeholder:text-gray-400 focus:outline-none focus:border-gray-900 transition-all";
+  "w-full border border-gray-200 rounded-md bg-gray-100 px-3 py-2.5 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:border-gray-900 transition-all";
 
 export const labelStyle = "block text-sm font-medium text-gray-500 mb-1.5";
 
@@ -123,7 +123,8 @@ export const newEducation = {
   school: "",
   location: "",
   degree: "",
-  date: "",
+  startDate: "",
+  endDate: "",
   additionalInfo: "",
 };
 
@@ -162,7 +163,8 @@ export const createNewEducation = () => ({
   school: "",
   location: "",
   degree: "",
-  date: "",
+  startDate: "",
+  endDate: "",
   additionalInfo: "",
 });
 
@@ -195,6 +197,6 @@ export const ZOOM_MAX = 150;
 export const ZOOM_STEP = 10;
 
 // Panel constraints (as fractions of window width)
-export const PANEL_MIN_FRACTION = 1 / 5;
+export const PANEL_MIN_FRACTION = 1 / 3;
 export const PANEL_MAX_FRACTION = 1 / 2;
-export const PANEL_DEFAULT_WIDTH = 384;
+export const PANEL_DEFAULT_WIDTH = 640;

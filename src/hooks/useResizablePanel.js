@@ -3,10 +3,21 @@
 import { useState, useCallback, useEffect } from "react";
 import { PANEL_MIN_FRACTION, PANEL_MAX_FRACTION, PANEL_DEFAULT_WIDTH } from "@/lib/constants";
 
-// Handles the resizable left panel divider logic
 export default function useResizablePanel() {
   const [panelWidth, setPanelWidth] = useState(PANEL_DEFAULT_WIDTH);
   const [isDragging, setIsDragging] = useState(false);
+
+  // Enforce min/max on initial load and window resize
+  useEffect(() => {
+    const clamp = () => {
+      const minWidth = window.innerWidth * PANEL_MIN_FRACTION;
+      const maxWidth = window.innerWidth * PANEL_MAX_FRACTION;
+      setPanelWidth((prev) => Math.min(Math.max(prev, minWidth), maxWidth));
+    };
+    requestAnimationFrame(clamp);
+    window.addEventListener("resize", clamp);
+    return () => window.removeEventListener("resize", clamp);
+  }, []);
 
   const handleMouseDown = useCallback((e) => {
     e.preventDefault();

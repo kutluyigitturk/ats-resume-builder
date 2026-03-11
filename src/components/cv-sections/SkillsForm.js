@@ -25,8 +25,6 @@ export default function SkillsForm({
       isOpen={isOpen}
       onToggle={onToggle}
     >
-      <AddButton label="Add Skill Category" onClick={() => addItem("skills")} />
-
       {skills.map((skill, index) => (
         <ReorderableCard
           key={skill.id ?? index}
@@ -36,22 +34,26 @@ export default function SkillsForm({
           onMoveDown={() => moveItemDown("skills", skill.id)}
           onRemove={() => removeItem("skills", skill.id)}
         >
-          <div className="grid grid-cols-1 gap-3">
-            <FormInput
-              label="Category"
-              placeholder="e.g. Programming Languages"
-              value={skill.category}
-              onChange={(v) => updateItem("skills", skill.id, "category", v)}
-            />
-            <FormInput
-              label="Items"
-              placeholder="e.g. JavaScript, Python, React"
-              value={skill.items}
-              onChange={(v) => updateItem("skills", skill.id, "items", v)}
-            />
+          <div className="pt-6">
+            <div className="grid grid-cols-1 gap-3">
+              <FormInput
+                label="Category"
+                placeholder="e.g. Programming Languages"
+                value={skill.category}
+                onChange={(v) => updateItem("skills", skill.id, "category", v)}
+              />
+              <FormInput
+                label="Items"
+                placeholder="e.g. JavaScript, Python, React"
+                value={skill.items}
+                onChange={(v) => updateItem("skills", skill.id, "items", v)}
+              />
+            </div>
           </div>
         </ReorderableCard>
       ))}
+
+      <AddButton label="Add Skill Category" onClick={() => addItem("skills")} />
     </Section>
   );
 }

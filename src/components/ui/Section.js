@@ -15,7 +15,7 @@ export default function Section({ title, icon, isOpen, onToggle, tips, children 
       >
         <div className="flex items-center gap-3">
           {icon && <span style={{ color: "rgb(37, 99, 235)" }}>{icon}</span>}
-          <span className="font-semibold text-gray-800 text-base">{title}</span>
+          <span className="font-semibold text-gray-900 text-sm">{title}</span>
         </div>
         <span className={`text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
           <ChevronDownIcon />

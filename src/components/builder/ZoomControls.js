@@ -8,7 +8,7 @@ export default function ZoomControls({ zoom, setZoom }) {
   const zoomOut = () => setZoom((prev) => Math.max(prev - ZOOM_STEP, ZOOM_MIN));
 
   return (
-    <div className="flex justify-center" style={{ paddingTop: "15px" }}>
+    <div className="flex justify-center">
       <div className="inline-flex items-center gap-1 bg-white border border-gray-300 rounded-lg px-2 py-1">
         <button
           onClick={zoomOut}
