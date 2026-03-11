@@ -1,3 +1,5 @@
+import { createId } from "@/lib/createId";
+
 // Shared style class strings used across all form components
 export const inputStyle =
   "w-full border border-gray-200 rounded-md bg-gray-50 px-3 py-2.5 text-sm text-gray-400 placeholder:text-gray-400 focus:outline-none focus:border-gray-900 transition-all";
@@ -144,6 +146,48 @@ export const newReference = {
   phone: "",
   email: "",
 };
+
+export const createNewExperience = () => ({
+  id: createId("exp"),
+  company: "",
+  position: "",
+  location: "",
+  startDate: "",
+  endDate: "",
+  bullets: [""],
+});
+
+export const createNewEducation = () => ({
+  id: createId("edu"),
+  school: "",
+  location: "",
+  degree: "",
+  date: "",
+  additionalInfo: "",
+});
+
+export const createNewSkill = () => ({
+  id: createId("skill"),
+  category: "",
+  items: "",
+});
+
+export const createNewProject = () => ({
+  id: createId("project"),
+  name: "",
+  startDate: "",
+  endDate: "",
+  url: "",
+  bullets: [""],
+});
+
+export const createNewReference = () => ({
+  id: createId("ref"),
+  name: "",
+  company: "",
+  phone: "",
+  email: "",
+});
 
 // Zoom constraints
 export const ZOOM_MIN = 40;

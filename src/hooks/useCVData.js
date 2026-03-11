@@ -3,21 +3,29 @@
 import { useState } from "react";
 import initialCV from "@/data/initialCV";
 import {
-  newExperience,
-  newEducation,
-  newSkill,
-  newProject,
-  newReference,
+  createNewExperience,
+  createNewEducation,
+  createNewSkill,
+  createNewProject,
+  createNewReference,
 } from "@/lib/constants";
 
 // Maps section keys to their "new item" templates
 const templateMap = {
-  experiences: newExperience,
-  education: newEducation,
-  skills: newSkill,
-  projects: newProject,
-  references: newReference,
+  experiences: createNewExperience,
+  education: createNewEducation,
+  skills: createNewSkill,
+  projects: createNewProject,
+  references: createNewReference,
 };
+
+function resolveItemIndex(items, itemIdentifier) {
+  if (typeof itemIdentifier === "number") {
+    return itemIdentifier;
+  }
+
+  return items.findIndex((item) => item.id === itemIdentifier);
+}
 
 // Central CV state management hook
 // Replaces ~30 individual add/remove/update/move functions with generic operations
@@ -31,88 +39,123 @@ export default function useCVData() {
 
   // Add a new item to an array section
   const addItem = (section) => {
-    const template = templateMap[section];
-    if (!template) return;
-    setCv((prev) => ({
-      ...prev,
-      [section]: [...prev[section], { ...template }],
-    }));
-  };
+  const createItem = templateMap[section];
+  if (!createItem) return;
+
+  setCv((prev) => ({
+    ...prev,
+    [section]: [...prev[section], createItem()],
+  }));
+};
 
   // Remove an item from an array section by index
-  const removeItem = (section, index) => {
-    setCv((prev) => ({
+  const removeItem = (section, itemIdentifier) => {
+  setCv((prev) => {
+    const index = resolveItemIndex(prev[section], itemIdentifier);
+    if (index === -1) return prev;
+
+    return {
       ...prev,
       [section]: prev[section].filter((_, i) => i !== index),
-    }));
-  };
+    };
+  });
+};
 
   // Update a specific field on an item in an array section
-  const updateItem = (section, index, field, value) => {
-    setCv((prev) => {
-      const updated = [...prev[section]];
-      updated[index] = { ...updated[index], [field]: value };
-      return { ...prev, [section]: updated };
-    });
-  };
+  const updateItem = (section, itemIdentifier, field, value) => {
+  setCv((prev) => {
+    const updated = [...prev[section]];
+    const index = resolveItemIndex(updated, itemIdentifier);
+
+    if (index === -1) return prev;
+
+    updated[index] = { ...updated[index], [field]: value };
+    return { ...prev, [section]: updated };
+  });
+};
 
   // Move an item up in its array
-  const moveItemUp = (section, index) => {
-    if (index === 0) return;
-    setCv((prev) => {
-      const updated = [...prev[section]];
-      [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
-      return { ...prev, [section]: updated };
-    });
-  };
+  const moveItemUp = (section, itemIdentifier) => {
+  setCv((prev) => {
+    const updated = [...prev[section]];
+    const index = resolveItemIndex(updated, itemIdentifier);
+
+    if (index <= 0) return prev;
+
+    [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+    return { ...prev, [section]: updated };
+  });
+};
 
   // Move an item down in its array
-  const moveItemDown = (section, index) => {
-    setCv((prev) => {
-      if (index === prev[section].length - 1) return prev;
-      const updated = [...prev[section]];
-      [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
-      return { ...prev, [section]: updated };
-    });
-  };
+  const moveItemDown = (section, itemIdentifier) => {
+  setCv((prev) => {
+    const updated = [...prev[section]];
+    const index = resolveItemIndex(updated, itemIdentifier);
+
+    if (index === -1 || index === updated.length - 1) return prev;
+
+    [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+    return { ...prev, [section]: updated };
+  });
+};
 
   // Add a bullet point to an item that has a bullets array
-  const addBullet = (section, itemIndex) => {
-    setCv((prev) => {
-      const updated = [...prev[section]];
-      updated[itemIndex] = {
-        ...updated[itemIndex],
-        bullets: [...updated[itemIndex].bullets, ""],
-      };
-      return { ...prev, [section]: updated };
-    });
-  };
+  const addBullet = (section, itemIdentifier) => {
+  setCv((prev) => {
+    const updated = [...prev[section]];
+    const index = resolveItemIndex(updated, itemIdentifier);
+
+    if (index === -1) return prev;
+
+    updated[index] = {
+      ...updated[index],
+      bullets: [...updated[index].bullets, ""],
+    };
+
+    return { ...prev, [section]: updated };
+  });
+};
 
   // Remove a bullet point (keeps at least one)
-  const removeBullet = (section, itemIndex, bulletIndex) => {
-    setCv((prev) => {
-      const item = prev[section][itemIndex];
-      if (item.bullets.length <= 1) return prev;
+  const removeBullet = (section, itemIdentifier, bulletIndex) => {
+  setCv((prev) => {
+    const updated = [...prev[section]];
+    const index = resolveItemIndex(updated, itemIdentifier);
 
-      const updated = [...prev[section]];
-      updated[itemIndex] = {
-        ...updated[itemIndex],
-        bullets: item.bullets.filter((_, i) => i !== bulletIndex),
-      };
-      return { ...prev, [section]: updated };
-    });
-  };
+    if (index === -1) return prev;
+
+    const item = updated[index];
+    if (item.bullets.length <= 1) return prev;
+
+    updated[index] = {
+      ...updated[index],
+      bullets: item.bullets.filter((_, i) => i !== bulletIndex),
+    };
+
+    return { ...prev, [section]: updated };
+  });
+};
 
   // Update a specific bullet point's text
-  const updateBullet = (section, itemIndex, bulletIndex, value) => {
-    setCv((prev) => {
-      const updated = [...prev[section]];
-      const newBullets = [...updated[itemIndex].bullets];
-      newBullets[bulletIndex] = value;
-      updated[itemIndex] = { ...updated[itemIndex], bullets: newBullets };
-      return { ...prev, [section]: updated };
-    });
-  };
+  const updateBullet = (section, itemIdentifier, bulletIndex, value) => {
+  setCv((prev) => {
+    const updated = [...prev[section]];
+    const index = resolveItemIndex(updated, itemIdentifier);
+
+    if (index === -1) return prev;
+
+    const newBullets = [...updated[index].bullets];
+    newBullets[bulletIndex] = value;
+
+    updated[index] = {
+      ...updated[index],
+      bullets: newBullets,
+    };
+
+    return { ...prev, [section]: updated };
+  });
+};
 
   return {
     cv,

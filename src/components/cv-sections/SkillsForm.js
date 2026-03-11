@@ -25,34 +25,31 @@ export default function SkillsForm({
       isOpen={isOpen}
       onToggle={onToggle}
     >
-      <AddButton label="Add Category" onClick={() => addItem("skills")} />
+      <AddButton label="Add Skill Category" onClick={() => addItem("skills")} />
 
       {skills.map((skill, index) => (
         <ReorderableCard
-          key={index}
+          key={skill.id ?? index}
           index={index}
           total={skills.length}
-          onMoveUp={(i) => moveItemUp("skills", i)}
-          onMoveDown={(i) => moveItemDown("skills", i)}
-          onRemove={(i) => removeItem("skills", i)}
+          onMoveUp={() => moveItemUp("skills", skill.id)}
+          onMoveDown={() => moveItemDown("skills", skill.id)}
+          onRemove={() => removeItem("skills", skill.id)}
         >
-          {/* Category Name */}
-          <div className="mb-3 pr-24">
+          <div className="grid grid-cols-1 gap-3">
             <FormInput
               label="Category"
-              placeholder="e.g. Backend & Languages"
+              placeholder="e.g. Programming Languages"
               value={skill.category}
-              onChange={(v) => updateItem("skills", index, "category", v)}
+              onChange={(v) => updateItem("skills", skill.id, "category", v)}
+            />
+            <FormInput
+              label="Items"
+              placeholder="e.g. JavaScript, Python, React"
+              value={skill.items}
+              onChange={(v) => updateItem("skills", skill.id, "items", v)}
             />
           </div>
-
-          {/* Skills */}
-          <FormInput
-            label="Skills"
-            placeholder="e.g. Python (Expert), SQL (Advanced), Java, C/C++"
-            value={skill.items}
-            onChange={(v) => updateItem("skills", index, "items", v)}
-          />
         </ReorderableCard>
       ))}
     </Section>

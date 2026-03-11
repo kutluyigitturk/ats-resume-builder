@@ -2,7 +2,6 @@
 
 import Section from "@/components/ui/Section";
 import FormInput from "@/components/ui/FormInput";
-import { FormTextarea } from "@/components/ui/FormInput";
 import AddButton from "@/components/ui/AddButton";
 import ReorderableCard from "@/components/ui/ReorderableCard";
 import sectionTips from "@/data/sectionTips";
@@ -30,55 +29,51 @@ export default function EducationForm({
 
       {education.map((edu, index) => (
         <ReorderableCard
-          key={index}
+          key={edu.id ?? index}
           index={index}
           total={education.length}
-          onMoveUp={(i) => moveItemUp("education", i)}
-          onMoveDown={(i) => moveItemDown("education", i)}
-          onRemove={(i) => removeItem("education", i)}
+          onMoveUp={() => moveItemUp("education", edu.id)}
+          onMoveDown={() => moveItemDown("education", edu.id)}
+          onRemove={() => removeItem("education", edu.id)}
         >
-          {/* University | Location */}
-          <div className="grid grid-cols-2 gap-3 mb-3">
+          <div className="mb-3 pr-24">
             <FormInput
-              label="University"
-              placeholder="University"
+              label="School"
+              placeholder="School Name"
               value={edu.school}
-              onChange={(v) => updateItem("education", index, "school", v)}
+              onChange={(v) => updateItem("education", edu.id, "school", v)}
             />
-            <div className="pr-24">
-              <FormInput
-                label="Location"
-                placeholder="Location"
-                value={edu.location}
-                onChange={(v) => updateItem("education", index, "location", v)}
-              />
-            </div>
           </div>
 
-          {/* Degree | Graduation Date */}
           <div className="grid grid-cols-2 gap-3 mb-3">
             <FormInput
               label="Degree"
               placeholder="Degree"
               value={edu.degree}
-              onChange={(v) => updateItem("education", index, "degree", v)}
+              onChange={(v) => updateItem("education", edu.id, "degree", v)}
             />
             <FormInput
-              label="Graduation Date"
-              placeholder="Graduation Date"
-              value={edu.date}
-              onChange={(v) => updateItem("education", index, "date", v)}
+              label="Location"
+              placeholder="Location"
+              value={edu.location}
+              onChange={(v) => updateItem("education", edu.id, "location", v)}
             />
           </div>
 
-          {/* Additional Information */}
-          <FormTextarea
-            label="Additional Information"
-            placeholder="Additional information (honors, relevant coursework, etc.)"
-            value={edu.additionalInfo}
-            onChange={(v) => updateItem("education", index, "additionalInfo", v)}
-            rows="h-20"
-          />
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <FormInput
+              label="Date"
+              placeholder="Date"
+              value={edu.date}
+              onChange={(v) => updateItem("education", edu.id, "date", v)}
+            />
+            <FormInput
+              label="Additional Info"
+              placeholder="Additional Info"
+              value={edu.additionalInfo}
+              onChange={(v) => updateItem("education", edu.id, "additionalInfo", v)}
+            />
+          </div>
         </ReorderableCard>
       ))}
     </Section>

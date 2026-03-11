@@ -33,64 +33,60 @@ export default function ExperienceForm({
 
       {experiences.map((exp, index) => (
         <ReorderableCard
-          key={index}
+          key={exp.id ?? index}
           index={index}
           total={experiences.length}
-          onMoveUp={(i) => moveItemUp("experiences", i)}
-          onMoveDown={(i) => moveItemDown("experiences", i)}
-          onRemove={(i) => removeItem("experiences", i)}
+          onMoveUp={() => moveItemUp("experiences", exp.id)}
+          onMoveDown={() => moveItemDown("experiences", exp.id)}
+          onRemove={() => removeItem("experiences", exp.id)}
         >
-          {/* Company */}
           <div className="mb-3 pr-24">
             <FormInput
               label="Company"
               placeholder="Company Name"
               value={exp.company}
-              onChange={(v) => updateItem("experiences", index, "company", v)}
+              onChange={(v) => updateItem("experiences", exp.id, "company", v)}
             />
           </div>
 
-          {/* Role | Location */}
           <div className="grid grid-cols-2 gap-3 mb-3">
             <FormInput
               label="Role"
               placeholder="Role"
               value={exp.position}
-              onChange={(v) => updateItem("experiences", index, "position", v)}
+              onChange={(v) => updateItem("experiences", exp.id, "position", v)}
             />
             <FormInput
               label="Location"
               placeholder="Location"
               value={exp.location}
-              onChange={(v) => updateItem("experiences", index, "location", v)}
+              onChange={(v) => updateItem("experiences", exp.id, "location", v)}
             />
           </div>
 
-          {/* Start Date | End Date */}
           <div className="grid grid-cols-2 gap-3 mb-3">
             <FormInput
               label="Start Date"
               placeholder="Start Date"
               value={exp.startDate}
-              onChange={(v) => updateItem("experiences", index, "startDate", v)}
+              onChange={(v) => updateItem("experiences", exp.id, "startDate", v)}
             />
             <FormInput
               label="End Date"
               placeholder="End Date"
               value={exp.endDate}
-              onChange={(v) => updateItem("experiences", index, "endDate", v)}
+              onChange={(v) => updateItem("experiences", exp.id, "endDate", v)}
             />
           </div>
 
-          {/* Responsibilities */}
           <BulletListEditor
             label="Responsibilities"
             placeholder="New Responsibility"
             addLabel="Add Responsibility"
             bullets={exp.bullets}
-            onUpdate={(bIndex, value) => updateBullet("experiences", index, bIndex, value)}
-            onAdd={() => addBullet("experiences", index)}
-            onRemove={(bIndex) => removeBullet("experiences", index, bIndex)}
+            onUpdate={(bIndex, value) => updateBullet("experiences", exp.id, bIndex, value)}
+            onAdd={() => addBullet("experiences", exp.id)}
+            onRemove={(bIndex) => removeBullet("experiences", exp.id, bIndex)}
           />
         </ReorderableCard>
       ))}

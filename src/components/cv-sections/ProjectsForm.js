@@ -33,58 +33,54 @@ export default function ProjectsForm({
 
       {projects.map((project, index) => (
         <ReorderableCard
-          key={index}
+          key={project.id ?? index}
           index={index}
           total={projects.length}
-          onMoveUp={(i) => moveItemUp("projects", i)}
-          onMoveDown={(i) => moveItemDown("projects", i)}
-          onRemove={(i) => removeItem("projects", i)}
+          onMoveUp={() => moveItemUp("projects", project.id)}
+          onMoveDown={() => moveItemDown("projects", project.id)}
+          onRemove={() => removeItem("projects", project.id)}
         >
-          {/* Project Title */}
           <div className="mb-3 pr-24">
             <FormInput
-              label="Project Title"
-              placeholder="New Project"
+              label="Project Name"
+              placeholder="Project Name"
               value={project.name}
-              onChange={(v) => updateItem("projects", index, "name", v)}
+              onChange={(v) => updateItem("projects", project.id, "name", v)}
             />
           </div>
 
-          {/* Start Date | End Date */}
           <div className="grid grid-cols-2 gap-3 mb-3">
             <FormInput
               label="Start Date"
               placeholder="Start Date"
               value={project.startDate}
-              onChange={(v) => updateItem("projects", index, "startDate", v)}
+              onChange={(v) => updateItem("projects", project.id, "startDate", v)}
             />
             <FormInput
               label="End Date"
               placeholder="End Date"
               value={project.endDate}
-              onChange={(v) => updateItem("projects", index, "endDate", v)}
+              onChange={(v) => updateItem("projects", project.id, "endDate", v)}
             />
           </div>
 
-          {/* Project URL */}
           <div className="mb-3">
             <FormInput
               label="Project URL"
-              placeholder="Project URL (optional)"
+              placeholder="https://..."
               value={project.url}
-              onChange={(v) => updateItem("projects", index, "url", v)}
+              onChange={(v) => updateItem("projects", project.id, "url", v)}
             />
           </div>
 
-          {/* Descriptions */}
           <BulletListEditor
-            label="Project Descriptions"
-            placeholder="Project description"
-            addLabel="Add Description"
+            label="Project Details"
+            placeholder="New Detail"
+            addLabel="Add Detail"
             bullets={project.bullets}
-            onUpdate={(bIndex, value) => updateBullet("projects", index, bIndex, value)}
-            onAdd={() => addBullet("projects", index)}
-            onRemove={(bIndex) => removeBullet("projects", index, bIndex)}
+            onUpdate={(bIndex, value) => updateBullet("projects", project.id, bIndex, value)}
+            onAdd={() => addBullet("projects", project.id)}
+            onRemove={(bIndex) => removeBullet("projects", project.id, bIndex)}
           />
         </ReorderableCard>
       ))}
