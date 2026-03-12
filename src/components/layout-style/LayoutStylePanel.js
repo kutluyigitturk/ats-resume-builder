@@ -2,8 +2,14 @@
 
 import { BackArrowIcon } from "@/icons";
 import FormattingSection from "@/components/layout-style/FormattingSection";
+import ReorderSections from "@/components/layout-style/ReorderSections";
 
-export default function LayoutStylePanel({ styleSettings, updateStyle, onBack }) {
+export default function LayoutStylePanel({
+  styleSettings,
+  updateStyle,
+  reorderSections,
+  onBack,
+}) {
   return (
     <div className="h-full">
       {/* Header — matches PdfNameEditor style */}
@@ -23,7 +29,10 @@ export default function LayoutStylePanel({ styleSettings, updateStyle, onBack })
         updateStyle={updateStyle}
       />
 
-      {/* Future sections (Layout, Reorder) will be added here */}
+      <ReorderSections
+        sectionOrder={styleSettings.sectionOrder}
+        onReorder={reorderSections}
+      />
     </div>
   );
 }

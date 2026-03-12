@@ -49,60 +49,20 @@ function buildResolvedStyles(settings) {
       fontSize: bodySize,
       lineHeight,
     },
-    name: {
-      ...cvStyles.name,
-      fontFamily: headingFont,
-    },
-    title: {
-      ...cvStyles.title,
-      fontFamily: bodyFont,
-    },
-    contact: {
-      ...cvStyles.contact,
-      fontFamily: bodyFont,
-    },
+    name: { ...cvStyles.name, fontFamily: headingFont },
+    title: { ...cvStyles.title, fontFamily: bodyFont },
+    contact: { ...cvStyles.contact, fontFamily: bodyFont },
     divider: cvStyles.divider,
-    sectionTitle: {
-      ...cvStyles.sectionTitle,
-      fontFamily: headingFont,
-      fontSize: headingSize,
-    },
-    sectionTitleFirst: {
-      ...cvStyles.sectionTitleFirst,
-      fontFamily: headingFont,
-      fontSize: headingSize,
-    },
-    summary: {
-      ...cvStyles.summary,
-      fontFamily: bodyFont,
-      fontSize: bodySize,
-    },
-    itemHeader: {
-      ...cvStyles.itemHeader,
-      fontFamily: headingFont,
-    },
-    itemDate: {
-      ...cvStyles.itemDate,
-      fontFamily: bodyFont,
-    },
-    itemSubtitle: {
-      ...cvStyles.itemSubtitle,
-      fontFamily: bodyFont,
-    },
-    bulletList: {
-      ...cvStyles.bulletList,
-      fontFamily: bodyFont,
-      fontSize: bodySize,
-    },
+    sectionTitle: { ...cvStyles.sectionTitle, fontFamily: headingFont, fontSize: headingSize },
+    sectionTitleFirst: { ...cvStyles.sectionTitleFirst, fontFamily: headingFont, fontSize: headingSize },
+    summary: { ...cvStyles.summary, fontFamily: bodyFont, fontSize: bodySize },
+    itemHeader: { ...cvStyles.itemHeader, fontFamily: headingFont },
+    itemDate: { ...cvStyles.itemDate, fontFamily: bodyFont },
+    itemSubtitle: { ...cvStyles.itemSubtitle, fontFamily: bodyFont },
+    bulletList: { ...cvStyles.bulletList, fontFamily: bodyFont, fontSize: bodySize },
     bulletItem: cvStyles.bulletItem,
-    referenceTitle: {
-      ...cvStyles.referenceTitle,
-      fontFamily: headingFont,
-    },
-    referenceContact: {
-      ...cvStyles.referenceContact,
-      fontFamily: bodyFont,
-    },
+    referenceTitle: { ...cvStyles.referenceTitle, fontFamily: headingFont },
+    referenceContact: { ...cvStyles.referenceContact, fontFamily: bodyFont },
   };
 }
 
@@ -111,12 +71,213 @@ function buildResolvedStyles(settings) {
 const PAGE_GAP_PX = 30;
 const PAGE_HEIGHT_BUFFER = 10;
 
-/* ─── Block builder (template-specific) ──────────── */
+/* ─── Section block builders ─────────────────────── */
 
-function buildBlocks(cv, hideReferences, styles) {
+function buildSummaryBlocks(cv, styles, isFirst) {
+  if (!hasValue(cv.summary)) return [];
+  const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
+  return [
+    { key: "summary-header", type: "section-header", element: <h2 style={titleStyle}>Professional Summary</h2> },
+    { key: "summary-content", type: "content", element: <p style={styles.summary}>{cv.summary}</p> },
+  ];
+}
+
+function buildExperienceBlocks(cv, styles, isFirst) {
+  const visible = cv.experiences.filter((e) => hasValue(e.company) || hasValue(e.position));
+  if (visible.length === 0) return [];
+  const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
+  const blocks = [
+    { key: "exp-header", type: "section-header", element: <h2 style={titleStyle}>Experience</h2> },
+  ];
+  visible.forEach((exp, i) => {
+    blocks.push({
+      key: `exp-${exp.id ?? i}`,
+      type: "item",
+      element: (
+        <div style={{ marginBottom: "12px" }}>
+          <div style={styles.itemHeader}>
+            <span>{exp.company}</span>
+            <span style={styles.itemDate}>
+              {exp.startDate}
+              {hasValue(exp.startDate) && hasValue(exp.endDate) ? " – " : ""}
+              {exp.endDate}
+            </span>
+          </div>
+          {(hasValue(exp.position) || hasValue(exp.location)) && (
+            <p style={styles.itemSubtitle}>
+              {exp.position}
+              {hasValue(exp.position) && hasValue(exp.location) ? " | " : ""}
+              {exp.location}
+            </p>
+          )}
+          {exp.bullets.some((b) => hasValue(b)) && (
+            <ul style={styles.bulletList}>
+              {exp.bullets.filter((b) => hasValue(b)).map((bullet, j) => (
+                <li key={j} style={styles.bulletItem}>{bullet}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ),
+    });
+  });
+  return blocks;
+}
+
+function buildEducationBlocks(cv, styles, isFirst) {
+  const visible = cv.education.filter((e) => hasValue(e.school) || hasValue(e.degree));
+  if (visible.length === 0) return [];
+  const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
+  const blocks = [
+    { key: "edu-header", type: "section-header", element: <h2 style={titleStyle}>Education</h2> },
+  ];
+  visible.forEach((edu, i) => {
+    blocks.push({
+      key: `edu-${edu.id ?? i}`,
+      type: "item",
+      element: (
+        <div style={{ marginBottom: "10px" }}>
+          <div style={styles.itemHeader}>
+            <span>{edu.degree}</span>
+            <span style={styles.itemDate}>
+              {edu.startDate}
+              {hasValue(edu.startDate) && hasValue(edu.endDate) ? " – " : ""}
+              {edu.endDate}
+            </span>
+          </div>
+          {(hasValue(edu.school) || hasValue(edu.location)) && (
+            <p style={{ fontFamily: styles.page.fontFamily, fontSize: styles.page.fontSize, fontStyle: "italic", marginBottom: "2px" }}>
+              {edu.school}
+              {hasValue(edu.school) && hasValue(edu.location) ? " | " : ""}
+              {edu.location}
+            </p>
+          )}
+          {hasValue(edu.additionalInfo) && (
+            <p style={{ fontFamily: styles.page.fontFamily, fontSize: "9.5pt", color: "#555" }}>{edu.additionalInfo}</p>
+          )}
+        </div>
+      ),
+    });
+  });
+  return blocks;
+}
+
+function buildSkillsBlocks(cv, styles, isFirst) {
+  const visible = cv.skills.filter((s) => hasValue(s.category) || hasValue(s.items));
+  if (visible.length === 0) return [];
+  const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
+  const blocks = [
+    { key: "skills-header", type: "section-header", element: <h2 style={titleStyle}>Technical Skills</h2> },
+  ];
+  visible.forEach((skill, i) => {
+    blocks.push({
+      key: `skill-${skill.id ?? i}`,
+      type: "item",
+      element: (
+        <div style={{ paddingLeft: "18px", fontFamily: styles.page.fontFamily, fontSize: styles.page.fontSize, position: "relative", marginBottom: "4px" }}>
+          <span style={{ position: "absolute", left: "4px" }}>•</span>
+          {hasValue(skill.category) && <strong>{skill.category}</strong>}
+          {hasValue(skill.category) && hasValue(skill.items) ? ": " : ""}
+          {skill.items}
+        </div>
+      ),
+    });
+  });
+  return blocks;
+}
+
+function buildProjectsBlocks(cv, styles, isFirst) {
+  const visible = cv.projects.filter((p) => hasValue(p.name));
+  if (visible.length === 0) return [];
+  const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
+  const blocks = [
+    { key: "projects-header", type: "section-header", element: <h2 style={titleStyle}>Technical Projects and Research</h2> },
+  ];
+  visible.forEach((project, i) => {
+    blocks.push({
+      key: `project-${project.id ?? i}`,
+      type: "item",
+      element: (
+        <div style={{ marginBottom: "10px" }}>
+          <div style={styles.itemHeader}>
+            <span>{project.name}</span>
+            <span style={styles.itemDate}>
+              {project.startDate}
+              {hasValue(project.startDate) && hasValue(project.endDate) ? " – " : ""}
+              {project.endDate}
+            </span>
+          </div>
+          {hasValue(project.url) && (
+            <p style={{ fontFamily: styles.page.fontFamily, fontSize: "9.5pt", color: "#555", marginBottom: "4px" }}>{project.url}</p>
+          )}
+          {project.bullets.some((b) => hasValue(b)) && (
+            <ul style={styles.bulletList}>
+              {project.bullets.filter((b) => hasValue(b)).map((bullet, j) => (
+                <li key={j} style={styles.bulletItem}>{bullet}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ),
+    });
+  });
+  return blocks;
+}
+
+function buildReferencesBlocks(cv, styles, isFirst, hideReferences) {
+  const visibleRefs = getVisibleReferences(cv.references);
+  if (!hideReferences && visibleRefs.length === 0) return [];
+  const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
+  const blocks = [
+    { key: "ref-header", type: "section-header", element: <h2 style={titleStyle}>References</h2> },
+  ];
+  if (hideReferences) {
+    blocks.push({
+      key: "ref-upon-request",
+      type: "content",
+      element: <p style={{ fontFamily: styles.page.fontFamily, fontSize: styles.page.fontSize, fontStyle: "italic" }}>Available upon request</p>,
+    });
+  } else {
+    visibleRefs.forEach((ref, i) => {
+      blocks.push({
+        key: `ref-${ref.id ?? i}`,
+        type: "item",
+        element: (
+          <div style={{ marginBottom: "8px" }}>
+            <div style={styles.referenceTitle}>
+              {ref.name}
+              {hasValue(ref.company) ? ` — ${ref.company}` : ""}
+            </div>
+            <div style={styles.referenceContact}>
+              {ref.phone}
+              {hasValue(ref.phone) && hasValue(ref.email) ? " | " : ""}
+              {ref.email}
+            </div>
+          </div>
+        ),
+      });
+    });
+  }
+  return blocks;
+}
+
+/* ─── Section builder registry ───────────────────── */
+
+const sectionBuilders = {
+  summary: (cv, styles, isFirst, hideReferences) => buildSummaryBlocks(cv, styles, isFirst),
+  experience: (cv, styles, isFirst, hideReferences) => buildExperienceBlocks(cv, styles, isFirst),
+  education: (cv, styles, isFirst, hideReferences) => buildEducationBlocks(cv, styles, isFirst),
+  skills: (cv, styles, isFirst, hideReferences) => buildSkillsBlocks(cv, styles, isFirst),
+  projects: (cv, styles, isFirst, hideReferences) => buildProjectsBlocks(cv, styles, isFirst),
+  references: (cv, styles, isFirst, hideReferences) => buildReferencesBlocks(cv, styles, isFirst, hideReferences),
+};
+
+/* ─── Block builder (order-aware) ────────────────── */
+
+function buildBlocks(cv, hideReferences, styles, sectionOrder) {
   const blocks = [];
 
-  // --- Personal info ---
+  // Personal info is always first
   if (hasValue(cv.name) || hasValue(cv.title) || hasContactInfo(cv)) {
     blocks.push({
       key: "personal",
@@ -136,226 +297,15 @@ function buildBlocks(cv, hideReferences, styles) {
     });
   }
 
-  // --- Professional Summary ---
-  if (hasValue(cv.summary)) {
-    blocks.push({
-      key: "summary-header",
-      type: "section-header",
-      element: <h2 style={styles.sectionTitleFirst}>Professional Summary</h2>,
-    });
-    blocks.push({
-      key: "summary-content",
-      type: "content",
-      element: <p style={styles.summary}>{cv.summary}</p>,
-    });
-  }
-
-  // --- Experience ---
-  const visibleExps = cv.experiences.filter(
-    (e) => hasValue(e.company) || hasValue(e.position)
-  );
-  if (visibleExps.length > 0) {
-    blocks.push({
-      key: "exp-header",
-      type: "section-header",
-      element: <h2 style={styles.sectionTitle}>Experience</h2>,
-    });
-    visibleExps.forEach((exp, i) => {
-      blocks.push({
-        key: `exp-${exp.id ?? i}`,
-        type: "item",
-        element: (
-          <div style={{ marginBottom: "12px" }}>
-            <div style={styles.itemHeader}>
-              <span>{exp.company}</span>
-              <span style={styles.itemDate}>
-                {exp.startDate}
-                {hasValue(exp.startDate) && hasValue(exp.endDate) ? " – " : ""}
-                {exp.endDate}
-              </span>
-            </div>
-            {(hasValue(exp.position) || hasValue(exp.location)) && (
-              <p style={styles.itemSubtitle}>
-                {exp.position}
-                {hasValue(exp.position) && hasValue(exp.location) ? " | " : ""}
-                {exp.location}
-              </p>
-            )}
-            {exp.bullets.some((b) => hasValue(b)) && (
-              <ul style={styles.bulletList}>
-                {exp.bullets
-                  .filter((b) => hasValue(b))
-                  .map((bullet, j) => (
-                    <li key={j} style={styles.bulletItem}>
-                      {bullet}
-                    </li>
-                  ))}
-              </ul>
-            )}
-          </div>
-        ),
-      });
-    });
-  }
-
-  // --- Education ---
-  const visibleEdus = cv.education.filter(
-    (e) => hasValue(e.school) || hasValue(e.degree)
-  );
-  if (visibleEdus.length > 0) {
-    blocks.push({
-      key: "edu-header",
-      type: "section-header",
-      element: <h2 style={styles.sectionTitle}>Education</h2>,
-    });
-    visibleEdus.forEach((edu, i) => {
-      blocks.push({
-        key: `edu-${edu.id ?? i}`,
-        type: "item",
-        element: (
-          <div style={{ marginBottom: "10px" }}>
-            <div style={styles.itemHeader}>
-              <span>{edu.degree}</span>
-              <span style={styles.itemDate}>
-                {edu.startDate}
-                {hasValue(edu.startDate) && hasValue(edu.endDate) ? " – " : ""}
-                {edu.endDate}
-              </span>
-            </div>
-            {(hasValue(edu.school) || hasValue(edu.location)) && (
-              <p style={{ fontFamily: styles.page.fontFamily, fontSize: styles.page.fontSize, fontStyle: "italic", marginBottom: "2px" }}>
-                {edu.school}
-                {hasValue(edu.school) && hasValue(edu.location) ? " | " : ""}
-                {edu.location}
-              </p>
-            )}
-            {hasValue(edu.additionalInfo) && (
-              <p style={{ fontFamily: styles.page.fontFamily, fontSize: "9.5pt", color: "#555" }}>
-                {edu.additionalInfo}
-              </p>
-            )}
-          </div>
-        ),
-      });
-    });
-  }
-
-  // --- Skills ---
-  const visibleSkills = cv.skills.filter(
-    (s) => hasValue(s.category) || hasValue(s.items)
-  );
-  if (visibleSkills.length > 0) {
-    blocks.push({
-      key: "skills-header",
-      type: "section-header",
-      element: <h2 style={styles.sectionTitle}>Technical Skills</h2>,
-    });
-    visibleSkills.forEach((skill, i) => {
-      blocks.push({
-        key: `skill-${skill.id ?? i}`,
-        type: "item",
-        element: (
-          <div
-            style={{
-              paddingLeft: "18px",
-              fontFamily: styles.page.fontFamily,
-              fontSize: styles.page.fontSize,
-              position: "relative",
-              marginBottom: "4px",
-            }}
-          >
-            <span style={{ position: "absolute", left: "4px" }}>•</span>
-            {hasValue(skill.category) && <strong>{skill.category}</strong>}
-            {hasValue(skill.category) && hasValue(skill.items) ? ": " : ""}
-            {skill.items}
-          </div>
-        ),
-      });
-    });
-  }
-
-  // --- Projects ---
-  const visibleProjects = cv.projects.filter((p) => hasValue(p.name));
-  if (visibleProjects.length > 0) {
-    blocks.push({
-      key: "projects-header",
-      type: "section-header",
-      element: <h2 style={styles.sectionTitle}>Technical Projects and Research</h2>,
-    });
-    visibleProjects.forEach((project, i) => {
-      blocks.push({
-        key: `project-${project.id ?? i}`,
-        type: "item",
-        element: (
-          <div style={{ marginBottom: "10px" }}>
-            <div style={styles.itemHeader}>
-              <span>{project.name}</span>
-              <span style={styles.itemDate}>
-                {project.startDate}
-                {hasValue(project.startDate) && hasValue(project.endDate) ? " – " : ""}
-                {project.endDate}
-              </span>
-            </div>
-            {hasValue(project.url) && (
-              <p style={{ fontFamily: styles.page.fontFamily, fontSize: "9.5pt", color: "#555", marginBottom: "4px" }}>
-                {project.url}
-              </p>
-            )}
-            {project.bullets.some((b) => hasValue(b)) && (
-              <ul style={styles.bulletList}>
-                {project.bullets
-                  .filter((b) => hasValue(b))
-                  .map((bullet, j) => (
-                    <li key={j} style={styles.bulletItem}>
-                      {bullet}
-                    </li>
-                  ))}
-              </ul>
-            )}
-          </div>
-        ),
-      });
-    });
-  }
-
-  // --- References ---
-  const visibleRefs = getVisibleReferences(cv.references);
-  if (hideReferences || visibleRefs.length > 0) {
-    blocks.push({
-      key: "ref-header",
-      type: "section-header",
-      element: <h2 style={styles.sectionTitle}>References</h2>,
-    });
-    if (hideReferences) {
-      blocks.push({
-        key: "ref-upon-request",
-        type: "content",
-        element: (
-          <p style={{ fontFamily: styles.page.fontFamily, fontSize: styles.page.fontSize, fontStyle: "italic" }}>
-            Available upon request
-          </p>
-        ),
-      });
-    } else {
-      visibleRefs.forEach((ref, i) => {
-        blocks.push({
-          key: `ref-${ref.id ?? i}`,
-          type: "item",
-          element: (
-            <div style={{ marginBottom: "8px" }}>
-              <div style={styles.referenceTitle}>
-                {ref.name}
-                {hasValue(ref.company) ? ` — ${ref.company}` : ""}
-              </div>
-              <div style={styles.referenceContact}>
-                {ref.phone}
-                {hasValue(ref.phone) && hasValue(ref.email) ? " | " : ""}
-                {ref.email}
-              </div>
-            </div>
-          ),
-        });
-      });
+  // Build sections in user-defined order
+  let isFirstSection = true;
+  for (const sectionId of sectionOrder) {
+    const builder = sectionBuilders[sectionId];
+    if (!builder) continue;
+    const sectionBlocks = builder(cv, styles, isFirstSection, hideReferences);
+    if (sectionBlocks.length > 0) {
+      blocks.push(...sectionBlocks);
+      isFirstSection = false;
     }
   }
 
@@ -421,8 +371,8 @@ export default function CVPreview({ cv, hideReferences, styleSettings }) {
   }), [resolvedStyles]);
 
   const blocks = useMemo(
-    () => buildBlocks(cv, hideReferences, resolvedStyles),
-    [cv, hideReferences, resolvedStyles]
+    () => buildBlocks(cv, hideReferences, resolvedStyles, settings.sectionOrder),
+    [cv, hideReferences, resolvedStyles, settings.sectionOrder]
   );
 
   useLayoutEffect(() => {
@@ -457,7 +407,7 @@ export default function CVPreview({ cv, hideReferences, styleSettings }) {
 
   return (
     <>
-      {/* Ruler: exact A4 content-area height in CSS pixels */}
+      {/* Ruler */}
       <div
         ref={rulerRef}
         style={{
@@ -470,7 +420,7 @@ export default function CVPreview({ cv, hideReferences, styleSettings }) {
         }}
       />
 
-      {/* Measurement container (always rendered offscreen) */}
+      {/* Measurement container */}
       <div
         ref={measureRef}
         aria-hidden="true"

@@ -43,7 +43,7 @@ export default function Builder() {
 
   const [builderMode, setBuilderMode] = useState("editor");
 
-  const { styleSettings, updateStyle, resetStyles } = useStyleSettings();
+  const { styleSettings, updateStyle, reorderSections, resetStyles } = useStyleSettings();
 
   const [openSections, setOpenSections] = useState({
     personal: false,
@@ -126,6 +126,7 @@ export default function Builder() {
           <LayoutStylePanel
             styleSettings={styleSettings}
             updateStyle={updateStyle}
+            reorderSections={reorderSections}
             onBack={() => setBuilderMode("editor")}
           />
         )}

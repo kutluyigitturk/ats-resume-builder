@@ -10,9 +10,13 @@ export default function useStyleSettings() {
     setStyleSettings((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  const reorderSections = useCallback((newOrder) => {
+    setStyleSettings((prev) => ({ ...prev, sectionOrder: newOrder }));
+  }, []);
+
   const resetStyles = useCallback(() => {
     setStyleSettings(defaultStyleSettings);
   }, []);
 
-  return { styleSettings, updateStyle, resetStyles };
+  return { styleSettings, updateStyle, reorderSections, resetStyles };
 }
