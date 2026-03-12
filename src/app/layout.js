@@ -1,10 +1,38 @@
-import { Inter } from "next/font/google";
+import { Inter, Roboto, Open_Sans, Lato, Carlito } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   fallback: ["sans-serif"],
+  variable: "--font-inter",
+});
+
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  display: "swap",
+  variable: "--font-roboto",
+});
+
+const openSans = Open_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-open-sans",
+});
+
+const lato = Lato({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+  variable: "--font-lato",
+});
+
+const carlito = Carlito({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+  variable: "--font-carlito",
 });
 
 export const metadata = {
@@ -15,7 +43,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
+      <body
+        className={`${inter.variable} ${roboto.variable} ${openSans.variable} ${lato.variable} ${carlito.variable} ${inter.className} antialiased`}
+      >
         {children}
       </body>
     </html>

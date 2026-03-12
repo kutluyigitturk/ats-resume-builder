@@ -2,6 +2,7 @@
 
 import { useRef, useState, useLayoutEffect, useMemo } from "react";
 import { cvStyles } from "@/lib/constants";
+import { fontOptions, defaultStyleSettings } from "@/data/styleDefaults";
 
 /* ─── Helpers ────────────────────────────────────── */
 
@@ -25,28 +26,94 @@ function getVisibleReferences(refs) {
   );
 }
 
+/* ─── Resolve font name to CSS font-family ───────── */
+
+function resolveFontFamily(fontName) {
+  const font = fontOptions.find((f) => f.name === fontName);
+  return font ? font.family : "Inter, sans-serif";
+}
+
+/* ─── Build resolved styles from base + settings ─── */
+
+function buildResolvedStyles(settings) {
+  const headingFont = resolveFontFamily(settings.primaryFont);
+  const bodyFont = resolveFontFamily(settings.secondaryFont);
+  const headingSize = `${settings.headingSize}pt`;
+  const bodySize = `${settings.bodySize}pt`;
+  const lineHeight = `${settings.lineSpacing}`;
+
+  return {
+    page: {
+      ...cvStyles.page,
+      fontFamily: bodyFont,
+      fontSize: bodySize,
+      lineHeight,
+    },
+    name: {
+      ...cvStyles.name,
+      fontFamily: headingFont,
+    },
+    title: {
+      ...cvStyles.title,
+      fontFamily: bodyFont,
+    },
+    contact: {
+      ...cvStyles.contact,
+      fontFamily: bodyFont,
+    },
+    divider: cvStyles.divider,
+    sectionTitle: {
+      ...cvStyles.sectionTitle,
+      fontFamily: headingFont,
+      fontSize: headingSize,
+    },
+    sectionTitleFirst: {
+      ...cvStyles.sectionTitleFirst,
+      fontFamily: headingFont,
+      fontSize: headingSize,
+    },
+    summary: {
+      ...cvStyles.summary,
+      fontFamily: bodyFont,
+      fontSize: bodySize,
+    },
+    itemHeader: {
+      ...cvStyles.itemHeader,
+      fontFamily: headingFont,
+    },
+    itemDate: {
+      ...cvStyles.itemDate,
+      fontFamily: bodyFont,
+    },
+    itemSubtitle: {
+      ...cvStyles.itemSubtitle,
+      fontFamily: bodyFont,
+    },
+    bulletList: {
+      ...cvStyles.bulletList,
+      fontFamily: bodyFont,
+      fontSize: bodySize,
+    },
+    bulletItem: cvStyles.bulletItem,
+    referenceTitle: {
+      ...cvStyles.referenceTitle,
+      fontFamily: headingFont,
+    },
+    referenceContact: {
+      ...cvStyles.referenceContact,
+      fontFamily: bodyFont,
+    },
+  };
+}
+
 /* ─── Constants ──────────────────────────────────── */
 
-// Gap between pages (~8mm, matching Word's print layout)
 const PAGE_GAP_PX = 30;
-
-// Safety buffer for margin collapsing differences at page boundaries
 const PAGE_HEIGHT_BUFFER = 10;
-
-// Shared base style for both measurement and display
-const pageBaseStyle = {
-  width: "210mm",
-  padding: "12.7mm",
-  fontFamily: "Inter, sans-serif",
-  fontSize: "11pt",
-  lineHeight: "1.5",
-  color: "#333",
-  boxSizing: "border-box",
-};
 
 /* ─── Block builder (template-specific) ──────────── */
 
-function buildBlocks(cv, hideReferences) {
+function buildBlocks(cv, hideReferences, styles) {
   const blocks = [];
 
   // --- Personal info ---
@@ -56,12 +123,12 @@ function buildBlocks(cv, hideReferences) {
       type: "personal",
       element: (
         <>
-          {hasValue(cv.name) && <h1 style={cvStyles.name}>{cv.name}</h1>}
-          {hasValue(cv.title) && <p style={cvStyles.title}>{cv.title}</p>}
+          {hasValue(cv.name) && <h1 style={styles.name}>{cv.name}</h1>}
+          {hasValue(cv.title) && <p style={styles.title}>{cv.title}</p>}
           {hasContactInfo(cv) && (
             <>
-              <p style={cvStyles.contact}>{formatContact(cv)}</p>
-              <hr style={cvStyles.divider} />
+              <p style={styles.contact}>{formatContact(cv)}</p>
+              <hr style={styles.divider} />
             </>
           )}
         </>
@@ -74,12 +141,12 @@ function buildBlocks(cv, hideReferences) {
     blocks.push({
       key: "summary-header",
       type: "section-header",
-      element: <h2 style={cvStyles.sectionTitleFirst}>Professional Summary</h2>,
+      element: <h2 style={styles.sectionTitleFirst}>Professional Summary</h2>,
     });
     blocks.push({
       key: "summary-content",
       type: "content",
-      element: <p style={cvStyles.summary}>{cv.summary}</p>,
+      element: <p style={styles.summary}>{cv.summary}</p>,
     });
   }
 
@@ -91,7 +158,7 @@ function buildBlocks(cv, hideReferences) {
     blocks.push({
       key: "exp-header",
       type: "section-header",
-      element: <h2 style={cvStyles.sectionTitle}>Experience</h2>,
+      element: <h2 style={styles.sectionTitle}>Experience</h2>,
     });
     visibleExps.forEach((exp, i) => {
       blocks.push({
@@ -99,27 +166,27 @@ function buildBlocks(cv, hideReferences) {
         type: "item",
         element: (
           <div style={{ marginBottom: "12px" }}>
-            <div style={cvStyles.itemHeader}>
+            <div style={styles.itemHeader}>
               <span>{exp.company}</span>
-              <span style={cvStyles.itemDate}>
+              <span style={styles.itemDate}>
                 {exp.startDate}
                 {hasValue(exp.startDate) && hasValue(exp.endDate) ? " – " : ""}
                 {exp.endDate}
               </span>
             </div>
             {(hasValue(exp.position) || hasValue(exp.location)) && (
-              <p style={cvStyles.itemSubtitle}>
+              <p style={styles.itemSubtitle}>
                 {exp.position}
                 {hasValue(exp.position) && hasValue(exp.location) ? " | " : ""}
                 {exp.location}
               </p>
             )}
             {exp.bullets.some((b) => hasValue(b)) && (
-              <ul style={cvStyles.bulletList}>
+              <ul style={styles.bulletList}>
                 {exp.bullets
                   .filter((b) => hasValue(b))
                   .map((bullet, j) => (
-                    <li key={j} style={cvStyles.bulletItem}>
+                    <li key={j} style={styles.bulletItem}>
                       {bullet}
                     </li>
                   ))}
@@ -139,7 +206,7 @@ function buildBlocks(cv, hideReferences) {
     blocks.push({
       key: "edu-header",
       type: "section-header",
-      element: <h2 style={cvStyles.sectionTitle}>Education</h2>,
+      element: <h2 style={styles.sectionTitle}>Education</h2>,
     });
     visibleEdus.forEach((edu, i) => {
       blocks.push({
@@ -147,23 +214,25 @@ function buildBlocks(cv, hideReferences) {
         type: "item",
         element: (
           <div style={{ marginBottom: "10px" }}>
-            <div style={cvStyles.itemHeader}>
+            <div style={styles.itemHeader}>
               <span>{edu.degree}</span>
-              <span style={cvStyles.itemDate}>
+              <span style={styles.itemDate}>
                 {edu.startDate}
                 {hasValue(edu.startDate) && hasValue(edu.endDate) ? " – " : ""}
                 {edu.endDate}
               </span>
             </div>
             {(hasValue(edu.school) || hasValue(edu.location)) && (
-              <p style={{ fontSize: "10pt", fontStyle: "italic", marginBottom: "2px" }}>
+              <p style={{ fontFamily: styles.page.fontFamily, fontSize: styles.page.fontSize, fontStyle: "italic", marginBottom: "2px" }}>
                 {edu.school}
                 {hasValue(edu.school) && hasValue(edu.location) ? " | " : ""}
                 {edu.location}
               </p>
             )}
             {hasValue(edu.additionalInfo) && (
-              <p style={{ fontSize: "9.5pt", color: "#555" }}>{edu.additionalInfo}</p>
+              <p style={{ fontFamily: styles.page.fontFamily, fontSize: "9.5pt", color: "#555" }}>
+                {edu.additionalInfo}
+              </p>
             )}
           </div>
         ),
@@ -179,7 +248,7 @@ function buildBlocks(cv, hideReferences) {
     blocks.push({
       key: "skills-header",
       type: "section-header",
-      element: <h2 style={cvStyles.sectionTitle}>Technical Skills</h2>,
+      element: <h2 style={styles.sectionTitle}>Technical Skills</h2>,
     });
     visibleSkills.forEach((skill, i) => {
       blocks.push({
@@ -189,7 +258,8 @@ function buildBlocks(cv, hideReferences) {
           <div
             style={{
               paddingLeft: "18px",
-              fontSize: "10pt",
+              fontFamily: styles.page.fontFamily,
+              fontSize: styles.page.fontSize,
               position: "relative",
               marginBottom: "4px",
             }}
@@ -210,7 +280,7 @@ function buildBlocks(cv, hideReferences) {
     blocks.push({
       key: "projects-header",
       type: "section-header",
-      element: <h2 style={cvStyles.sectionTitle}>Technical Projects and Research</h2>,
+      element: <h2 style={styles.sectionTitle}>Technical Projects and Research</h2>,
     });
     visibleProjects.forEach((project, i) => {
       blocks.push({
@@ -218,25 +288,25 @@ function buildBlocks(cv, hideReferences) {
         type: "item",
         element: (
           <div style={{ marginBottom: "10px" }}>
-            <div style={cvStyles.itemHeader}>
+            <div style={styles.itemHeader}>
               <span>{project.name}</span>
-              <span style={cvStyles.itemDate}>
+              <span style={styles.itemDate}>
                 {project.startDate}
                 {hasValue(project.startDate) && hasValue(project.endDate) ? " – " : ""}
                 {project.endDate}
               </span>
             </div>
             {hasValue(project.url) && (
-              <p style={{ fontSize: "9.5pt", color: "#555", marginBottom: "4px" }}>
+              <p style={{ fontFamily: styles.page.fontFamily, fontSize: "9.5pt", color: "#555", marginBottom: "4px" }}>
                 {project.url}
               </p>
             )}
             {project.bullets.some((b) => hasValue(b)) && (
-              <ul style={cvStyles.bulletList}>
+              <ul style={styles.bulletList}>
                 {project.bullets
                   .filter((b) => hasValue(b))
                   .map((bullet, j) => (
-                    <li key={j} style={cvStyles.bulletItem}>
+                    <li key={j} style={styles.bulletItem}>
                       {bullet}
                     </li>
                   ))}
@@ -254,14 +324,16 @@ function buildBlocks(cv, hideReferences) {
     blocks.push({
       key: "ref-header",
       type: "section-header",
-      element: <h2 style={cvStyles.sectionTitle}>References</h2>,
+      element: <h2 style={styles.sectionTitle}>References</h2>,
     });
     if (hideReferences) {
       blocks.push({
         key: "ref-upon-request",
         type: "content",
         element: (
-          <p style={{ fontSize: "10pt", fontStyle: "italic" }}>Available upon request</p>
+          <p style={{ fontFamily: styles.page.fontFamily, fontSize: styles.page.fontSize, fontStyle: "italic" }}>
+            Available upon request
+          </p>
         ),
       });
     } else {
@@ -271,11 +343,11 @@ function buildBlocks(cv, hideReferences) {
           type: "item",
           element: (
             <div style={{ marginBottom: "8px" }}>
-              <div style={cvStyles.referenceTitle}>
+              <div style={styles.referenceTitle}>
                 {ref.name}
                 {hasValue(ref.company) ? ` — ${ref.company}` : ""}
               </div>
-              <div style={cvStyles.referenceContact}>
+              <div style={styles.referenceContact}>
                 {ref.phone}
                 {hasValue(ref.phone) && hasValue(ref.email) ? " | " : ""}
                 {ref.email}
@@ -300,16 +372,13 @@ function paginateBlocks(heights, types, maxPageHeight) {
   for (let i = 0; i < heights.length; i++) {
     const h = heights[i];
 
-    // Block fits on current page
     if (currentHeight + h <= maxPageHeight) {
       currentPage.push(i);
       currentHeight += h;
       continue;
     }
 
-    // Block doesn't fit — start a new page
     if (currentPage.length > 0) {
-      // Section-header protection: don't leave a header alone at page bottom
       const lastIdx = currentPage[currentPage.length - 1];
       if (types[lastIdx] === "section-header") {
         currentPage.pop();
@@ -322,7 +391,6 @@ function paginateBlocks(heights, types, maxPageHeight) {
         currentHeight = h;
       }
     } else {
-      // Edge case: single block taller than a full page — give it its own page
       currentPage = [i];
       currentHeight = h;
     }
@@ -334,17 +402,29 @@ function paginateBlocks(heights, types, maxPageHeight) {
 
 /* ─── Main component ─────────────────────────────── */
 
-export default function CVPreview({ cv, hideReferences }) {
+export default function CVPreview({ cv, hideReferences, styleSettings }) {
   const measureRef = useRef(null);
   const rulerRef = useRef(null);
   const [pageGroups, setPageGroups] = useState(null);
 
+  const settings = styleSettings || defaultStyleSettings;
+  const resolvedStyles = useMemo(() => buildResolvedStyles(settings), [settings]);
+
+  const pageBaseStyle = useMemo(() => ({
+    width: "210mm",
+    padding: "12.7mm",
+    fontFamily: resolvedStyles.page.fontFamily,
+    fontSize: resolvedStyles.page.fontSize,
+    lineHeight: resolvedStyles.page.lineHeight,
+    color: "#333",
+    boxSizing: "border-box",
+  }), [resolvedStyles]);
+
   const blocks = useMemo(
-    () => buildBlocks(cv, hideReferences),
-    [cv, hideReferences]
+    () => buildBlocks(cv, hideReferences, resolvedStyles),
+    [cv, hideReferences, resolvedStyles]
   );
 
-  // Measure block heights and compute page distribution
   useLayoutEffect(() => {
     if (!measureRef.current || !rulerRef.current) return;
 
@@ -359,7 +439,6 @@ export default function CVPreview({ cv, hideReferences }) {
       return;
     }
 
-    // Use offsetTop differences for accurate height including margins
     const heights = [];
     const types = [];
     for (let i = 0; i < blockEls.length; i++) {
@@ -374,7 +453,7 @@ export default function CVPreview({ cv, hideReferences }) {
     setPageGroups(
       paginateBlocks(heights, types, pageContentHeight - PAGE_HEIGHT_BUFFER)
     );
-  }, [blocks]);
+  }, [blocks, pageBaseStyle]);
 
   return (
     <>

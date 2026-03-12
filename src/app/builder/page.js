@@ -6,6 +6,7 @@ import { useState } from "react";
 import useCVData from "@/hooks/useCVData";
 import useResizablePanel from "@/hooks/useResizablePanel";
 import usePdfExport from "@/hooks/usePdfExport";
+import useStyleSettings from "@/hooks/useStyleSettings";
 
 // Builder components
 import PdfNameEditor from "@/components/builder/PdfNameEditor";
@@ -22,6 +23,9 @@ import SkillsForm from "@/components/cv-sections/SkillsForm";
 import ProjectsForm from "@/components/cv-sections/ProjectsForm";
 import ReferencesForm from "@/components/cv-sections/ReferencesForm";
 
+// Layout & Style panel
+import LayoutStylePanel from "@/components/layout-style/LayoutStylePanel";
+
 // CV preview
 import CVPreview from "@/components/cv-preview/CVPreview";
 
@@ -36,6 +40,10 @@ export default function Builder() {
   const pdfExport = usePdfExport(cv, hideReferences);
 
   const [zoom, setZoom] = useState(100);
+
+  const [builderMode, setBuilderMode] = useState("editor");
+
+  const { styleSettings, updateStyle, resetStyles } = useStyleSettings();
 
   const [openSections, setOpenSections] = useState({
     personal: false,
@@ -54,75 +62,87 @@ export default function Builder() {
   // ─── Render ─────────────────────────────────────────────
   return (
     <div className="h-screen bg-gray-200 flex overflow-hidden">
-      {/* ==================== LEFT PANEL - FORM ==================== */}
+      {/* ==================== LEFT PANEL ==================== */}
       <div
         className="bg-gray-100 border-r border-gray-300 overflow-y-auto h-screen"
         style={{ width: `${panelWidth}px` }}
       >
-        <PdfNameEditor {...pdfExport} />
+        {builderMode === "editor" ? (
+          <>
+            <PdfNameEditor {...pdfExport} />
 
-        <PersonalInfoForm
-          cv={cv}
-          updateField={cvData.updateField}
-          isOpen={openSections.personal}
-          onToggle={() => toggleSection("personal")}
-        />
+            <PersonalInfoForm
+              cv={cv}
+              updateField={cvData.updateField}
+              isOpen={openSections.personal}
+              onToggle={() => toggleSection("personal")}
+            />
 
-        <SummaryForm
-          cv={cv}
-          updateField={cvData.updateField}
-          isOpen={openSections.summary}
-          onToggle={() => toggleSection("summary")}
-        />
+            <SummaryForm
+              cv={cv}
+              updateField={cvData.updateField}
+              isOpen={openSections.summary}
+              onToggle={() => toggleSection("summary")}
+            />
 
-        <ExperienceForm
-          experiences={cv.experiences}
-          {...cvData}
-          isOpen={openSections.experience}
-          onToggle={() => toggleSection("experience")}
-        />
+            <ExperienceForm
+              experiences={cv.experiences}
+              {...cvData}
+              isOpen={openSections.experience}
+              onToggle={() => toggleSection("experience")}
+            />
 
-        <EducationForm
-          education={cv.education}
-          {...cvData}
-          isOpen={openSections.education}
-          onToggle={() => toggleSection("education")}
-        />
+            <EducationForm
+              education={cv.education}
+              {...cvData}
+              isOpen={openSections.education}
+              onToggle={() => toggleSection("education")}
+            />
 
-        <SkillsForm
-          skills={cv.skills}
-          {...cvData}
-          isOpen={openSections.skills}
-          onToggle={() => toggleSection("skills")}
-        />
+            <SkillsForm
+              skills={cv.skills}
+              {...cvData}
+              isOpen={openSections.skills}
+              onToggle={() => toggleSection("skills")}
+            />
 
-        <ProjectsForm
-          projects={cv.projects}
-          {...cvData}
-          isOpen={openSections.projects}
-          onToggle={() => toggleSection("projects")}
-        />
+            <ProjectsForm
+              projects={cv.projects}
+              {...cvData}
+              isOpen={openSections.projects}
+              onToggle={() => toggleSection("projects")}
+            />
 
-        <ReferencesForm
-          references={cv.references}
-          hideReferences={hideReferences}
-          setHideReferences={setHideReferences}
-          {...cvData}
-          isOpen={openSections.references}
-          onToggle={() => toggleSection("references")}
-        />
+            <ReferencesForm
+              references={cv.references}
+              hideReferences={hideReferences}
+              setHideReferences={setHideReferences}
+              {...cvData}
+              isOpen={openSections.references}
+              onToggle={() => toggleSection("references")}
+            />
+          </>
+        ) : (
+          <LayoutStylePanel
+            styleSettings={styleSettings}
+            updateStyle={updateStyle}
+            onBack={() => setBuilderMode("editor")}
+          />
+        )}
       </div>
 
       {/* Resizable Divider */}
       <ResizableDivider onMouseDown={handleMouseDown} />
 
-            {/* ==================== RIGHT PANEL - TOOLBAR + LIVE PREVIEW ==================== */}
+      {/* ==================== RIGHT PANEL - TOOLBAR + LIVE PREVIEW ==================== */}
       <div className="flex-1 h-screen overflow-y-auto bg-gray-200">
         <div className="sticky top-0 z-20 bg-gray-200 pb-[25px]">
           <div className="max-w-[200mm] mx-auto bg-white border-x border-b border-gray-300 rounded-b-lg px-6 py-3">
             <Toolbar
               downloading={pdfExport.downloading}
               onDownloadPDF={pdfExport.handleDownloadPDF}
+              onLayoutStyle={() => setBuilderMode("layout")}
+              builderMode={builderMode}
             />
           </div>
 
@@ -134,7 +154,7 @@ export default function Builder() {
         {/* CV Preview */}
         <div className="flex justify-center items-start px-8 pb-8">
           <div style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}>
-            <CVPreview cv={cv} hideReferences={hideReferences} />
+            <CVPreview cv={cv} hideReferences={hideReferences} styleSettings={styleSettings} />
           </div>
         </div>
       </div>
