@@ -19,7 +19,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { sectionDefinitions } from "@/data/styleDefaults";
 import { restrictToVerticalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
-import { ListOrderedIcon, PersonIcon, DocumentIcon, BriefcaseIcon, GraduationCapIcon, WrenchIcon, FolderIcon, UsersIcon } from "@/icons";
+import { ListOrderedIcon, PersonIcon, DocumentIcon, BriefcaseIcon, GraduationCapIcon, WrenchIcon, FolderIcon, UsersIcon, VolunteeringIcon, CertificationIcon, LanguagesIcon } from "@/icons";
 import React from "react";
 
 /* ─── Drag Handle Icon ───────────────────────────── */
@@ -45,6 +45,9 @@ const sectionIcons = {
   skills: WrenchIcon,
   projects: FolderIcon,
   references: UsersIcon,
+  volunteering: VolunteeringIcon,
+  certifications: CertificationIcon,
+  languages: LanguagesIcon,
 };
 
 /* ─── Sortable Item ──────────────────────────────── */
@@ -72,14 +75,14 @@ function SortableItem({ id }) {
       style={style}
       {...attributes}
       {...listeners}
-      className={`flex items-center gap-3 px-4 py-3 rounded-lg border bg-white cursor-grab active:cursor-grabbing touch-none transition-shadow ${
+      className={`flex items-center gap-3 px-4 py-3 rounded-lg border cursor-grab active:cursor-grabbing touch-none transition-shadow ${
         isDragging
-          ? "border-blue-300 shadow-md"
-          : "border-gray-200 hover:border-gray-300"
+          ? "border-gray-200 bg-gray-100 shadow-md"
+          : "bg-white border-gray-200 hover:border-gray-300"
       }`}
     >
       <span className="text-gray-400">
-        <DragHandleIcon />
+        <ListOrderedIcon size={16} />
       </span>
       <span style={{ color: "rgb(37, 99, 235)" }}>
         {sectionIcons[id] && React.createElement(sectionIcons[id], { size: 18 })}

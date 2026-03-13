@@ -21,6 +21,9 @@ import ExperienceForm from "@/components/cv-sections/ExperienceForm";
 import EducationForm from "@/components/cv-sections/EducationForm";
 import SkillsForm from "@/components/cv-sections/SkillsForm";
 import ProjectsForm from "@/components/cv-sections/ProjectsForm";
+import VolunteeringForm from "@/components/cv-sections/VolunteeringForm";
+import CertificationsForm from "@/components/cv-sections/CertificationsForm";
+import LanguagesForm from "@/components/cv-sections/LanguagesForm";
 import ReferencesForm from "@/components/cv-sections/ReferencesForm";
 
 // Layout & Style panel
@@ -30,20 +33,18 @@ import LayoutStylePanel from "@/components/layout-style/LayoutStylePanel";
 import CVPreview from "@/components/cv-preview/CVPreview";
 
 export default function Builder() {
-  // ─── State ──────────────────────────────────────────────
   const cvData = useCVData();
   const { cv } = cvData;
 
   const { panelWidth, handleMouseDown } = useResizablePanel();
 
   const [hideReferences, setHideReferences] = useState(false);
-  const pdfExport = usePdfExport(cv, hideReferences);
-
   const [zoom, setZoom] = useState(100);
-
   const [builderMode, setBuilderMode] = useState("editor");
 
   const { styleSettings, updateStyle, reorderSections, resetStyles } = useStyleSettings();
+
+  const pdfExport = usePdfExport(cv, hideReferences, styleSettings);
 
   const [openSections, setOpenSections] = useState({
     personal: false,
@@ -52,6 +53,9 @@ export default function Builder() {
     education: false,
     skills: false,
     projects: false,
+    volunteering: false,
+    certifications: false,
+    languages: false,
     references: false,
   });
 
@@ -59,10 +63,8 @@ export default function Builder() {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // ─── Render ─────────────────────────────────────────────
   return (
     <div className="h-screen bg-gray-200 flex overflow-hidden">
-      {/* ==================== LEFT PANEL ==================== */}
       <div
         className="bg-gray-100 border-r border-gray-300 overflow-y-auto h-screen"
         style={{ width: `${panelWidth}px` }}
@@ -113,6 +115,27 @@ export default function Builder() {
               onToggle={() => toggleSection("projects")}
             />
 
+            <VolunteeringForm
+              volunteering={cv.volunteering}
+              {...cvData}
+              isOpen={openSections.volunteering}
+              onToggle={() => toggleSection("volunteering")}
+            />
+
+            <CertificationsForm
+              certifications={cv.certifications}
+              {...cvData}
+              isOpen={openSections.certifications}
+              onToggle={() => toggleSection("certifications")}
+            />
+
+            <LanguagesForm
+              languages={cv.languages}
+              {...cvData}
+              isOpen={openSections.languages}
+              onToggle={() => toggleSection("languages")}
+            />
+
             <ReferencesForm
               references={cv.references}
               hideReferences={hideReferences}
@@ -132,10 +155,8 @@ export default function Builder() {
         )}
       </div>
 
-      {/* Resizable Divider */}
       <ResizableDivider onMouseDown={handleMouseDown} />
 
-      {/* ==================== RIGHT PANEL - TOOLBAR + LIVE PREVIEW ==================== */}
       <div className="flex-1 h-screen overflow-y-auto bg-gray-200">
         <div className="sticky top-0 z-20 bg-gray-200 pb-[25px]">
           <div className="max-w-[200mm] mx-auto bg-white border-x border-b border-gray-300 rounded-b-lg px-6 py-3">
@@ -152,10 +173,13 @@ export default function Builder() {
           </div>
         </div>
 
-        {/* CV Preview */}
         <div className="flex justify-center items-start px-8 pb-8">
           <div style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}>
-            <CVPreview cv={cv} hideReferences={hideReferences} styleSettings={styleSettings} />
+            <CVPreview
+              cv={cv}
+              hideReferences={hideReferences}
+              styleSettings={styleSettings}
+            />
           </div>
         </div>
       </div>

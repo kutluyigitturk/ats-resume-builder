@@ -38,10 +38,11 @@ export async function POST(request) {
     await page.setContent(html, { waitUntil: "networkidle0" });
 
     // Generate PDF with A4 size
+    await page.emulateMediaType("print");
+
     const pdfBuffer = await page.pdf({
-      format: "A4",
       printBackground: true,
-      margin: { top: "0mm", right: "0mm", bottom: "0mm", left: "0mm" },
+      preferCSSPageSize: true,
     });
 
     // Return PDF as response

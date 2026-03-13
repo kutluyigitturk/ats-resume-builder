@@ -26,6 +26,11 @@ function getVisibleReferences(refs) {
   );
 }
 
+function formatDateRange(start, end) {
+  if (hasValue(start) && hasValue(end)) return `${start} – ${end}`;
+  return start || end || "";
+}
+
 /* ─── Resolve font name to CSS font-family ───────── */
 
 function resolveFontFamily(fontName) {
@@ -41,6 +46,9 @@ function buildResolvedStyles(settings) {
   const headingSize = `${settings.headingSize}pt`;
   const bodySize = `${settings.bodySize}pt`;
   const lineHeight = `${settings.lineSpacing}`;
+  const sectionGap = `${settings.betweenSections}pt`;
+  const titleGap = `${settings.betweenTitleContent}pt`;
+  const blockGap = `${settings.betweenContentBlocks}pt`;
 
   return {
     page: {
@@ -48,13 +56,25 @@ function buildResolvedStyles(settings) {
       fontFamily: bodyFont,
       fontSize: bodySize,
       lineHeight,
+      padding: `${settings.marginTopBottom}mm ${settings.marginLeftRight}mm`,
     },
     name: { ...cvStyles.name, fontFamily: headingFont },
     title: { ...cvStyles.title, fontFamily: bodyFont },
     contact: { ...cvStyles.contact, fontFamily: bodyFont },
     divider: cvStyles.divider,
-    sectionTitle: { ...cvStyles.sectionTitle, fontFamily: headingFont, fontSize: headingSize },
-    sectionTitleFirst: { ...cvStyles.sectionTitleFirst, fontFamily: headingFont, fontSize: headingSize },
+    sectionTitle: {
+      ...cvStyles.sectionTitle,
+      fontFamily: headingFont,
+      fontSize: headingSize,
+      marginTop: sectionGap,
+      marginBottom: titleGap,
+    },
+    sectionTitleFirst: {
+      ...cvStyles.sectionTitleFirst,
+      fontFamily: headingFont,
+      fontSize: headingSize,
+      marginBottom: titleGap,
+    },
     summary: { ...cvStyles.summary, fontFamily: bodyFont, fontSize: bodySize },
     itemHeader: { ...cvStyles.itemHeader, fontFamily: headingFont },
     itemDate: { ...cvStyles.itemDate, fontFamily: bodyFont },
@@ -63,6 +83,7 @@ function buildResolvedStyles(settings) {
     bulletItem: cvStyles.bulletItem,
     referenceTitle: { ...cvStyles.referenceTitle, fontFamily: headingFont },
     referenceContact: { ...cvStyles.referenceContact, fontFamily: bodyFont },
+    blockGap,
   };
 }
 
@@ -76,33 +97,51 @@ const PAGE_HEIGHT_BUFFER = 10;
 function buildSummaryBlocks(cv, styles, isFirst) {
   if (!hasValue(cv.summary)) return [];
   const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
+
   return [
-    { key: "summary-header", type: "section-header", element: <h2 style={titleStyle}>Professional Summary</h2> },
-    { key: "summary-content", type: "content", element: <p style={styles.summary}>{cv.summary}</p> },
+    {
+      key: "summary-header",
+      type: "section-header",
+      element: <h2 style={titleStyle}>Professional Summary</h2>,
+    },
+    {
+      key: "summary-content",
+      type: "content",
+      element: <p style={styles.summary}>{cv.summary}</p>,
+    },
   ];
 }
 
 function buildExperienceBlocks(cv, styles, isFirst) {
-  const visible = cv.experiences.filter((e) => hasValue(e.company) || hasValue(e.position));
+  const visible = (cv.experiences || []).filter(
+    (e) => hasValue(e.company) || hasValue(e.position)
+  );
   if (visible.length === 0) return [];
+
   const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
   const blocks = [
-    { key: "exp-header", type: "section-header", element: <h2 style={titleStyle}>Experience</h2> },
+    {
+      key: "exp-header",
+      type: "section-header",
+      element: <h2 style={titleStyle}>Experience</h2>,
+    },
   ];
+
   visible.forEach((exp, i) => {
+    const visibleBullets = (exp.bullets || []).filter((b) => hasValue(b));
+
     blocks.push({
       key: `exp-${exp.id ?? i}`,
       type: "item",
       element: (
-        <div style={{ marginBottom: "12px" }}>
+        <div style={{ marginBottom: styles.blockGap }}>
           <div style={styles.itemHeader}>
             <span>{exp.company}</span>
             <span style={styles.itemDate}>
-              {exp.startDate}
-              {hasValue(exp.startDate) && hasValue(exp.endDate) ? " – " : ""}
-              {exp.endDate}
+              {formatDateRange(exp.startDate, exp.endDate)}
             </span>
           </div>
+
           {(hasValue(exp.position) || hasValue(exp.location)) && (
             <p style={styles.itemSubtitle}>
               {exp.position}
@@ -110,10 +149,13 @@ function buildExperienceBlocks(cv, styles, isFirst) {
               {exp.location}
             </p>
           )}
-          {exp.bullets.some((b) => hasValue(b)) && (
+
+          {visibleBullets.length > 0 && (
             <ul style={styles.bulletList}>
-              {exp.bullets.filter((b) => hasValue(b)).map((bullet, j) => (
-                <li key={j} style={styles.bulletItem}>{bullet}</li>
+              {visibleBullets.map((bullet, j) => (
+                <li key={j} style={styles.bulletItem}>
+                  {bullet}
+                </li>
               ))}
             </ul>
           )}
@@ -121,60 +163,101 @@ function buildExperienceBlocks(cv, styles, isFirst) {
       ),
     });
   });
+
   return blocks;
 }
 
 function buildEducationBlocks(cv, styles, isFirst) {
-  const visible = cv.education.filter((e) => hasValue(e.school) || hasValue(e.degree));
+  const visible = (cv.education || []).filter(
+    (e) => hasValue(e.school) || hasValue(e.degree)
+  );
   if (visible.length === 0) return [];
+
   const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
   const blocks = [
-    { key: "edu-header", type: "section-header", element: <h2 style={titleStyle}>Education</h2> },
+    {
+      key: "edu-header",
+      type: "section-header",
+      element: <h2 style={titleStyle}>Education</h2>,
+    },
   ];
+
   visible.forEach((edu, i) => {
     blocks.push({
       key: `edu-${edu.id ?? i}`,
       type: "item",
       element: (
-        <div style={{ marginBottom: "10px" }}>
+        <div style={{ marginBottom: styles.blockGap }}>
           <div style={styles.itemHeader}>
             <span>{edu.degree}</span>
             <span style={styles.itemDate}>
-              {edu.startDate}
-              {hasValue(edu.startDate) && hasValue(edu.endDate) ? " – " : ""}
-              {edu.endDate}
+              {formatDateRange(edu.startDate, edu.endDate)}
             </span>
           </div>
+
           {(hasValue(edu.school) || hasValue(edu.location)) && (
-            <p style={{ fontFamily: styles.page.fontFamily, fontSize: styles.page.fontSize, fontStyle: "italic", marginBottom: "2px" }}>
+            <p
+              style={{
+                fontFamily: styles.page.fontFamily,
+                fontSize: styles.page.fontSize,
+                fontStyle: "italic",
+                marginBottom: "2px",
+              }}
+            >
               {edu.school}
               {hasValue(edu.school) && hasValue(edu.location) ? " | " : ""}
               {edu.location}
             </p>
           )}
+
           {hasValue(edu.additionalInfo) && (
-            <p style={{ fontFamily: styles.page.fontFamily, fontSize: "9.5pt", color: "#555" }}>{edu.additionalInfo}</p>
+            <p
+              style={{
+                fontFamily: styles.page.fontFamily,
+                fontSize: "9.5pt",
+                color: "#555",
+              }}
+            >
+              {edu.additionalInfo}
+            </p>
           )}
         </div>
       ),
     });
   });
+
   return blocks;
 }
 
 function buildSkillsBlocks(cv, styles, isFirst) {
-  const visible = cv.skills.filter((s) => hasValue(s.category) || hasValue(s.items));
+  const visible = (cv.skills || []).filter(
+    (s) => hasValue(s.category) || hasValue(s.items)
+  );
   if (visible.length === 0) return [];
+
   const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
   const blocks = [
-    { key: "skills-header", type: "section-header", element: <h2 style={titleStyle}>Technical Skills</h2> },
+    {
+      key: "skills-header",
+      type: "section-header",
+      element: <h2 style={titleStyle}>Technical Skills</h2>,
+    },
   ];
+
   visible.forEach((skill, i) => {
     blocks.push({
       key: `skill-${skill.id ?? i}`,
       type: "item",
       element: (
-        <div style={{ paddingLeft: "18px", fontFamily: styles.page.fontFamily, fontSize: styles.page.fontSize, position: "relative", marginBottom: "4px" }}>
+        <div
+          style={{
+            paddingLeft: "18px",
+            fontFamily: styles.page.fontFamily,
+            fontSize: styles.page.fontSize,
+            position: "relative",
+            marginBottom: "4px",
+          }}
+        >
           <span style={{ position: "absolute", left: "4px" }}>•</span>
           {hasValue(skill.category) && <strong>{skill.category}</strong>}
           {hasValue(skill.category) && hasValue(skill.items) ? ": " : ""}
@@ -183,37 +266,57 @@ function buildSkillsBlocks(cv, styles, isFirst) {
       ),
     });
   });
+
   return blocks;
 }
 
 function buildProjectsBlocks(cv, styles, isFirst) {
-  const visible = cv.projects.filter((p) => hasValue(p.name));
+  const visible = (cv.projects || []).filter((p) => hasValue(p.name));
   if (visible.length === 0) return [];
+
   const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
   const blocks = [
-    { key: "projects-header", type: "section-header", element: <h2 style={titleStyle}>Technical Projects and Research</h2> },
+    {
+      key: "projects-header",
+      type: "section-header",
+      element: <h2 style={titleStyle}>Technical Projects and Research</h2>,
+    },
   ];
+
   visible.forEach((project, i) => {
+    const visibleBullets = (project.bullets || []).filter((b) => hasValue(b));
+
     blocks.push({
       key: `project-${project.id ?? i}`,
       type: "item",
       element: (
-        <div style={{ marginBottom: "10px" }}>
+        <div style={{ marginBottom: styles.blockGap }}>
           <div style={styles.itemHeader}>
             <span>{project.name}</span>
             <span style={styles.itemDate}>
-              {project.startDate}
-              {hasValue(project.startDate) && hasValue(project.endDate) ? " – " : ""}
-              {project.endDate}
+              {formatDateRange(project.startDate, project.endDate)}
             </span>
           </div>
+
           {hasValue(project.url) && (
-            <p style={{ fontFamily: styles.page.fontFamily, fontSize: "9.5pt", color: "#555", marginBottom: "4px" }}>{project.url}</p>
+            <p
+              style={{
+                fontFamily: styles.page.fontFamily,
+                fontSize: "9.5pt",
+                color: "#555",
+                marginBottom: "4px",
+              }}
+            >
+              {project.url}
+            </p>
           )}
-          {project.bullets.some((b) => hasValue(b)) && (
+
+          {visibleBullets.length > 0 && (
             <ul style={styles.bulletList}>
-              {project.bullets.filter((b) => hasValue(b)).map((bullet, j) => (
-                <li key={j} style={styles.bulletItem}>{bullet}</li>
+              {visibleBullets.map((bullet, j) => (
+                <li key={j} style={styles.bulletItem}>
+                  {bullet}
+                </li>
               ))}
             </ul>
           )}
@@ -221,21 +324,173 @@ function buildProjectsBlocks(cv, styles, isFirst) {
       ),
     });
   });
+
+  return blocks;
+}
+
+function buildVolunteeringBlocks(cv, styles, isFirst) {
+  const visible = (cv.volunteering || []).filter(
+    (item) => hasValue(item.organization) || hasValue(item.role)
+  );
+  if (visible.length === 0) return [];
+
+  const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
+  const blocks = [
+    {
+      key: "volunteering-header",
+      type: "section-header",
+      element: <h2 style={titleStyle}>Volunteering & Leadership</h2>,
+    },
+  ];
+
+  visible.forEach((item, i) => {
+    const visibleBullets = (item.bullets || []).filter((b) => hasValue(b));
+
+    blocks.push({
+      key: `vol-${item.id ?? i}`,
+      type: "item",
+      element: (
+        <div style={{ marginBottom: styles.blockGap }}>
+          <div style={styles.itemHeader}>
+            <span>{item.organization}</span>
+            <span style={styles.itemDate}>
+              {formatDateRange(item.startDate, item.endDate)}
+            </span>
+          </div>
+
+          {(hasValue(item.role) || hasValue(item.location)) && (
+            <p style={styles.itemSubtitle}>
+              {item.role}
+              {hasValue(item.role) && hasValue(item.location) ? " | " : ""}
+              {item.location}
+            </p>
+          )}
+
+          {visibleBullets.length > 0 && (
+            <ul style={styles.bulletList}>
+              {visibleBullets.map((bullet, j) => (
+                <li key={j} style={styles.bulletItem}>
+                  {bullet}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ),
+    });
+  });
+
+  return blocks;
+}
+
+function buildCertificationsBlocks(cv, styles, isFirst) {
+  const visible = (cv.certifications || []).filter(
+    (item) => hasValue(item.name) || hasValue(item.institution)
+  );
+  if (visible.length === 0) return [];
+
+  const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
+  const blocks = [
+    {
+      key: "certifications-header",
+      type: "section-header",
+      element: <h2 style={titleStyle}>Certifications</h2>,
+    },
+  ];
+
+  visible.forEach((item, i) => {
+    blocks.push({
+      key: `cert-${item.id ?? i}`,
+      type: "item",
+      element: (
+        <div style={{ marginBottom: styles.blockGap }}>
+          <div style={styles.itemHeader}>
+            <span>{item.name}</span>
+            <span style={styles.itemDate}>
+              {formatDateRange(item.dateAcquired, item.expirationDate)}
+            </span>
+          </div>
+
+          {hasValue(item.institution) && (
+            <p style={styles.itemSubtitle}>{item.institution}</p>
+          )}
+        </div>
+      ),
+    });
+  });
+
+  return blocks;
+}
+
+function buildLanguagesBlocks(cv, styles, isFirst) {
+  const visible = (cv.languages || []).filter(
+    (item) => hasValue(item.language) || hasValue(item.fluencyLevel)
+  );
+  if (visible.length === 0) return [];
+
+  const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
+  const blocks = [
+    {
+      key: "languages-header",
+      type: "section-header",
+      element: <h2 style={titleStyle}>Languages</h2>,
+    },
+  ];
+
+  visible.forEach((item, i) => {
+    blocks.push({
+      key: `lang-${item.id ?? i}`,
+      type: "item",
+      element: (
+        <div
+          style={{
+            paddingLeft: "18px",
+            fontFamily: styles.page.fontFamily,
+            fontSize: styles.page.fontSize,
+            position: "relative",
+            marginBottom: "4px",
+          }}
+        >
+          <span style={{ position: "absolute", left: "4px" }}>•</span>
+          {hasValue(item.language) && <strong>{item.language}</strong>}
+          {hasValue(item.language) && hasValue(item.fluencyLevel) ? ": " : ""}
+          {item.fluencyLevel}
+        </div>
+      ),
+    });
+  });
+
   return blocks;
 }
 
 function buildReferencesBlocks(cv, styles, isFirst, hideReferences) {
-  const visibleRefs = getVisibleReferences(cv.references);
+  const visibleRefs = getVisibleReferences(cv.references || []);
   if (!hideReferences && visibleRefs.length === 0) return [];
+
   const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
   const blocks = [
-    { key: "ref-header", type: "section-header", element: <h2 style={titleStyle}>References</h2> },
+    {
+      key: "ref-header",
+      type: "section-header",
+      element: <h2 style={titleStyle}>References</h2>,
+    },
   ];
+
   if (hideReferences) {
     blocks.push({
       key: "ref-upon-request",
       type: "content",
-      element: <p style={{ fontFamily: styles.page.fontFamily, fontSize: styles.page.fontSize, fontStyle: "italic" }}>Available upon request</p>,
+      element: (
+        <p
+          style={{
+            fontFamily: styles.page.fontFamily,
+            fontSize: styles.page.fontSize,
+            fontStyle: "italic",
+          }}
+        >
+          Available upon request
+        </p>
+      ),
     });
   } else {
     visibleRefs.forEach((ref, i) => {
@@ -258,18 +513,23 @@ function buildReferencesBlocks(cv, styles, isFirst, hideReferences) {
       });
     });
   }
+
   return blocks;
 }
 
 /* ─── Section builder registry ───────────────────── */
 
 const sectionBuilders = {
-  summary: (cv, styles, isFirst, hideReferences) => buildSummaryBlocks(cv, styles, isFirst),
-  experience: (cv, styles, isFirst, hideReferences) => buildExperienceBlocks(cv, styles, isFirst),
-  education: (cv, styles, isFirst, hideReferences) => buildEducationBlocks(cv, styles, isFirst),
-  skills: (cv, styles, isFirst, hideReferences) => buildSkillsBlocks(cv, styles, isFirst),
-  projects: (cv, styles, isFirst, hideReferences) => buildProjectsBlocks(cv, styles, isFirst),
-  references: (cv, styles, isFirst, hideReferences) => buildReferencesBlocks(cv, styles, isFirst, hideReferences),
+  summary: (cv, styles, isFirst) => buildSummaryBlocks(cv, styles, isFirst),
+  experience: (cv, styles, isFirst) => buildExperienceBlocks(cv, styles, isFirst),
+  education: (cv, styles, isFirst) => buildEducationBlocks(cv, styles, isFirst),
+  skills: (cv, styles, isFirst) => buildSkillsBlocks(cv, styles, isFirst),
+  projects: (cv, styles, isFirst) => buildProjectsBlocks(cv, styles, isFirst),
+  volunteering: (cv, styles, isFirst) => buildVolunteeringBlocks(cv, styles, isFirst),
+  certifications: (cv, styles, isFirst) => buildCertificationsBlocks(cv, styles, isFirst),
+  languages: (cv, styles, isFirst) => buildLanguagesBlocks(cv, styles, isFirst),
+  references: (cv, styles, isFirst, hideReferences) =>
+    buildReferencesBlocks(cv, styles, isFirst, hideReferences),
 };
 
 /* ─── Block builder (order-aware) ────────────────── */
@@ -277,7 +537,6 @@ const sectionBuilders = {
 function buildBlocks(cv, hideReferences, styles, sectionOrder) {
   const blocks = [];
 
-  // Personal info is always first
   if (hasValue(cv.name) || hasValue(cv.title) || hasContactInfo(cv)) {
     blocks.push({
       key: "personal",
@@ -297,11 +556,12 @@ function buildBlocks(cv, hideReferences, styles, sectionOrder) {
     });
   }
 
-  // Build sections in user-defined order
   let isFirstSection = true;
+
   for (const sectionId of sectionOrder) {
     const builder = sectionBuilders[sectionId];
     if (!builder) continue;
+
     const sectionBlocks = builder(cv, styles, isFirstSection, hideReferences);
     if (sectionBlocks.length > 0) {
       blocks.push(...sectionBlocks);
@@ -330,9 +590,12 @@ function paginateBlocks(heights, types, maxPageHeight) {
 
     if (currentPage.length > 0) {
       const lastIdx = currentPage[currentPage.length - 1];
+
       if (types[lastIdx] === "section-header") {
         currentPage.pop();
+
         if (currentPage.length > 0) pages.push([...currentPage]);
+
         currentPage = [lastIdx, i];
         currentHeight = heights[lastIdx] + h;
       } else {
@@ -360,15 +623,20 @@ export default function CVPreview({ cv, hideReferences, styleSettings }) {
   const settings = styleSettings || defaultStyleSettings;
   const resolvedStyles = useMemo(() => buildResolvedStyles(settings), [settings]);
 
-  const pageBaseStyle = useMemo(() => ({
-    width: "210mm",
-    padding: "12.7mm",
-    fontFamily: resolvedStyles.page.fontFamily,
-    fontSize: resolvedStyles.page.fontSize,
-    lineHeight: resolvedStyles.page.lineHeight,
-    color: "#333",
-    boxSizing: "border-box",
-  }), [resolvedStyles]);
+  const pageBaseStyle = useMemo(
+    () => ({
+      width: "210mm",
+      padding: resolvedStyles.page.padding,
+      fontFamily: resolvedStyles.page.fontFamily,
+      fontSize: resolvedStyles.page.fontSize,
+      lineHeight: resolvedStyles.page.lineHeight,
+      color: "#333",
+      boxSizing: "border-box",
+    }),
+    [resolvedStyles]
+  );
+
+  const rulerHeight = `${297 - 2 * settings.marginTopBottom}mm`;
 
   const blocks = useMemo(
     () => buildBlocks(cv, hideReferences, resolvedStyles, settings.sectionOrder),
@@ -379,9 +647,7 @@ export default function CVPreview({ cv, hideReferences, styleSettings }) {
     if (!measureRef.current || !rulerRef.current) return;
 
     const pageContentHeight = rulerRef.current.offsetHeight;
-    const blockEls = Array.from(
-      measureRef.current.querySelectorAll("[data-cv-block]")
-    );
+    const blockEls = Array.from(measureRef.current.querySelectorAll("[data-cv-block]"));
     const sentinel = measureRef.current.querySelector("[data-cv-sentinel]");
 
     if (blockEls.length === 0 || !sentinel) {
@@ -391,11 +657,9 @@ export default function CVPreview({ cv, hideReferences, styleSettings }) {
 
     const heights = [];
     const types = [];
+
     for (let i = 0; i < blockEls.length; i++) {
-      const nextTop =
-        i < blockEls.length - 1
-          ? blockEls[i + 1].offsetTop
-          : sentinel.offsetTop;
+      const nextTop = i < blockEls.length - 1 ? blockEls[i + 1].offsetTop : sentinel.offsetTop;
       heights.push(nextTop - blockEls[i].offsetTop);
       types.push(blockEls[i].dataset.blockType || "content");
     }
@@ -403,24 +667,22 @@ export default function CVPreview({ cv, hideReferences, styleSettings }) {
     setPageGroups(
       paginateBlocks(heights, types, pageContentHeight - PAGE_HEIGHT_BUFFER)
     );
-  }, [blocks, pageBaseStyle]);
+  }, [blocks, pageBaseStyle, rulerHeight]);
 
   return (
     <>
-      {/* Ruler */}
       <div
         ref={rulerRef}
         style={{
           position: "absolute",
           left: "-9999px",
           width: "1mm",
-          height: `${297 - 2 * 12.7}mm`,
+          height: rulerHeight,
           visibility: "hidden",
           pointerEvents: "none",
         }}
       />
 
-      {/* Measurement container */}
       <div
         ref={measureRef}
         aria-hidden="true"
@@ -441,7 +703,6 @@ export default function CVPreview({ cv, hideReferences, styleSettings }) {
         <div data-cv-sentinel style={{ height: "1px" }} />
       </div>
 
-      {/* Paginated display */}
       {pageGroups !== null && pageGroups.length > 0 ? (
         <div
           style={{
@@ -461,9 +722,12 @@ export default function CVPreview({ cv, hideReferences, styleSettings }) {
                 boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)",
               }}
             >
-              {group.map((idx) => (
-                <div key={blocks[idx].key}>{blocks[idx].element}</div>
-              ))}
+              {group.map((idx) => {
+                const block = blocks[idx];
+                if (!block) return null;
+
+                return <div key={block.key}>{block.element}</div>;
+              })}
             </div>
           ))}
         </div>

@@ -1,17 +1,12 @@
-// Builds the full HTML document that gets sent to Puppeteer for PDF generation
-// This is the single source of truth for PDF output styling
-
 import { escapeHtml } from "./htmlEscape";
+import { defaultStyleSettings } from "@/data/styleDefaults";
 
 function hasValue(value) {
   return typeof value === "string" && value.trim() !== "";
 }
 
 function joinContact(fields, separator = " | ") {
-  return fields
-    .filter(hasValue)
-    .map(escapeHtml)
-    .join(separator);
+  return fields.filter(hasValue).map(escapeHtml).join(separator);
 }
 
 function formatDateRange(start, end) {
@@ -32,7 +27,7 @@ function getVisibleReferences(references) {
   );
 }
 
-export function buildPdfHtml(cv, hideReferences) {
+export function buildPdfHtml(cv, hideReferences, styleSettings = null) {
   const name = escapeHtml(cv.name || "");
   const title = escapeHtml(cv.title || "");
   const contact = joinContact([
@@ -44,6 +39,30 @@ export function buildPdfHtml(cv, hideReferences) {
   ]);
   const summary = escapeHtml(cv.summary || "");
   const visibleReferences = getVisibleReferences(cv.references || []);
+  const sectionOrder =
+    styleSettings?.sectionOrder || defaultStyleSettings.sectionOrder;
+
+  const sectionBuilders = {
+    summary: () =>
+      summary
+        ? `
+          <div class="cv-section-title">Professional Summary</div>
+          <div class="cv-summary">${summary}</div>
+        `
+        : "",
+    experience: () => buildExperienceHtml(cv.experiences || []),
+    education: () => buildEducationHtml(cv.education || []),
+    skills: () => buildSkillsHtml(cv.skills || []),
+    projects: () => buildProjectsHtml(cv.projects || []),
+    volunteering: () => buildVolunteeringHtml(cv.volunteering || []),
+    certifications: () => buildCertificationsHtml(cv.certifications || []),
+    languages: () => buildLanguagesHtml(cv.languages || []),
+    references: () => buildReferencesHtml(visibleReferences, hideReferences),
+  };
+
+  const orderedSections = sectionOrder
+    .map((sectionId) => sectionBuilders[sectionId]?.() || "")
+    .join("");
 
   return `<!DOCTYPE html>
 <html>
@@ -61,7 +80,7 @@ export function buildPdfHtml(cv, hideReferences) {
 
     .cv-page {
       width: 100%;
-      min-height: 297mm;
+      min-height: auto;
     }
 
     .cv-name {
@@ -178,6 +197,7 @@ export function buildPdfHtml(cv, hideReferences) {
     .mb-12 { margin-bottom: 12px; }
     .mb-10 { margin-bottom: 10px; }
     .mb-8 { margin-bottom: 8px; }
+    .mb-6 { margin-bottom: 6px; }
 
     .cv-section-title,
     .item-header,
@@ -187,7 +207,8 @@ export function buildPdfHtml(cv, hideReferences) {
 
     .mb-12,
     .mb-10,
-    .mb-8 {
+    .mb-8,
+    .mb-6 {
       break-inside: avoid;
     }
 
@@ -206,16 +227,7 @@ export function buildPdfHtml(cv, hideReferences) {
       <hr class="cv-divider" />
     ` : ""}
 
-    ${summary ? `
-      <div class="cv-section-title">Professional Summary</div>
-      <div class="cv-summary">${summary}</div>
-    ` : ""}
-
-    ${buildExperienceHtml(cv.experiences || [])}
-    ${buildEducationHtml(cv.education || [])}
-    ${buildSkillsHtml(cv.skills || [])}
-    ${buildProjectsHtml(cv.projects || [])}
-    ${buildReferencesHtml(visibleReferences, hideReferences)}
+    ${orderedSections}
   </div>
 </body>
 </html>`;
@@ -273,7 +285,7 @@ function buildEducationHtml(education) {
         .join(" | ");
 
       return `
-        <div class="mb-10">
+        <div class="mb-12">
           <div class="item-header">
             <span>${escapeHtml(edu.degree || "")}</span>
             <span class="item-date">${formatDateRange(edu.startDate, edu.endDate)}</span>
@@ -301,20 +313,18 @@ function buildSkillsHtml(skills) {
 
   const items = filtered
     .map((skill) => {
-      const category = hasValue(skill.category)
-        ? `<strong>${escapeHtml(skill.category)}</strong>`
-        : "";
-      const separator =
-        hasValue(skill.category) && hasValue(skill.items) ? ": " : "";
-      const itemsText = escapeHtml(skill.items || "");
+      const category = escapeHtml(skill.category || "");
+      const skillItems = escapeHtml(skill.items || "");
 
-      return `<li>${category}${separator}${itemsText}</li>`;
+      return `<li>${
+        category ? `<strong>${category}</strong>` : ""
+      }${category && skillItems ? ": " : ""}${skillItems}</li>`;
     })
     .join("");
 
   return `
     <div class="cv-section-title">Technical Skills</div>
-    <ul class="skills-list">${items}</ul>
+    <ul class="skills-list mb-10">${items}</ul>
   `;
 }
 
@@ -331,7 +341,7 @@ function buildProjectsHtml(projects) {
         .join("");
 
       return `
-        <div class="mb-10">
+        <div class="mb-12">
           <div class="item-header">
             <span>${escapeHtml(project.name || "")}</span>
             <span class="item-date">${formatDateRange(project.startDate, project.endDate)}</span>
@@ -350,25 +360,120 @@ function buildProjectsHtml(projects) {
   return `<div class="cv-section-title">Technical Projects and Research</div>${items}`;
 }
 
-function buildReferencesHtml(visibleReferences, hideReferences) {
-  if (!hideReferences && visibleReferences.length === 0) {
-    return "";
-  }
+function buildVolunteeringHtml(volunteering) {
+  const filtered = volunteering.filter(
+    (item) => hasValue(item.organization) || hasValue(item.role)
+  );
 
-  const content = hideReferences
-    ? `<p style="font-size: 10pt; font-style: italic;">Available upon request</p>`
-    : visibleReferences
-        .map((ref) => `
-          <div class="mb-8">
-            <div class="reference-title">
-              ${escapeHtml(ref.name || "")}${hasValue(ref.company) ? ` — ${escapeHtml(ref.company)}` : ""}
-            </div>
-            <div class="reference-contact">
-              ${escapeHtml(ref.phone || "")}${hasValue(ref.phone) && hasValue(ref.email) ? " | " : ""}${escapeHtml(ref.email || "")}
-            </div>
-          </div>
-        `)
+  if (filtered.length === 0) return "";
+
+  const items = filtered
+    .map((item) => {
+      const subtitle = [item.role, item.location]
+        .filter(hasValue)
+        .map(escapeHtml)
+        .join(" | ");
+
+      const bullets = (item.bullets || [])
+        .filter(hasValue)
+        .map((b) => `<li>${escapeHtml(b)}</li>`)
         .join("");
 
-  return `<div class="cv-section-title">References</div>${content}`;
+      return `
+        <div class="mb-12">
+          <div class="item-header">
+            <span>${escapeHtml(item.organization || "")}</span>
+            <span class="item-date">${formatDateRange(item.startDate, item.endDate)}</span>
+          </div>
+          ${subtitle ? `<div class="item-subtitle">${subtitle}</div>` : ""}
+          ${bullets ? `<ul class="bullets">${bullets}</ul>` : ""}
+        </div>
+      `;
+    })
+    .join("");
+
+  return `<div class="cv-section-title">Volunteering & Leadership</div>${items}`;
+}
+
+function buildCertificationsHtml(certifications) {
+  const filtered = certifications.filter(
+    (item) => hasValue(item.name) || hasValue(item.institution)
+  );
+
+  if (filtered.length === 0) return "";
+
+  const items = filtered
+    .map((item) => {
+      return `
+        <div class="mb-10">
+          <div class="item-header">
+            <span>${escapeHtml(item.name || "")}</span>
+            <span class="item-date">${formatDateRange(item.dateAcquired, item.expirationDate)}</span>
+          </div>
+          ${
+            hasValue(item.institution)
+              ? `<div class="item-subtitle">${escapeHtml(item.institution)}</div>`
+              : ""
+          }
+        </div>
+      `;
+    })
+    .join("");
+
+  return `<div class="cv-section-title">Certifications</div>${items}`;
+}
+
+function buildLanguagesHtml(languages) {
+  const filtered = languages.filter(
+    (item) => hasValue(item.language) || hasValue(item.fluencyLevel)
+  );
+
+  if (filtered.length === 0) return "";
+
+  const items = filtered
+    .map((item) => {
+      const language = escapeHtml(item.language || "");
+      const fluency = escapeHtml(item.fluencyLevel || "");
+
+      return `<li>${
+        language ? `<strong>${language}</strong>` : ""
+      }${language && fluency ? ": " : ""}${fluency}</li>`;
+    })
+    .join("");
+
+  return `
+    <div class="cv-section-title">Languages</div>
+    <ul class="skills-list mb-10">${items}</ul>
+  `;
+}
+
+function buildReferencesHtml(visibleReferences, hideReferences) {
+  if (!hideReferences && visibleReferences.length === 0) return "";
+
+  if (hideReferences) {
+    return `
+      <div class="cv-section-title">References</div>
+      <div class="mb-10"><em>Available upon request</em></div>
+    `;
+  }
+
+  const items = visibleReferences
+    .map((ref) => {
+      const contact = [ref.phone, ref.email]
+        .filter(hasValue)
+        .map(escapeHtml)
+        .join(" | ");
+
+      return `
+        <div class="mb-8">
+          <div class="reference-title">
+            ${escapeHtml(ref.name || "")}${hasValue(ref.company) ? ` — ${escapeHtml(ref.company)}` : ""}
+          </div>
+          ${contact ? `<div class="reference-contact">${contact}</div>` : ""}
+        </div>
+      `;
+    })
+    .join("");
+
+  return `<div class="cv-section-title">References</div>${items}`;
 }

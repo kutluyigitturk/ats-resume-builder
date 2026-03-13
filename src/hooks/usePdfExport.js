@@ -4,7 +4,7 @@ import { useState } from "react";
 import { buildPdfHtml } from "@/lib/pdfHtmlBuilder";
 
 // Handles PDF name editing, generation and download
-export default function usePdfExport(cv, hideReferences) {
+export default function usePdfExport(cv, hideReferences, styleSettings) {
   const [downloading, setDownloading] = useState(false);
   const [pdfName, setPdfName] = useState("Untitled_CV");
   const [editingName, setEditingName] = useState(false);
@@ -13,7 +13,7 @@ export default function usePdfExport(cv, hideReferences) {
     setDownloading(true);
 
     try {
-      const html = buildPdfHtml(cv, hideReferences);
+      const html = buildPdfHtml(cv, hideReferences, styleSettings);
 
       const response = await fetch("/api/generate-pdf", {
         method: "POST",

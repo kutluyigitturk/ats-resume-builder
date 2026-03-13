@@ -3,6 +3,7 @@
 import { BackArrowIcon } from "@/icons";
 import FormattingSection from "@/components/layout-style/FormattingSection";
 import ReorderSections from "@/components/layout-style/ReorderSections";
+import MarginsSpacingSection from "@/components/layout-style/MarginsSpacingSection";
 
 export default function LayoutStylePanel({
   styleSettings,
@@ -32,6 +33,11 @@ export default function LayoutStylePanel({
       <ReorderSections
         sectionOrder={styleSettings.sectionOrder}
         onReorder={reorderSections}
+      />
+
+      <MarginsSpacingSection
+        styleSettings={styleSettings}
+        updateStyle={updateStyle}
       />
     </div>
   );

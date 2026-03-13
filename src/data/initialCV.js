@@ -15,6 +15,9 @@ const initialCV = {
   education: [],
   skills: [],
   projects: [],
+  volunteering: [],
+  certifications: [],
+  languages: [],
   references: [],
 };
 

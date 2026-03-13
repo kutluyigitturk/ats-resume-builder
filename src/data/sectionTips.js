@@ -44,6 +44,27 @@ const sectionTips = {
     "Link to code, demo, or portfolio when available.",
     "Select projects that best match the target role's requirements.",
   ],
+
+  volunteering: [
+    "List role, organization, and service dates.",
+    "Describe duties with action verbs and measurable impact.",
+    "Quantify scope (team size, events run, funds raised) when possible.",
+    "Emphasize skills transferable to the target job.",
+    "Place section after work experience unless early career.",
+  ],
+
+  certifications: [
+    "Include credential name, issuing body, and completion date.",
+    "Feature only credentials recognized in the field.",
+    "Order chronologically by completion date.",
+    "Remove expired or irrelevant certificates.",
+  ],
+
+  languages: [
+    "List languages with proficiency level (Native, Fluent, Professional, Basic).",
+    "Place strongest languages first.",
+    "Only include languages relevant to the role or region.",
+  ],
 };
 
 export default sectionTips;

@@ -109,44 +109,7 @@ export const cvStyles = {
   },
 };
 
-// New item templates for each section's "Add" button
-export const newExperience = {
-  company: "",
-  position: "",
-  location: "",
-  startDate: "",
-  endDate: "",
-  bullets: [""],
-};
-
-export const newEducation = {
-  school: "",
-  location: "",
-  degree: "",
-  startDate: "",
-  endDate: "",
-  additionalInfo: "",
-};
-
-export const newSkill = {
-  category: "",
-  items: "",
-};
-
-export const newProject = {
-  name: "",
-  startDate: "",
-  endDate: "",
-  url: "",
-  bullets: [""],
-};
-
-export const newReference = {
-  name: "",
-  company: "",
-  phone: "",
-  email: "",
-};
+// Factory functions for creating new items with unique IDs
 
 export const createNewExperience = () => ({
   id: createId("exp"),
@@ -181,6 +144,30 @@ export const createNewProject = () => ({
   endDate: "",
   url: "",
   bullets: [""],
+});
+
+export const createNewVolunteering = () => ({
+  id: createId("vol"),
+  organization: "",
+  role: "",
+  location: "",
+  startDate: "",
+  endDate: "",
+  bullets: [""],
+});
+
+export const createNewCertification = () => ({
+  id: createId("cert"),
+  name: "",
+  institution: "",
+  dateAcquired: "",
+  expirationDate: "",
+});
+
+export const createNewLanguage = () => ({
+  id: createId("lang"),
+  language: "",
+  fluencyLevel: "",
 });
 
 export const createNewReference = () => ({
