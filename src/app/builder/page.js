@@ -42,8 +42,7 @@ export default function Builder() {
   const [zoom, setZoom] = useState(100);
   const [builderMode, setBuilderMode] = useState("editor");
 
-  const { styleSettings, updateStyle, reorderSections, resetStyles } = useStyleSettings();
-
+  const { styleSettings, updateStyle, reorderSections } = useStyleSettings();
   const pdfExport = usePdfExport(cv, hideReferences, styleSettings);
 
   const [openSections, setOpenSections] = useState({
@@ -64,86 +63,90 @@ export default function Builder() {
   };
 
   return (
-    <div className="h-screen bg-gray-200 flex overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-slate-200">
       <div
-        className="bg-gray-100 border-r border-gray-300 overflow-y-auto h-screen"
+        className="h-screen overflow-y-auto border-r border-slate-200 bg-[#f5f7fb]"
         style={{ width: `${panelWidth}px` }}
       >
         {builderMode === "editor" ? (
           <>
             <PdfNameEditor {...pdfExport} />
 
-            <PersonalInfoForm
-              cv={cv}
-              updateField={cvData.updateField}
-              isOpen={openSections.personal}
-              onToggle={() => toggleSection("personal")}
-            />
+            <div className="w-full px-3 pb-5">
+              <div className="space-y-2.5">
+                <PersonalInfoForm
+                  cv={cv}
+                  updateField={cvData.updateField}
+                  isOpen={openSections.personal}
+                  onToggle={() => toggleSection("personal")}
+                />
 
-            <SummaryForm
-              cv={cv}
-              updateField={cvData.updateField}
-              isOpen={openSections.summary}
-              onToggle={() => toggleSection("summary")}
-            />
+                <SummaryForm
+                  cv={cv}
+                  updateField={cvData.updateField}
+                  isOpen={openSections.summary}
+                  onToggle={() => toggleSection("summary")}
+                />
 
-            <ExperienceForm
-              experiences={cv.experiences}
-              {...cvData}
-              isOpen={openSections.experience}
-              onToggle={() => toggleSection("experience")}
-            />
+                <ExperienceForm
+                  experiences={cv.experiences}
+                  {...cvData}
+                  isOpen={openSections.experience}
+                  onToggle={() => toggleSection("experience")}
+                />
 
-            <EducationForm
-              education={cv.education}
-              {...cvData}
-              isOpen={openSections.education}
-              onToggle={() => toggleSection("education")}
-            />
+                <EducationForm
+                  education={cv.education}
+                  {...cvData}
+                  isOpen={openSections.education}
+                  onToggle={() => toggleSection("education")}
+                />
 
-            <SkillsForm
-              skills={cv.skills}
-              {...cvData}
-              isOpen={openSections.skills}
-              onToggle={() => toggleSection("skills")}
-            />
+                <SkillsForm
+                  skills={cv.skills}
+                  {...cvData}
+                  isOpen={openSections.skills}
+                  onToggle={() => toggleSection("skills")}
+                />
 
-            <ProjectsForm
-              projects={cv.projects}
-              {...cvData}
-              isOpen={openSections.projects}
-              onToggle={() => toggleSection("projects")}
-            />
+                <ProjectsForm
+                  projects={cv.projects}
+                  {...cvData}
+                  isOpen={openSections.projects}
+                  onToggle={() => toggleSection("projects")}
+                />
 
-            <VolunteeringForm
-              volunteering={cv.volunteering}
-              {...cvData}
-              isOpen={openSections.volunteering}
-              onToggle={() => toggleSection("volunteering")}
-            />
+                <VolunteeringForm
+                  volunteering={cv.volunteering}
+                  {...cvData}
+                  isOpen={openSections.volunteering}
+                  onToggle={() => toggleSection("volunteering")}
+                />
 
-            <CertificationsForm
-              certifications={cv.certifications}
-              {...cvData}
-              isOpen={openSections.certifications}
-              onToggle={() => toggleSection("certifications")}
-            />
+                <CertificationsForm
+                  certifications={cv.certifications}
+                  {...cvData}
+                  isOpen={openSections.certifications}
+                  onToggle={() => toggleSection("certifications")}
+                />
 
-            <LanguagesForm
-              languages={cv.languages}
-              {...cvData}
-              isOpen={openSections.languages}
-              onToggle={() => toggleSection("languages")}
-            />
+                <LanguagesForm
+                  languages={cv.languages}
+                  {...cvData}
+                  isOpen={openSections.languages}
+                  onToggle={() => toggleSection("languages")}
+                />
 
-            <ReferencesForm
-              references={cv.references}
-              hideReferences={hideReferences}
-              setHideReferences={setHideReferences}
-              {...cvData}
-              isOpen={openSections.references}
-              onToggle={() => toggleSection("references")}
-            />
+                <ReferencesForm
+                  references={cv.references}
+                  hideReferences={hideReferences}
+                  setHideReferences={setHideReferences}
+                  {...cvData}
+                  isOpen={openSections.references}
+                  onToggle={() => toggleSection("references")}
+                />
+              </div>
+            </div>
           </>
         ) : (
           <LayoutStylePanel
@@ -157,9 +160,9 @@ export default function Builder() {
 
       <ResizableDivider onMouseDown={handleMouseDown} />
 
-      <div className="flex-1 h-screen overflow-y-auto bg-gray-200">
-        <div className="sticky top-0 z-20 bg-gray-200 pb-[25px]">
-          <div className="max-w-[200mm] mx-auto bg-white border-x border-b border-gray-300 rounded-b-lg px-6 py-3">
+      <div className="flex-1 h-screen overflow-y-auto bg-slate-200">
+        <div className="sticky top-0 z-20 bg-slate-200 pb-[25px]">
+          <div className="mx-auto max-w-[200mm] rounded-b-lg border-x border-b border-slate-300 bg-white px-6 py-3">
             <Toolbar
               downloading={pdfExport.downloading}
               onDownloadPDF={pdfExport.handleDownloadPDF}
@@ -173,7 +176,7 @@ export default function Builder() {
           </div>
         </div>
 
-        <div className="flex justify-center items-start px-8 pb-8">
+        <div className="flex items-start justify-center px-8 pb-8">
           <div style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}>
             <CVPreview
               cv={cv}

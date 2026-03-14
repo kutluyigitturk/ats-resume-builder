@@ -13,18 +13,24 @@ export default function LayoutStylePanel({
 }) {
   return (
     <div className="h-full">
-      {/* Header — matches PdfNameEditor style */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 py-3">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-gray-800 hover:bg-gray-50 transition-colors"
-        >
-          <BackArrowIcon />
-          Back to Editor
-        </button>
+      <div className="sticky top-0 z-20 bg-gradient-to-b from-[#f5f7fb] via-[#f5f7fb] to-transparent px-3 pb-0 pt-3">
+        <div className="mx-3 mt-2.5 mb-0 overflow-hidden rounded-[18px] border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05),0_1px_2px_rgba(15,23,42,0.05)]">
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex w-full items-center gap-2.5 px-4 py-3.5 text-left transition-colors hover:bg-slate-50/80"
+          >
+            <span className="flex shrink-0 items-center justify-center text-slate-700">
+              <BackArrowIcon />
+            </span>
+
+            <span className="truncate text-[15px] font-semibold tracking-[-0.01em] text-slate-900">
+              Back to Editor
+            </span>
+          </button>
+        </div>
       </div>
 
-      {/* Content */}
       <FormattingSection
         styleSettings={styleSettings}
         updateStyle={updateStyle}
