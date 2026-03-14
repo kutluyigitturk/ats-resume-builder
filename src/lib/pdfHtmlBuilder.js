@@ -1,5 +1,5 @@
 import { escapeHtml } from "./htmlEscape";
-import { defaultStyleSettings } from "@/data/styleDefaults";
+import { defaultStyleSettings, fontOptions } from "@/data/styleDefaults";
 
 function hasValue(value) {
   return typeof value === "string" && value.trim() !== "";
@@ -27,7 +27,194 @@ function getVisibleReferences(references) {
   );
 }
 
+/* ─── Resolve font name to CSS font-family ───────── */
+
+function resolveFontFamily(fontName) {
+  const font = fontOptions.find((f) => f.name === fontName);
+  return font ? font.family : "Inter, sans-serif";
+}
+
+/* ─── Build dynamic CSS from styleSettings ───────── */
+
+function buildDynamicCss(settings) {
+  const headingFont = resolveFontFamily(settings.primaryFont);
+  const bodyFont = resolveFontFamily(settings.secondaryFont);
+  const headingSize = `${settings.headingSize}pt`;
+  const bodySize = `${settings.bodySize}pt`;
+  const lineHeight = settings.lineSpacing;
+  const marginTB = `${settings.marginTopBottom}mm`;
+  const marginLR = `${settings.marginLeftRight}mm`;
+  const sectionGap = `${settings.betweenSections}pt`;
+  const titleGap = `${settings.betweenTitleContent}pt`;
+  const blockGap = `${settings.betweenContentBlocks}pt`;
+
+  return `
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: ${bodyFont};
+      font-size: ${bodySize};
+      line-height: ${lineHeight};
+      color: #333;
+    }
+
+    .cv-page {
+      width: 100%;
+      min-height: auto;
+    }
+
+    .cv-name {
+      font-size: 22pt;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 2px;
+      color: #000;
+      font-family: ${headingFont};
+    }
+
+    .cv-title {
+      text-align: center;
+      font-size: 11pt;
+      color: #444;
+      margin-bottom: 8px;
+      font-family: ${bodyFont};
+    }
+
+    .cv-contact {
+      text-align: center;
+      font-size: 9pt;
+      color: #555;
+      margin-bottom: 16px;
+      word-break: break-word;
+      font-family: ${bodyFont};
+    }
+
+    .cv-divider {
+      border: none;
+      border-top: 1.5px solid #000;
+      margin-bottom: 12px;
+    }
+
+    .cv-section-title {
+      font-size: ${headingSize};
+      font-weight: bold;
+      text-transform: uppercase;
+      border-bottom: 1px solid #999;
+      padding-bottom: 2px;
+      margin-bottom: ${titleGap};
+      margin-top: ${sectionGap};
+      font-family: ${headingFont};
+    }
+
+    .cv-section-title:first-of-type {
+      margin-top: 0;
+    }
+
+    .cv-summary {
+      font-size: ${bodySize};
+      margin-bottom: 14px;
+      font-family: ${bodyFont};
+    }
+
+    .item-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      font-size: 10.5pt;
+      gap: 12px;
+      font-family: ${headingFont};
+    }
+
+    .item-date {
+      font-weight: normal;
+      color: #555;
+      white-space: nowrap;
+      font-family: ${bodyFont};
+    }
+
+    .item-subtitle {
+      font-style: italic;
+      font-size: ${bodySize};
+      margin-bottom: 4px;
+      font-family: ${bodyFont};
+    }
+
+    .item-meta {
+      font-size: 9.5pt;
+      color: #555;
+      margin-bottom: 4px;
+      word-break: break-word;
+      font-family: ${bodyFont};
+    }
+
+    .edu-school {
+      font-size: ${bodySize};
+      font-style: italic;
+      margin-bottom: 2px;
+      font-family: ${bodyFont};
+    }
+
+    .bullets {
+      padding-left: 18px;
+      font-size: ${bodySize};
+      list-style-type: disc;
+      font-family: ${bodyFont};
+    }
+
+    .bullets li {
+      margin-bottom: 2px;
+    }
+
+    .skills-list {
+      padding-left: 18px;
+      font-size: ${bodySize};
+      list-style-type: disc;
+      font-family: ${bodyFont};
+    }
+
+    .skills-list li {
+      margin-bottom: 2px;
+    }
+
+    .reference-title {
+      font-weight: bold;
+      font-size: 10.5pt;
+      font-family: ${headingFont};
+    }
+
+    .reference-contact {
+      font-size: ${bodySize};
+      color: #555;
+      font-family: ${bodyFont};
+    }
+
+    .mb-block { margin-bottom: ${blockGap}; }
+    .mb-10 { margin-bottom: 10px; }
+    .mb-8 { margin-bottom: 8px; }
+
+    .cv-section-title,
+    .item-header,
+    .reference-title {
+      break-after: avoid;
+    }
+
+    .mb-block,
+    .mb-10,
+    .mb-8 {
+      break-inside: avoid;
+    }
+
+    @page {
+      size: A4;
+      margin: ${marginTB} ${marginLR};
+    }
+  `;
+}
+
 export function buildPdfHtml(cv, hideReferences, styleSettings = null) {
+  const settings = styleSettings || defaultStyleSettings;
+  const dynamicCss = buildDynamicCss(settings);
+
   const name = escapeHtml(cv.name || "");
   const title = escapeHtml(cv.title || "");
   const contact = joinContact([
@@ -40,7 +227,7 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null) {
   const summary = escapeHtml(cv.summary || "");
   const visibleReferences = getVisibleReferences(cv.references || []);
   const sectionOrder =
-    styleSettings?.sectionOrder || defaultStyleSettings.sectionOrder;
+    settings.sectionOrder || defaultStyleSettings.sectionOrder;
 
   const sectionBuilders = {
     summary: () =>
@@ -68,155 +255,7 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null) {
 <html>
 <head>
   <meta charset="UTF-8">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: Inter, sans-serif;
-      font-size: 11pt;
-      line-height: 1.5;
-      color: #333;
-    }
-
-    .cv-page {
-      width: 100%;
-      min-height: auto;
-    }
-
-    .cv-name {
-      font-size: 22pt;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 2px;
-      color: #000;
-    }
-
-    .cv-title {
-      text-align: center;
-      font-size: 11pt;
-      color: #444;
-      margin-bottom: 8px;
-    }
-
-    .cv-contact {
-      text-align: center;
-      font-size: 9pt;
-      color: #555;
-      margin-bottom: 16px;
-      word-break: break-word;
-    }
-
-    .cv-divider {
-      border: none;
-      border-top: 1.5px solid #000;
-      margin-bottom: 12px;
-    }
-
-    .cv-section-title {
-      font-size: 12pt;
-      font-weight: bold;
-      text-transform: uppercase;
-      border-bottom: 1px solid #999;
-      padding-bottom: 2px;
-      margin-bottom: 6px;
-      margin-top: 14px;
-    }
-
-    .cv-section-title:first-of-type {
-      margin-top: 0;
-    }
-
-    .cv-summary {
-      font-size: 10pt;
-      margin-bottom: 14px;
-    }
-
-    .item-header {
-      display: flex;
-      justify-content: space-between;
-      font-weight: bold;
-      font-size: 10.5pt;
-      gap: 12px;
-    }
-
-    .item-date {
-      font-weight: normal;
-      color: #555;
-      white-space: nowrap;
-    }
-
-    .item-subtitle {
-      font-style: italic;
-      font-size: 10pt;
-      margin-bottom: 4px;
-    }
-
-    .item-meta {
-      font-size: 9.5pt;
-      color: #555;
-      margin-bottom: 4px;
-      word-break: break-word;
-    }
-
-    .edu-school {
-      font-size: 10pt;
-      font-style: italic;
-      margin-bottom: 2px;
-    }
-
-    .bullets {
-      padding-left: 18px;
-      font-size: 10pt;
-      list-style-type: disc;
-    }
-
-    .bullets li {
-      margin-bottom: 2px;
-    }
-
-    .skills-list {
-      padding-left: 18px;
-      font-size: 10pt;
-      list-style-type: disc;
-    }
-
-    .skills-list li {
-      margin-bottom: 2px;
-    }
-
-    .reference-title {
-      font-weight: bold;
-      font-size: 10.5pt;
-    }
-
-    .reference-contact {
-      font-size: 10pt;
-      color: #555;
-    }
-
-    .mb-12 { margin-bottom: 12px; }
-    .mb-10 { margin-bottom: 10px; }
-    .mb-8 { margin-bottom: 8px; }
-    .mb-6 { margin-bottom: 6px; }
-
-    .cv-section-title,
-    .item-header,
-    .reference-title {
-      break-after: avoid;
-    }
-
-    .mb-12,
-    .mb-10,
-    .mb-8,
-    .mb-6 {
-      break-inside: avoid;
-    }
-
-    @page {
-      size: A4;
-      margin: 12.7mm;
-    }
-  </style>
+  <style>${dynamicCss}</style>
 </head>
 <body>
   <div class="cv-page">
@@ -255,7 +294,7 @@ function buildExperienceHtml(experiences) {
         .join("");
 
       return `
-        <div class="mb-12">
+        <div class="mb-block">
           <div class="item-header">
             <span>${escapeHtml(exp.company || "")}</span>
             <span class="item-date">${formatDateRange(exp.startDate, exp.endDate)}</span>
@@ -285,7 +324,7 @@ function buildEducationHtml(education) {
         .join(" | ");
 
       return `
-        <div class="mb-12">
+        <div class="mb-block">
           <div class="item-header">
             <span>${escapeHtml(edu.degree || "")}</span>
             <span class="item-date">${formatDateRange(edu.startDate, edu.endDate)}</span>
@@ -341,7 +380,7 @@ function buildProjectsHtml(projects) {
         .join("");
 
       return `
-        <div class="mb-12">
+        <div class="mb-block">
           <div class="item-header">
             <span>${escapeHtml(project.name || "")}</span>
             <span class="item-date">${formatDateRange(project.startDate, project.endDate)}</span>
@@ -380,7 +419,7 @@ function buildVolunteeringHtml(volunteering) {
         .join("");
 
       return `
-        <div class="mb-12">
+        <div class="mb-block">
           <div class="item-header">
             <span>${escapeHtml(item.organization || "")}</span>
             <span class="item-date">${formatDateRange(item.startDate, item.endDate)}</span>
@@ -405,7 +444,7 @@ function buildCertificationsHtml(certifications) {
   const items = filtered
     .map((item) => {
       return `
-        <div class="mb-10">
+        <div class="mb-block">
           <div class="item-header">
             <span>${escapeHtml(item.name || "")}</span>
             <span class="item-date">${formatDateRange(item.dateAcquired, item.expirationDate)}</span>

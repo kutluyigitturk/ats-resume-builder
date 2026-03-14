@@ -67,7 +67,7 @@ export default function EducationForm({
                   onChange={(v) => updateItem("education", edu.id, "startDate", v)}
                 />
                 <FormInput
-                  label="Graduation Date"
+                  label="End Date"
                   placeholder="MM/YYYY"
                   value={edu.endDate}
                   onChange={(v) => updateItem("education", edu.id, "endDate", v)}
