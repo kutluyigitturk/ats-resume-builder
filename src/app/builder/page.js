@@ -65,7 +65,7 @@ export default function Builder() {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-200">
       <div
-        className="h-screen overflow-y-auto border-r border-slate-200 bg-[#f5f7fb]"
+        className="h-screen overflow-y-auto border-r border-slate-200 bg-gray-100"
         style={{ width: `${panelWidth}px` }}
       >
         {builderMode === "editor" ? (
@@ -160,8 +160,8 @@ export default function Builder() {
 
       <ResizableDivider onMouseDown={handleMouseDown} />
 
-      <div className="flex-1 h-screen overflow-y-auto bg-slate-200">
-        <div className="sticky top-0 z-20 bg-slate-200 pb-[25px]">
+      <div className="flex-1 h-screen overflow-y-auto bg-gray-100">
+        <div className="sticky top-0 z-20 bg-gray-100 pb-[25px]">
           <div className="mx-auto max-w-[200mm] rounded-b-lg border-x border-b border-slate-300 bg-white px-6 py-3">
             <Toolbar
               downloading={pdfExport.downloading}

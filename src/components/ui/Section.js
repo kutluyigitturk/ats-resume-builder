@@ -47,7 +47,7 @@ export default function Section({ title, icon, isOpen, onToggle, tips, children 
                 onClick={() => setTipsOpen((prev) => !prev)}
                 className="flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left"
               >
-                <span className="text-sm font-medium text-slate-700">
+                <span className="text-xs font-medium text-slate-700">
                   Tips and Recommendations
                 </span>
 
@@ -61,9 +61,9 @@ export default function Section({ title, icon, isOpen, onToggle, tips, children 
               </button>
 
               {tipsOpen && (
-                <div className="px-4 pb-4 space-y-2">
+                <div className="px-4 pb-3 space-y-1">
                   {tips.map((tip, index) => (
-                    <div key={index} className="text-sm text-gray-700">
+                    <div key={index} className="text-xs leading-snug text-slate-600">
                       • {tip}
                     </div>
                   ))}

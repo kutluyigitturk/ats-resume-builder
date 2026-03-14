@@ -9,7 +9,7 @@ export default function PdfNameEditor({
   setEditingName,
 }) {
   return (
-    <div className="sticky top-0 z-20 bg-gradient-to-b from-[#f5f7fb] via-[#f5f7fb] to-transparent px-3 pb-2.5 pt-3">
+    <div className="sticky top-0 z-20 bg-gradient-to-b from-[#f3f4f6] via-[#f3f4f6] to-transparent px-3 pb-2.5 pt-3">
       <div className="w-full rounded-[18px] border border-slate-200 bg-white/95 px-4 py-2.5 shadow-[0_1px_2px_rgba(15,23,42,0.05),0_1px_2px_rgba(15,23,42,0.05)] backdrop-blur">
         <div className="grid grid-cols-[36px_1fr_36px] items-center gap-2.5">
           <button
