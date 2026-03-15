@@ -21,6 +21,7 @@ export default function ProjectsForm({
   updateBullet,
   isOpen,
   onToggle,
+  templateId,
 }) {
   return (
     <Section
@@ -61,6 +62,17 @@ export default function ProjectsForm({
                   onChange={(v) => updateItem("projects", project.id, "endDate", v)}
                 />
             </div>
+
+            {templateId === "advanced" && (
+              <div className="mb-3">
+                <FormInput
+                  label="Project URL"
+                  placeholder="https://..."
+                  value={project.url}
+                  onChange={(v) => updateItem("projects", project.id, "url", v)}
+                />
+              </div>
+            )}
 
             <BulletListEditor
               label="Project Details"

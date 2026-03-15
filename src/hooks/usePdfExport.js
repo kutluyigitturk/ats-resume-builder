@@ -5,7 +5,7 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { buildPdfHtml } from "@/lib/pdfHtmlBuilder";
 
 // Handles PDF name editing, generation and download
-export default function usePdfExport(cv, hideReferences, styleSettings) {
+export default function usePdfExport(cv, hideReferences, styleSettings, templateId) {
   const [downloading, setDownloading] = useState(false);
   const [pdfName, setPdfName] = useLocalStorage("cv-builder-pdfName", "Untitled_CV");
   const [editingName, setEditingName] = useState(false);
@@ -14,7 +14,7 @@ export default function usePdfExport(cv, hideReferences, styleSettings) {
     setDownloading(true);
 
     try {
-      const html = buildPdfHtml(cv, hideReferences, styleSettings);
+      const html = buildPdfHtml(cv, hideReferences, styleSettings, templateId);
 
       const response = await fetch("/api/generate-pdf", {
         method: "POST",

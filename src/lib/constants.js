@@ -162,6 +162,8 @@ export const createNewCertification = () => ({
   institution: "",
   dateAcquired: "",
   expirationDate: "",
+  url: "",
+  description: "",
 });
 
 export const createNewLanguage = () => ({

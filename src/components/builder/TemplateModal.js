@@ -87,7 +87,7 @@ function TemplateCard({
 
               {isDefault && (
                 <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold text-blue-600 ring-1 ring-blue-100">
-                  Default
+                  Current
                 </span>
               )}
             </div>

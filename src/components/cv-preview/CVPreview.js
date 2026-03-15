@@ -3,6 +3,7 @@
 import { useRef, useState, useLayoutEffect, useMemo } from "react";
 import { cvStyles } from "@/lib/constants";
 import { fontOptions, defaultStyleSettings } from "@/data/styleDefaults";
+import { MailIcon, PhoneIcon, MapPinIcon, LinkedInIcon, LinkIcon } from "@/icons";
 
 /* ─── Helpers ────────────────────────────────────── */
 
@@ -270,7 +271,7 @@ function buildSkillsBlocks(cv, styles, isFirst) {
   return blocks;
 }
 
-function buildProjectsBlocks(cv, styles, isFirst) {
+function buildProjectsBlocks(cv, styles, isFirst, templateId) {
   const visible = (cv.projects || []).filter((p) => hasValue(p.name));
   if (visible.length === 0) return [];
 
@@ -297,6 +298,19 @@ function buildProjectsBlocks(cv, styles, isFirst) {
               {formatDateRange(project.startDate, project.endDate)}
             </span>
           </div>
+
+          {templateId === "advanced" && hasValue(project.url) && (
+            <p
+              style={{
+                fontFamily: styles.page.fontFamily,
+                fontSize: "9.5pt",
+                color: "#555",
+                marginBottom: "4px",
+              }}
+            >
+              {project.url}
+            </p>
+          )}
 
           {visibleBullets.length > 0 && (
             <ul style={styles.bulletList}>
@@ -370,7 +384,7 @@ function buildVolunteeringBlocks(cv, styles, isFirst) {
   return blocks;
 }
 
-function buildCertificationsBlocks(cv, styles, isFirst) {
+function buildCertificationsBlocks(cv, styles, isFirst, templateId) {
   const visible = (cv.certifications || []).filter(
     (item) => hasValue(item.name) || hasValue(item.institution)
   );
@@ -398,8 +412,25 @@ function buildCertificationsBlocks(cv, styles, isFirst) {
             </span>
           </div>
 
-          {hasValue(item.institution) && (
-            <p style={styles.itemSubtitle}>{item.institution}</p>
+          {(hasValue(item.institution) || (templateId === "advanced" && hasValue(item.url))) && (
+            <p style={styles.itemSubtitle}>
+              {item.institution}
+              {hasValue(item.institution) && templateId === "advanced" && hasValue(item.url) && " – "}
+              {templateId === "advanced" && hasValue(item.url) && (<a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "9pt", color: "#2563eb", textDecoration: "none", fontStyle: "normal" }}>View Credentials</a>)}
+            </p>
+          )}
+
+          {templateId === "advanced" && hasValue(item.description) && (
+            <p
+              style={{
+                fontFamily: styles.page.fontFamily,
+                fontSize: "9.5pt",
+                color: "#555",
+                marginTop: "2px",
+              }}
+            >
+              {item.description}
+            </p>
           )}
         </div>
       ),
@@ -511,9 +542,9 @@ const sectionBuilders = {
   experience: (cv, styles, isFirst) => buildExperienceBlocks(cv, styles, isFirst),
   education: (cv, styles, isFirst) => buildEducationBlocks(cv, styles, isFirst),
   skills: (cv, styles, isFirst) => buildSkillsBlocks(cv, styles, isFirst),
-  projects: (cv, styles, isFirst) => buildProjectsBlocks(cv, styles, isFirst),
+  projects: (cv, styles, isFirst, hideReferences, templateId) => buildProjectsBlocks(cv, styles, isFirst, templateId),
   volunteering: (cv, styles, isFirst) => buildVolunteeringBlocks(cv, styles, isFirst),
-  certifications: (cv, styles, isFirst) => buildCertificationsBlocks(cv, styles, isFirst),
+  certifications: (cv, styles, isFirst, hideReferences, templateId) => buildCertificationsBlocks(cv, styles, isFirst, templateId),
   languages: (cv, styles, isFirst) => buildLanguagesBlocks(cv, styles, isFirst),
   references: (cv, styles, isFirst, hideReferences) =>
     buildReferencesBlocks(cv, styles, isFirst, hideReferences),
@@ -521,7 +552,7 @@ const sectionBuilders = {
 
 /* ─── Block builder (order-aware) ────────────────── */
 
-function buildBlocks(cv, hideReferences, styles, sectionOrder) {
+function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "classic") {
   const blocks = [];
 
   if (hasValue(cv.name) || hasValue(cv.title) || hasContactInfo(cv)) {
@@ -534,7 +565,37 @@ function buildBlocks(cv, hideReferences, styles, sectionOrder) {
           {hasValue(cv.title) && <p style={styles.title}>{cv.title}</p>}
           {hasContactInfo(cv) && (
             <>
-              <p style={styles.contact}>{formatContact(cv)}</p>
+              {templateId === "advanced" ? (
+                <div style={{ ...styles.contact, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "12px", alignItems: "center" }}>
+                  {hasValue(cv.email) && (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <MailIcon size={13} /> {cv.email}
+                    </span>
+                  )}
+                  {hasValue(cv.phone) && (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <PhoneIcon size={13} /> {cv.phone}
+                    </span>
+                  )}
+                  {hasValue(cv.location) && (
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                      <MapPinIcon size={13} /> {cv.location}
+                    </span>
+                  )}
+                  {hasValue(cv.linkedin) && (
+                    <a href={cv.linkedin.startsWith("http") ? cv.linkedin : `https://${cv.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#555", textDecoration: "none" }}>
+                      <LinkedInIcon size={13} /> LinkedIn
+                    </a>
+                  )}
+                  {hasValue(cv.website) && (
+                    <a href={cv.website.startsWith("http") ? cv.website : `https://${cv.website}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#555", textDecoration: "none" }}>
+                      <LinkIcon size={13} /> Portfolio
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <p style={styles.contact}>{formatContact(cv)}</p>
+              )}
               <hr style={styles.divider} />
             </>
           )}
@@ -549,7 +610,7 @@ function buildBlocks(cv, hideReferences, styles, sectionOrder) {
     const builder = sectionBuilders[sectionId];
     if (!builder) continue;
 
-    const sectionBlocks = builder(cv, styles, isFirstSection, hideReferences);
+    const sectionBlocks = builder(cv, styles, isFirstSection, hideReferences, templateId);
     if (sectionBlocks.length > 0) {
       blocks.push(...sectionBlocks);
       isFirstSection = false;
@@ -602,7 +663,7 @@ function paginateBlocks(heights, types, maxPageHeight) {
 
 /* ─── Main component ─────────────────────────────── */
 
-export default function CVPreview({ cv, hideReferences, styleSettings }) {
+export default function CVPreview({ cv, hideReferences, styleSettings, templateId = "classic" }) {
   const measureRef = useRef(null);
   const rulerRef = useRef(null);
   const [pageGroups, setPageGroups] = useState(null);
@@ -626,8 +687,8 @@ export default function CVPreview({ cv, hideReferences, styleSettings }) {
   const rulerHeight = `${297 - 2 * settings.marginTopBottom}mm`;
 
   const blocks = useMemo(
-    () => buildBlocks(cv, hideReferences, resolvedStyles, settings.sectionOrder),
-    [cv, hideReferences, resolvedStyles, settings.sectionOrder]
+    () => buildBlocks(cv, hideReferences, resolvedStyles, settings.sectionOrder, templateId),
+    [cv, hideReferences, resolvedStyles, settings.sectionOrder, templateId]
   );
 
   useLayoutEffect(() => {

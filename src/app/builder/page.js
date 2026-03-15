@@ -48,7 +48,9 @@ export default function Builder() {
   const [builderMode, setBuilderMode] = useState("editor");
 
   const { styleSettings, updateStyle, reorderSections } = useStyleSettings();
-  const pdfExport = usePdfExport(cv, hideReferences, styleSettings);
+  const [templateId, setTemplateId] = useLocalStorage("cv-builder-templateId", defaultTemplateId);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  const pdfExport = usePdfExport(cv, hideReferences, styleSettings, templateId);
 
   const [openSections, setOpenSections] = useLocalStorage("cv-builder-openSections", {
     personal: false,
@@ -66,9 +68,6 @@ export default function Builder() {
   const toggleSection = (section) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
-
-  const [templateId, setTemplateId] = useLocalStorage("cv-builder-templateId", defaultTemplateId);
-  const [templateModalOpen, setTemplateModalOpen] = useState(false);
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-200">
@@ -122,6 +121,7 @@ export default function Builder() {
                   {...cvData}
                   isOpen={openSections.projects}
                   onToggle={() => toggleSection("projects")}
+                  templateId={templateId}
                 />
 
                 <VolunteeringForm
@@ -136,6 +136,7 @@ export default function Builder() {
                   {...cvData}
                   isOpen={openSections.certifications}
                   onToggle={() => toggleSection("certifications")}
+                  templateId={templateId}
                 />
 
                 <LanguagesForm
@@ -191,6 +192,7 @@ export default function Builder() {
               cv={cv}
               hideReferences={hideReferences}
               styleSettings={styleSettings}
+              templateId={templateId}
             />
           </div>
         </div>

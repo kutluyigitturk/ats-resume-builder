@@ -6,6 +6,7 @@ import AddButton from "@/components/ui/AddButton";
 import ReorderableCard from "@/components/ui/ReorderableCard";
 import sectionTips from "@/data/sectionTips";
 import DateInput from "@/components/ui/DateInput";
+import { labelStyle, inputStyle } from "@/lib/constants";
 import { CertificationIcon } from "@/icons";
 
 export default function CertificationsForm({
@@ -17,6 +18,7 @@ export default function CertificationsForm({
   moveItemDown,
   isOpen,
   onToggle,
+  templateId,
 }) {
   return (
     <Section
@@ -66,6 +68,31 @@ export default function CertificationsForm({
                   onChange={(v) => updateItem("certifications", cert.id, "expirationDate", v)}
                 />
             </div>
+            {templateId === "advanced" && (
+              <>
+                <div className="mb-3">
+                  <FormInput
+                    label="Credential URL"
+                    placeholder="https://..."
+                    value={cert.url}
+                    onChange={(v) => updateItem("certifications", cert.id, "url", v)}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelStyle}>Description</label>
+                  <textarea
+                    rows={3}
+                    placeholder="Brief description of the certification"
+                    value={cert.description}
+                    onChange={(e) =>
+                      updateItem("certifications", cert.id, "description", e.target.value)
+                    }
+                    className={`${inputStyle} min-h-[80px] resize-y leading-6`}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </ReorderableCard>
       ))}
