@@ -385,11 +385,6 @@ function buildProjectsHtml(projects) {
             <span>${escapeHtml(project.name || "")}</span>
             <span class="item-date">${formatDateRange(project.startDate, project.endDate)}</span>
           </div>
-          ${
-            hasValue(project.url)
-              ? `<div class="item-meta">${escapeHtml(project.url)}</div>`
-              : ""
-          }
           ${bullets ? `<ul class="bullets">${bullets}</ul>` : ""}
         </div>
       `;

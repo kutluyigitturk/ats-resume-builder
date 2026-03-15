@@ -5,6 +5,7 @@ import FormInput from "@/components/ui/FormInput";
 import AddButton from "@/components/ui/AddButton";
 import ReorderableCard from "@/components/ui/ReorderableCard";
 import sectionTips from "@/data/sectionTips";
+import DateInput from "@/components/ui/DateInput";
 import { labelStyle, inputStyle } from "@/lib/constants";
 import { GraduationCapIcon } from "@/icons";
 
@@ -60,15 +61,13 @@ export default function EducationForm({
               />
 
               <div className="grid grid-cols-2 gap-3">
-                <FormInput
+                <DateInput
                   label="Start Date"
-                  placeholder="MM/YYYY"
                   value={edu.startDate}
                   onChange={(v) => updateItem("education", edu.id, "startDate", v)}
                 />
-                <FormInput
+                <DateInput
                   label="End Date"
-                  placeholder="MM/YYYY"
                   value={edu.endDate}
                   onChange={(v) => updateItem("education", edu.id, "endDate", v)}
                 />

@@ -6,6 +6,7 @@ import AddButton from "@/components/ui/AddButton";
 import ReorderableCard from "@/components/ui/ReorderableCard";
 import BulletListEditor from "@/components/ui/BulletListEditor";
 import sectionTips from "@/data/sectionTips";
+import DateInput from "@/components/ui/DateInput";
 import { VolunteeringIcon } from "@/icons";
 
 export default function VolunteeringForm({
@@ -64,18 +65,16 @@ export default function VolunteeringForm({
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-3">
-              <FormInput
-                label="Start Date"
-                placeholder="Start Date"
-                value={vol.startDate}
-                onChange={(v) => updateItem("volunteering", vol.id, "startDate", v)}
-              />
-              <FormInput
-                label="End Date"
-                placeholder="End Date"
-                value={vol.endDate}
-                onChange={(v) => updateItem("volunteering", vol.id, "endDate", v)}
-              />
+              <DateInput
+                  label="Start Date"
+                  value={vol.startDate}
+                  onChange={(v) => updateItem("volunteering", vol.id, "startDate", v)}
+                />
+                <DateInput
+                  label="End Date"
+                  value={vol.endDate}
+                  onChange={(v) => updateItem("volunteering", vol.id, "endDate", v)}
+                />
             </div>
 
             <BulletListEditor

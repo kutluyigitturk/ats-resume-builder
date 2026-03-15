@@ -6,6 +6,7 @@ import AddButton from "@/components/ui/AddButton";
 import ReorderableCard from "@/components/ui/ReorderableCard";
 import BulletListEditor from "@/components/ui/BulletListEditor";
 import sectionTips from "@/data/sectionTips";
+import DateInput from "@/components/ui/DateInput";
 import { BriefcaseIcon } from "@/icons";
 
 export default function ExperienceForm({
@@ -64,15 +65,13 @@ export default function ExperienceForm({
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-3">
-              <FormInput
+              <DateInput
                 label="Start Date"
-                placeholder="Start Date"
                 value={exp.startDate}
                 onChange={(v) => updateItem("experiences", exp.id, "startDate", v)}
               />
-              <FormInput
+              <DateInput
                 label="End Date"
-                placeholder="End Date"
                 value={exp.endDate}
                 onChange={(v) => updateItem("experiences", exp.id, "endDate", v)}
               />

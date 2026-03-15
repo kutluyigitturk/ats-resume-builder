@@ -5,6 +5,7 @@ import FormInput from "@/components/ui/FormInput";
 import AddButton from "@/components/ui/AddButton";
 import ReorderableCard from "@/components/ui/ReorderableCard";
 import sectionTips from "@/data/sectionTips";
+import DateInput from "@/components/ui/DateInput";
 import { CertificationIcon } from "@/icons";
 
 export default function CertificationsForm({
@@ -53,19 +54,17 @@ export default function CertificationsForm({
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <FormInput
-                label="Date Acquired"
-                placeholder="MM/YYYY"
-                value={cert.dateAcquired}
-                onChange={(v) => updateItem("certifications", cert.id, "dateAcquired", v)}
-              />
-              <FormInput
-                label="Expiration Date"
-                placeholder="MM/YYYY"
-                value={cert.expirationDate}
-                onChange={(v) => updateItem("certifications", cert.id, "expirationDate", v)}
-              />
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <DateInput
+                  label="Date Acquired"
+                  value={cert.dateAcquired}
+                  onChange={(v) => updateItem("certifications", cert.id, "dateAcquired", v)}
+                />
+                <DateInput
+                  label="Expiration Date"
+                  value={cert.expirationDate}
+                  onChange={(v) => updateItem("certifications", cert.id, "expirationDate", v)}
+                />
             </div>
           </div>
         </ReorderableCard>

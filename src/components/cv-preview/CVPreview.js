@@ -298,19 +298,6 @@ function buildProjectsBlocks(cv, styles, isFirst) {
             </span>
           </div>
 
-          {hasValue(project.url) && (
-            <p
-              style={{
-                fontFamily: styles.page.fontFamily,
-                fontSize: "9.5pt",
-                color: "#555",
-                marginBottom: "4px",
-              }}
-            >
-              {project.url}
-            </p>
-          )}
-
           {visibleBullets.length > 0 && (
             <ul style={styles.bulletList}>
               {visibleBullets.map((bullet, j) => (

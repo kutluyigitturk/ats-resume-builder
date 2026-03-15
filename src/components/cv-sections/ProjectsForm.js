@@ -6,6 +6,7 @@ import AddButton from "@/components/ui/AddButton";
 import ReorderableCard from "@/components/ui/ReorderableCard";
 import BulletListEditor from "@/components/ui/BulletListEditor";
 import sectionTips from "@/data/sectionTips";
+import DateInput from "@/components/ui/DateInput";
 import { FolderIcon } from "@/icons";
 
 export default function ProjectsForm({
@@ -49,27 +50,16 @@ export default function ProjectsForm({
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-3">
-              <FormInput
-                label="Start Date"
-                placeholder="Start Date"
-                value={project.startDate}
-                onChange={(v) => updateItem("projects", project.id, "startDate", v)}
-              />
-              <FormInput
-                label="End Date"
-                placeholder="End Date"
-                value={project.endDate}
-                onChange={(v) => updateItem("projects", project.id, "endDate", v)}
-              />
-            </div>
-
-            <div className="mb-3">
-              <FormInput
-                label="Project URL"
-                placeholder="https://..."
-                value={project.url}
-                onChange={(v) => updateItem("projects", project.id, "url", v)}
-              />
+              <DateInput
+                  label="Start Date"
+                  value={project.startDate}
+                  onChange={(v) => updateItem("projects", project.id, "startDate", v)}
+                />
+                <DateInput
+                  label="End Date"
+                  value={project.endDate}
+                  onChange={(v) => updateItem("projects", project.id, "endDate", v)}
+                />
             </div>
 
             <BulletListEditor
