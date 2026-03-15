@@ -1,22 +1,26 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
+import useLocalStorage from "@/hooks/useLocalStorage";
 import { defaultStyleSettings } from "@/data/styleDefaults";
 
 export default function useStyleSettings() {
-  const [styleSettings, setStyleSettings] = useState(defaultStyleSettings);
+  const [styleSettings, setStyleSettings] = useLocalStorage(
+    "cv-builder-styleSettings",
+    defaultStyleSettings
+  );
 
   const updateStyle = useCallback((key, value) => {
     setStyleSettings((prev) => ({ ...prev, [key]: value }));
-  }, []);
+  }, [setStyleSettings]);
 
   const reorderSections = useCallback((newOrder) => {
     setStyleSettings((prev) => ({ ...prev, sectionOrder: newOrder }));
-  }, []);
+  }, [setStyleSettings]);
 
   const resetStyles = useCallback(() => {
     setStyleSettings(defaultStyleSettings);
-  }, []);
+  }, [setStyleSettings]);
 
   return { styleSettings, updateStyle, reorderSections, resetStyles };
 }

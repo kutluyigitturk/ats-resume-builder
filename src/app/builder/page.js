@@ -7,6 +7,7 @@ import useCVData from "@/hooks/useCVData";
 import useResizablePanel from "@/hooks/useResizablePanel";
 import usePdfExport from "@/hooks/usePdfExport";
 import useStyleSettings from "@/hooks/useStyleSettings";
+import useLocalStorage from "@/hooks/useLocalStorage";
 
 // Builder components
 import PdfNameEditor from "@/components/builder/PdfNameEditor";
@@ -45,7 +46,7 @@ export default function Builder() {
   const { styleSettings, updateStyle, reorderSections } = useStyleSettings();
   const pdfExport = usePdfExport(cv, hideReferences, styleSettings);
 
-  const [openSections, setOpenSections] = useState({
+  const [openSections, setOpenSections] = useLocalStorage("cv-builder-openSections", {
     personal: false,
     summary: false,
     experience: false,

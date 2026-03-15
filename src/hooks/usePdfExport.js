@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import useLocalStorage from "@/hooks/useLocalStorage";
 import { buildPdfHtml } from "@/lib/pdfHtmlBuilder";
 
 // Handles PDF name editing, generation and download
 export default function usePdfExport(cv, hideReferences, styleSettings) {
   const [downloading, setDownloading] = useState(false);
-  const [pdfName, setPdfName] = useState("Untitled_CV");
+  const [pdfName, setPdfName] = useLocalStorage("cv-builder-pdfName", "Untitled_CV");
   const [editingName, setEditingName] = useState(false);
 
   const handleDownloadPDF = async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import useLocalStorage from "@/hooks/useLocalStorage";
 import initialCV from "@/data/initialCV";
 import {
   createNewExperience,
@@ -33,9 +33,9 @@ function resolveItemIndex(items, itemIdentifier) {
   return items.findIndex((item) => item.id === itemIdentifier);
 }
 
-// Central CV state management hook
+// Central CV state management hook with localStorage persistence
 export default function useCVData() {
-  const [cv, setCv] = useState(initialCV);
+  const [cv, setCv] = useLocalStorage("cv-builder-cvData", initialCV);
 
   const updateField = (field, value) => {
     setCv((prev) => ({ ...prev, [field]: value }));
