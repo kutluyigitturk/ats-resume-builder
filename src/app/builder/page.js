@@ -33,6 +33,10 @@ import LayoutStylePanel from "@/components/layout-style/LayoutStylePanel";
 // CV preview
 import CVPreview from "@/components/cv-preview/CVPreview";
 
+// Templates
+import TemplateModal from "@/components/builder/TemplateModal";
+import { defaultTemplateId } from "@/data/templates";
+
 export default function Builder() {
   const cvData = useCVData();
   const { cv } = cvData;
@@ -62,6 +66,9 @@ export default function Builder() {
   const toggleSection = (section) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
+
+  const [templateId, setTemplateId] = useLocalStorage("cv-builder-templateId", defaultTemplateId);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-200">
@@ -168,6 +175,7 @@ export default function Builder() {
               downloading={pdfExport.downloading}
               onDownloadPDF={pdfExport.handleDownloadPDF}
               onLayoutStyle={() => setBuilderMode("layout")}
+              onTemplates={() => setTemplateModalOpen(true)}
               builderMode={builderMode}
             />
           </div>
@@ -187,6 +195,15 @@ export default function Builder() {
           </div>
         </div>
       </div>
+      <TemplateModal
+        isOpen={templateModalOpen}
+        onClose={() => setTemplateModalOpen(false)}
+        currentTemplateId={templateId}
+        onApply={setTemplateId}
+        cv={cv}
+        hideReferences={hideReferences}
+        styleSettings={styleSettings}
+      />
     </div>
   );
 }

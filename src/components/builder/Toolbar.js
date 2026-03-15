@@ -2,12 +2,13 @@
 
 import { TemplatesIcon, SettingsIcon, DownloadIcon } from "@/icons";
 
-export default function Toolbar({ downloading, onDownloadPDF, onLayoutStyle, builderMode }) {
+export default function Toolbar({ downloading, onDownloadPDF, onLayoutStyle, onTemplates, builderMode }) {
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-2">
         <button
           type="button"
+          onClick={onTemplates}
           className="inline-flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-200 hover:border-slate-300 hover:bg-slate-50"
         >
           <TemplatesIcon />
