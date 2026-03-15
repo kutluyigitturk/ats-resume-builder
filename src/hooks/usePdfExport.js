@@ -14,7 +14,7 @@ export default function usePdfExport(cv, hideReferences, styleSettings, template
     setDownloading(true);
 
     try {
-      const html = buildPdfHtml(cv, hideReferences, styleSettings, templateId);
+      const html = buildPdfHtml(cv, hideReferences, styleSettings, templateId, pdfName);
 
       const response = await fetch("/api/generate-pdf", {
         method: "POST",

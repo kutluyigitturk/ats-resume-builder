@@ -256,7 +256,7 @@ function buildDynamicCss(settings) {
   `;
 }
 
-export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateId = "classic") {
+export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateId = "classic", pdfName = "Resume") {
   const settings = styleSettings || defaultStyleSettings;
   const dynamicCss = buildDynamicCss(settings);
 
@@ -301,6 +301,7 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
 <html>
 <head>
   <meta charset="UTF-8">
+  <title>${pdfName}</title>
   <style>${dynamicCss}</style>
 </head>
 <body>
