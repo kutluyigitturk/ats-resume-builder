@@ -1,4 +1,4 @@
-# ATS Resume Builder
+<h1 align="center">ATS Resume Builder - easyATS</h1>
 
 A modern, professional resume builder web application designed to produce ATS (Applicant Tracking System) friendly, text-based resumes. Built with Next.js, React, and Tailwind CSS.
 
