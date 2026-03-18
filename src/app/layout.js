@@ -1,4 +1,4 @@
-import { Inter, Roboto, Open_Sans, Lato, Carlito } from "next/font/google";
+import { Inter, Roboto, Open_Sans, Lato, Carlito, Sora } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -35,6 +35,13 @@ const carlito = Carlito({
   variable: "--font-carlito",
 });
 
+const sora = Sora({
+  subsets: ["latin"],
+  weight: ["400", "700", "800"],
+  display: "swap",
+  variable: "--font-montserrat",
+});
+
 export const metadata = {
   title: "ATS Resume Builder",
   description: "ATS-friendly resume builder with live preview and text-based PDF export",
@@ -44,7 +51,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${roboto.variable} ${openSans.variable} ${lato.variable} ${carlito.variable} ${inter.className} antialiased`}
+        className={`${inter.variable} ${roboto.variable} ${openSans.variable} ${lato.variable} ${carlito.variable} ${inter.className} ${sora.variable} antialiased`}
       >
         {children}
       </body>
