@@ -308,6 +308,64 @@ function Hero() {
   );
 }
 
+/* ─── Logo Marquee ───────────────────────────────── */
+
+const platforms = [
+  { name: "LinkedIn", logo: "/logos/linkedin.svg" },
+  { name: "Indeed", logo: "/logos/indeed.svg" },
+  { name: "Glassdoor", logo: "/logos/glassdoor.svg" },
+  { name: "Monster", logo: "/logos/monster.svg" },
+  { name: "Michael Page", logo: "/logos/michael-page.svg" },
+  { name: "Randstad", logo: "/logos/randstad.svg" },
+  { name: "Wellfound", logo: "/logos/wellfound.svg" },
+  { name: "Built In", logo: "/logos/builtin.svg" },
+  { name: "Kariyer.net", logo: "/logos/kariyer-net.svg" },
+  { name: "We Work Remotely", logo: "/logos/we-work-remotely.svg" },
+  { name: "Greenhouse", logo: "/logos/greenhouse.svg" },
+  { name: "Hired", logo: "/logos/hired.svg" },
+  { name: "CareerBuilder", logo: "/logos/career-builder.svg" },
+  { name: "ZipRecruiter", logo: "/logos/zip-recruiter.svg" },
+];
+
+function LogoMarquee() {
+  const renderLogos = (suffix) =>
+    platforms.map((item, i) => (
+      <img
+        key={`${item.name}-${suffix}-${i}`}
+        src={item.logo}
+        alt={item.name}
+        className="mx-6 h-5 w-auto opacity-40 grayscale transition-all duration-300 hover:opacity-90 hover:grayscale-0 shrink-0"
+        draggable={false}
+      />
+    ));
+
+  return (
+    <section className="py-16 overflow-hidden">
+      <div className="mx-auto max-w-[976px]">
+        <p
+          className="text-left text-[#A0A0A0] mb-4 font-semibold"
+          style={{ fontFamily: "Inter, 'Inter Fallback', sans-serif", fontSize: "16px" }}
+        >
+          Optimized for top job platforms
+        </p>
+      </div>
+
+      <div
+        className="relative marquee-wrapper overflow-hidden mx-auto max-w-[976px]"
+        style={{
+          maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+          WebkitMaskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+        }}
+      >
+        <div className="flex items-center animate-marquee w-max">
+          {renderLogos("a")}
+          {renderLogos("b")}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── Features ───────────────────────────────────── */
 
 const features = [
@@ -634,6 +692,7 @@ export default function LandingPage() {
     <main className="min-h-screen bg-white">
       <Navbar />
       <Hero />
+      <LogoMarquee />
       <Features />
       <HowItWorks />
       <Templates />
