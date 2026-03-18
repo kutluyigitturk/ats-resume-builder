@@ -52,6 +52,16 @@ Users fill out structured forms on the left panel, see a real-time A4 preview on
 - **Hydration-safe**: No SSR/client mismatch — loads from storage after mount
 - **Cross-template persistence**: Data preserved when switching templates; fields hidden in one template remain stored for use in another
 
+### Landing Page
+- **Animated logo**: easyATS → eATSy hover animation with smooth letter transitions
+- **Glassmorphism navbar**: Floating navbar with backdrop blur, scroll-aware styling
+- **Hero section**: Bold headline with RoughNotation highlight animation on "simplest"
+- **Logo marquee**: Infinite scrolling job platform logos (LinkedIn, Indeed, Glassdoor, etc.) with CSS mask fade edges, pause on hover
+- **Scroll reveal**: Fade-in/slide-up animations triggered by IntersectionObserver
+- **Features dropdown**: Amie.so-inspired dropdown with anchor scroll navigation
+- **FAQ accordion**: Expandable question/answer section
+- **Responsive CTA**: Multiple call-to-action sections directing to builder
+
 ---
 
 ## Tech Stack
@@ -71,24 +81,42 @@ Users fill out structured forms on the left panel, see a real-time A4 preview on
 ## Project Structure
 
 ```
+public/
+├── logos/                      # Job platform SVG logos for marquee
+│   ├── linkedin.svg
+│   ├── indeed.svg
+│   ├── glassdoor.svg
+│   ├── monster.svg
+│   ├── michael-page.svg
+│   ├── randstad.svg
+│   ├── wellfound.svg
+│   ├── builtin.svg
+│   ├── kariyer-net.svg
+│   ├── we-work-remotely.svg
+│   ├── greenhouse.svg
+│   ├── hired.svg
+│   ├── career-builder.svg
+│   └── zip-recruiter.svg
+│
 src/
 ├── app/
-│   ├── layout.js              # Root layout with Google Fonts
-│   ├── page.js                # Landing page
-│   ├── globals.css            # Global styles
+│   ├── layout.js               # Root layout with Google Fonts
+│   ├── page.js                 # Landing page with hero, marquee, features, FAQ
+│   ├── globals.css             # Global styles
 │   ├── builder/
-│   │   └── page.js            # Builder page orchestration
+│   │   └── page.js             # Builder page orchestration
 │   └── api/
 │       └── generate-pdf/
-│           └── route.js       # Puppeteer PDF generation API
+│           └── route.js        # Puppeteer PDF generation API
 │
 ├── components/
+│   ├── Logo.js                 # Animated easyATS → eATSy logo component
 │   ├── builder/
-│   │   ├── PdfNameEditor.js   # PDF filename editor
-│   │   ├── Toolbar.js         # Templates, Layout & Style, Download buttons
-│   │   ├── ZoomControls.js    # Zoom in/out controls
-│   │   ├── ResizableDivider.js# Draggable panel divider
-│   │   └── TemplateModal.js   # Template selection modal with live previews
+│   │   ├── PdfNameEditor.js    # PDF filename editor
+│   │   ├── Toolbar.js          # Templates, Layout & Style, Download buttons
+│   │   ├── ZoomControls.js     # Zoom in/out controls
+│   │   ├── ResizableDivider.js # Draggable panel divider
+│   │   └── TemplateModal.js    # Template selection modal with live previews
 │   │
 │   ├── cv-sections/
 │   │   ├── PersonalInfoForm.js
@@ -103,7 +131,7 @@ src/
 │   │   └── ReferencesForm.js
 │   │
 │   ├── cv-preview/
-│   │   └── CVPreview.js       # Paginated A4 preview with style resolution
+│   │   └── CVPreview.js        # Paginated A4 preview with style resolution
 │   │
 │   ├── layout-style/
 │   │   ├── LayoutStylePanel.js
@@ -114,35 +142,35 @@ src/
 │   │   └── MarginsSpacingSection.js
 │   │
 │   └── ui/
-│       ├── Section.js         # Accordion section wrapper
-│       ├── ReorderableCard.js # Card with move up/down/delete controls
-│       ├── ItemControls.js    # Shared control buttons
-│       ├── FormInput.js       # Standard text input
-│       ├── DateInput.js       # Auto-formatting MM/YYYY input
-│       ├── BulletListEditor.js# Bullet point add/remove/edit
-│       └── AddButton.js       # "Add ..." buttons
+│       ├── Section.js          # Accordion section wrapper
+│       ├── ReorderableCard.js  # Card with move up/down/delete controls
+│       ├── ItemControls.js     # Shared control buttons
+│       ├── FormInput.js        # Standard text input
+│       ├── DateInput.js        # Auto-formatting MM/YYYY input
+│       ├── BulletListEditor.js # Bullet point add/remove/edit
+│       └── AddButton.js        # "Add ..." buttons
 │
 ├── data/
-│   ├── initialCV.js           # Empty CV data structure
-│   ├── sectionTips.js         # Tips for each section
-│   ├── styleDefaults.js       # Fonts, controls, presets, defaults
-│   └── templates.js           # Template registry
+│   ├── initialCV.js            # Empty CV data structure
+│   ├── sectionTips.js          # Tips for each section
+│   ├── styleDefaults.js        # Fonts, controls, presets, defaults
+│   └── templates.js            # Template registry
 │
 ├── hooks/
-│   ├── useCVData.js           # CV state management + localStorage
-│   ├── useStyleSettings.js    # Style state + localStorage
-│   ├── usePdfExport.js        # PDF generation + localStorage
-│   ├── useResizablePanel.js   # Panel resize behavior
-│   └── useLocalStorage.js     # Generic localStorage hook with debounce
+│   ├── useCVData.js            # CV state management + localStorage
+│   ├── useStyleSettings.js     # Style state + localStorage
+│   ├── usePdfExport.js         # PDF generation + localStorage
+│   ├── useResizablePanel.js    # Panel resize behavior
+│   └── useLocalStorage.js      # Generic localStorage hook with debounce
 │
 ├── icons/
-│   └── index.js               # All SVG icon components
+│   └── index.js                # All SVG icon components
 │
 └── lib/
-    ├── constants.js           # Shared styles, factories, constraints
-    ├── createId.js            # Unique ID generator
-    ├── htmlEscape.js          # XSS/HTML escape for PDF
-    └── pdfHtmlBuilder.js      # PDF HTML document builder
+    ├── constants.js            # Shared styles, factories, constraints
+    ├── createId.js             # Unique ID generator
+    ├── htmlEscape.js           # XSS/HTML escape for PDF
+    └── pdfHtmlBuilder.js       # PDF HTML document builder
 ```
 
 ---
