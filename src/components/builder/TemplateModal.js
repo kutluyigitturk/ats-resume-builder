@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { templates } from "@/data/templates";
+import { defaultStyleSettings } from "@/data/styleDefaults";
+import initialCV from "@/data/initialCV";
 import CVPreview from "@/components/cv-preview/CVPreview";
 
 /* ─── Mini Preview ───────────────────────────────── */
@@ -19,7 +21,6 @@ function MiniPreview({ cv, hideReferences, styleSettings, isSelected }) {
         background: "linear-gradient(145deg, #f1f5f9 0%, #e8ecf1 100%)",
       }}
     >
-      {/* Inner CV paper with shadow */}
       <div
         className="absolute bg-white"
         style={{
@@ -147,6 +148,7 @@ function TemplateCard({
 }
 
 /* ─── Main Modal ─────────────────────────────────── */
+// mode: "switch" (default, used in builder) | "create" (used in dashboard)
 
 export default function TemplateModal({
   isOpen,
@@ -156,12 +158,32 @@ export default function TemplateModal({
   cv,
   hideReferences,
   styleSettings,
+  mode = "switch",
+  onCreate,
 }) {
-  const [selectedId, setSelectedId] = useState(currentTemplateId);
+  const [selectedId, setSelectedId] = useState(currentTemplateId || "classic");
+  const [resumeName, setResumeName] = useState("");
+  const nameInputRef = useRef(null);
+
+  const isCreateMode = mode === "create";
+
+  // Use provided CV data or fallback to initialCV for create mode
+  const previewCv = cv || initialCV;
+  const previewStyle = styleSettings || defaultStyleSettings;
 
   useEffect(() => {
-    if (isOpen) setSelectedId(currentTemplateId);
-  }, [isOpen, currentTemplateId]);
+    if (isOpen) {
+      setSelectedId(currentTemplateId || "classic");
+      if (isCreateMode) setResumeName("");
+    }
+  }, [isOpen, currentTemplateId, isCreateMode]);
+
+  useEffect(() => {
+    if (isOpen && isCreateMode) {
+      // Small delay to ensure modal is rendered
+      setTimeout(() => nameInputRef.current?.focus(), 100);
+    }
+  }, [isOpen, isCreateMode]);
 
   useEffect(() => {
     if (isOpen) {
@@ -177,7 +199,12 @@ export default function TemplateModal({
   if (!isOpen) return null;
 
   const handleApply = () => {
-    onApply(selectedId);
+    if (isCreateMode && onCreate) {
+      const finalName = resumeName.trim() || "Untitled Resume";
+      onCreate(finalName, selectedId);
+    } else {
+      onApply(selectedId);
+    }
     onClose();
   };
 
@@ -195,10 +222,12 @@ export default function TemplateModal({
         <div className="flex items-center justify-between border-b border-slate-100 px-7 py-5">
           <div>
             <h2 className="text-lg font-bold text-slate-900">
-              Choose Resume Template
+              {isCreateMode ? "Create New Resume" : "Choose Resume Template"}
             </h2>
             <p className="mt-0.5 text-xs text-slate-500">
-              Select a template that fits your style. Your content will be preserved.
+              {isCreateMode
+                ? "Choose a template and give your resume a name."
+                : "Select a template that fits your style. Your content will be preserved."}
             </p>
           </div>
           <button
@@ -222,6 +251,21 @@ export default function TemplateModal({
           </button>
         </div>
 
+        {/* Name Input (create mode only) */}
+        {isCreateMode && (
+          <div className="border-b border-slate-100 px-7 py-4">
+            <label className="mb-1.5 block text-xs font-semibold text-slate-700">Resume Name</label>
+            <input
+              ref={nameInputRef}
+              value={resumeName}
+              onChange={(e) => setResumeName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleApply()}
+              className="w-full max-w-md rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+              placeholder="e.g. Software Engineer Resume"
+            />
+          </div>
+        )}
+
         {/* Template Grid */}
         <div className="flex-1 overflow-y-auto px-7 py-6">
           <div className="grid grid-cols-2 gap-6">
@@ -230,11 +274,11 @@ export default function TemplateModal({
                 key={template.id}
                 template={template}
                 isSelected={selectedId === template.id}
-                isDefault={currentTemplateId === template.id}
+                isDefault={!isCreateMode && currentTemplateId === template.id}
                 onSelect={setSelectedId}
-                cv={cv}
-                hideReferences={hideReferences}
-                styleSettings={styleSettings}
+                cv={previewCv}
+                hideReferences={hideReferences || false}
+                styleSettings={previewStyle}
               />
             ))}
           </div>
@@ -254,7 +298,7 @@ export default function TemplateModal({
             onClick={handleApply}
             className="rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-semibold text-white shadow-[0_4px_12px_rgba(15,23,42,0.15)] transition-all duration-200 hover:bg-slate-800 hover:shadow-[0_6px_16px_rgba(15,23,42,0.2)]"
           >
-            Apply Template
+            {isCreateMode ? "Create Resume" : "Apply Template"}
           </button>
         </div>
       </div>

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
 
 // Hooks
 import useCVData from "@/hooks/useCVData";
@@ -37,9 +39,40 @@ import CVPreview from "@/components/cv-preview/CVPreview";
 import TemplateModal from "@/components/builder/TemplateModal";
 import { defaultTemplateId } from "@/data/templates";
 
-export default function Builder() {
-  const cvData = useCVData();
+// Resume manager
+import { touchResume, getResumes } from "@/lib/resumeManager";
+
+function BuilderInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const resumeId = searchParams.get("id");
+
+  // Redirect to dashboard if no ID or invalid ID
+  useEffect(() => {
+    if (!resumeId) {
+      router.replace("/dashboard");
+      return;
+    }
+    // Check if this resume actually exists in registry
+    const resumes = getResumes();
+    const exists = resumes.some((r) => r.id === resumeId);
+    if (!exists) {
+      router.replace("/dashboard");
+    }
+  }, [resumeId, router]);
+
+  const cvData = useCVData(resumeId);
   const { cv } = cvData;
+
+  // Update "last edited" timestamp when CV data changes
+  useEffect(() => {
+    if (!resumeId || !cv) return;
+    // Debounce the touch to avoid excessive writes
+    const timeout = setTimeout(() => {
+      touchResume(resumeId);
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [cv, resumeId]);
 
   const { panelWidth, handleMouseDown } = useResizablePanel();
 
@@ -47,12 +80,15 @@ export default function Builder() {
   const [zoom, setZoom] = useState(100);
   const [builderMode, setBuilderMode] = useState("editor");
 
-  const { styleSettings, updateStyle, reorderSections } = useStyleSettings();
-  const [templateId, setTemplateId] = useLocalStorage("cv-builder-templateId", defaultTemplateId);
-  const [templateModalOpen, setTemplateModalOpen] = useState(false);
-  const pdfExport = usePdfExport(cv, hideReferences, styleSettings, templateId);
+  const { styleSettings, updateStyle, reorderSections } = useStyleSettings(resumeId);
 
-  const [openSections, setOpenSections] = useLocalStorage("cv-builder-openSections", {
+  const templateStorageKey = resumeId ? `cv-${resumeId}-templateId` : "cv-builder-templateId";
+  const [templateId, setTemplateId] = useLocalStorage(templateStorageKey, defaultTemplateId);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
+  const pdfExport = usePdfExport(cv, hideReferences, styleSettings, templateId, resumeId);
+
+  const openSectionsKey = resumeId ? `cv-${resumeId}-openSections` : "cv-builder-openSections";
+  const [openSections, setOpenSections] = useLocalStorage(openSectionsKey, {
     personal: false,
     summary: false,
     experience: false,
@@ -207,5 +243,13 @@ export default function Builder() {
         styleSettings={styleSettings}
       />
     </div>
+  );
+}
+
+export default function Builder() {
+  return (
+    <Suspense>
+      <BuilderInner />
+    </Suspense>
   );
 }

@@ -12,32 +12,235 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* ─── Marquee ─────────────────────────────────────── */
+
 @keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .animate-marquee {
-  animation: marquee 70s linear infinite;
+  animation: marquee 40s linear infinite;
 }
 
 .marquee-wrapper:hover .animate-marquee {
   animation-play-state: paused;
 }
+
+/* ─── Hero Background Blobs ──────────────────────── */
+
+@keyframes blob-float-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
+}
+
+@keyframes blob-float-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-25px, 20px) scale(0.95); }
+  66% { transform: translate(20px, -15px) scale(1.08); }
+}
+
+@keyframes blob-float-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(15px, 25px) scale(1.03); }
+  66% { transform: translate(-30px, -10px) scale(0.97); }
+}
+
+.blob-1 { animation: blob-float-1 12s ease-in-out infinite; }
+.blob-2 { animation: blob-float-2 15s ease-in-out infinite; }
+.blob-3 { animation: blob-float-3 18s ease-in-out infinite; }
+
+/* ─── Feature Card Gradient Border ───────────────── */
+
+.feature-card {
+  position: relative;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.feature-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, transparent 30%, rgba(30, 144, 255, 0.2) 50%, transparent 70%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.feature-card:hover::before {
+  opacity: 1;
+}
+
+.feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px -8px rgba(0, 0, 0, 0.08), 0 4px 12px -4px rgba(0, 0, 0, 0.04);
+}
+
+/* ─── FAQ Smooth Animation ───────────────────────── */
+
+.faq-answer {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease-out;
+}
+
+.faq-answer.open {
+  grid-template-rows: 1fr;
+}
+
+.faq-answer > div {
+  overflow: hidden;
+}
+
+/* ─── CTA Shimmer ─────────────────────────────────── */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.cta-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(30, 144, 255, 0.03) 25%,
+    rgba(30, 144, 255, 0.07) 50%,
+    rgba(30, 144, 255, 0.03) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 8s ease-in-out infinite;
+}
+
+/* ─── Button Shine ────────────────────────────────── */
+
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+
+.btn-primary:hover::after {
+  left: 120%;
+}
+
+/* ─── Template Card ───────────────────────────────── */
+
+.template-card {
+  transition: all 0.3s ease;
+}
+
+.template-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
+}
+
+.template-card:hover .template-preview {
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+}
+
+/* ─── Icon Box Gradient ───────────────────────────── */
+
+.icon-box {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover .icon-box {
+  background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
+  transform: scale(1.05);
+}
+
+/* ─── Number Box ──────────────────────────────────── */
+
+.number-box {
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.number-box::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(30, 144, 255, 0.15), transparent);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.number-box:hover::after {
+  opacity: 1;
+}
+
+.number-box:hover {
+  transform: scale(1.05);
+}
+
+/* ─── Step Connector ──────────────────────────────── */
+
+@keyframes dash-flow {
+  0% { stroke-dashoffset: 16; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* ─── Floating Badges ─────────────────────────────── */
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(var(--badge-rotate, 0deg)); }
+  50% { transform: translateY(-10px) rotate(var(--badge-rotate, 0deg)); }
+}
+
+@keyframes float-medium {
+  0%, 100% { transform: translateY(0) rotate(var(--badge-rotate, 0deg)); }
+  50% { transform: translateY(-14px) rotate(var(--badge-rotate, 0deg)); }
+}
+
+@keyframes float-fast {
+  0%, 100% { transform: translateY(0) rotate(var(--badge-rotate, 0deg)); }
+  50% { transform: translateY(-8px) rotate(var(--badge-rotate, 0deg)); }
+}
+
+.floating-badge {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+
+.floating-badge.visible {
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.float-slow { animation: float-slow 5s ease-in-out infinite; }
+.float-medium { animation: float-medium 4s ease-in-out infinite; }
+.float-fast { animation: float-fast 3.5s ease-in-out infinite; }

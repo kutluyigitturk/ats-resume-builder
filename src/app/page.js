@@ -137,8 +137,8 @@ function Navbar() {
             Log in
           </button>
           <Link
-            href="/builder"
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 hover:shadow-md"
+            href="/dashboard"
+            className="btn-primary rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 hover:shadow-md"
           >
             Get Started
           </Link>
@@ -153,11 +153,12 @@ function Navbar() {
 function Hero() {
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-48">
-      {/* Background subtle shapes */}
+      {/* Animated background blobs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-32 -top-32 h-[500px] w-[500px] rounded-full bg-blue-100/40 blur-3xl" />
-        <div className="absolute -right-32 top-1/3 h-[400px] w-[400px] rounded-full bg-slate-100/60 blur-3xl" />
-        <div className="absolute -bottom-32 left-1/3 h-[300px] w-[300px] rounded-full bg-indigo-50/40 blur-3xl" />
+        <div className="blob-1 absolute -left-24 -top-24 h-[600px] w-[600px] rounded-full bg-blue-200/30 blur-[100px]" />
+        <div className="blob-2 absolute -right-24 top-1/4 h-[500px] w-[500px] rounded-full bg-indigo-200/25 blur-[100px]" />
+        <div className="blob-3 absolute -bottom-24 left-1/4 h-[400px] w-[400px] rounded-full bg-sky-100/30 blur-[80px]" />
+        <div className="blob-2 absolute left-1/2 top-1/2 h-[300px] w-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-100/20 blur-[60px]" />
       </div>
 
       <div className="relative z-10 mx-auto w-full text-center">
@@ -200,8 +201,8 @@ function Hero() {
         <Reveal delay={300}>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
-              href="/builder"
-              className="group inline-flex items-center gap-2 rounded-xl bg-slate-900 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:bg-slate-800 hover:shadow-xl"
+              href="/dashboard"
+              className="btn-primary group inline-flex items-center gap-2 rounded-xl bg-slate-900 px-7 py-3.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:bg-slate-800 hover:shadow-xl hover:scale-[1.02]"
             >
               Start Building — It&apos;s Free
               <svg
@@ -213,17 +214,100 @@ function Hero() {
             </Link>
             <button
               onClick={() => document.getElementById("templates")?.scrollIntoView({ behavior: "smooth" })}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-7 py-3.5 text-sm font-semibold text-slate-700 transition-all duration-200 hover:border-slate-300 hover:bg-slate-50 hover:shadow-md"
             >
               See Templates
             </button>
           </div>
         </Reveal>
 
-        {/* Builder Mockup */}
+        {/* Builder Mockup with Floating Badges */}
         <Reveal delay={400}>
           <div className="mt-16 sm:mt-20">
             <div className="relative mx-auto max-w-5xl">
+
+              {/* ── Floating Badges ── */}
+
+              {/* PDF — top left */}
+              <div
+                className="floating-badge visible float-slow hidden sm:block"
+                style={{ top: "-18px", left: "-60px", "--badge-rotate": "-6deg", animationDelay: "0s" }}
+              >
+                <div className="flex items-center gap-1.5 rounded-xl bg-red-50 px-3.5 py-2 shadow-lg shadow-red-100/40 ring-1 ring-red-100/60" style={{ transform: "rotate(-6deg)" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                    <path d="M14 2v6h6" /><path d="M12 18v-6" /><path d="m9 15 3 3 3-3" />
+                  </svg>
+                  <span className="text-xs font-bold text-red-600">PDF</span>
+                </div>
+              </div>
+
+              {/* ATS Score — top right */}
+              <div
+                className="floating-badge visible float-medium hidden sm:block"
+                style={{ top: "-14px", right: "-50px", "--badge-rotate": "5deg", animationDelay: "0.8s" }}
+              >
+                <div className="flex items-center gap-1.5 rounded-xl bg-emerald-50 px-3.5 py-2 shadow-lg shadow-emerald-100/40 ring-1 ring-emerald-100/60" style={{ transform: "rotate(5deg)" }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 12l2 2 4-4" /><circle cx="12" cy="12" r="10" />
+                  </svg>
+                  <span className="text-xs font-bold text-emerald-600">ATS</span>
+                </div>
+              </div>
+
+              {/* A4 — mid left */}
+              <div
+                className="floating-badge visible float-fast hidden sm:block"
+                style={{ top: "35%", left: "-70px", "--badge-rotate": "-4deg", animationDelay: "1.5s" }}
+              >
+                <div className="flex items-center gap-1.5 rounded-xl bg-blue-50 px-3.5 py-2 shadow-lg shadow-blue-100/40 ring-1 ring-blue-100/60" style={{ transform: "rotate(-4deg)" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18" />
+                  </svg>
+                  <span className="text-xs font-bold text-blue-600">A4</span>
+                </div>
+              </div>
+
+              {/* Live Preview — mid right */}
+              <div
+                className="floating-badge visible float-slow hidden sm:block"
+                style={{ top: "40%", right: "-80px", "--badge-rotate": "4deg", animationDelay: "0.5s" }}
+              >
+                <div className="flex items-center gap-1.5 rounded-xl bg-violet-50 px-3.5 py-2 shadow-lg shadow-violet-100/40 ring-1 ring-violet-100/60" style={{ transform: "rotate(4deg)" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" />
+                  </svg>
+                  <span className="text-xs font-bold text-violet-600">Live Preview</span>
+                </div>
+              </div>
+
+              {/* Free — bottom left */}
+              <div
+                className="floating-badge visible float-medium hidden sm:block"
+                style={{ bottom: "30px", left: "-46px", "--badge-rotate": "6deg", animationDelay: "2s" }}
+              >
+                <div className="flex items-center gap-1.5 rounded-xl bg-amber-50 px-3.5 py-2 shadow-lg shadow-amber-100/40 ring-1 ring-amber-100/60" style={{ transform: "rotate(6deg)" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                  </svg>
+                  <span className="text-xs font-bold text-amber-600">Free</span>
+                </div>
+              </div>
+
+              {/* LinkedIn logo — bottom right */}
+              <div
+                className="floating-badge visible float-fast hidden sm:block"
+                style={{ bottom: "50px", right: "-56px", "--badge-rotate": "-5deg", animationDelay: "1.2s" }}
+              >
+                <div className="flex items-center gap-1.5 rounded-xl bg-sky-50 px-3.5 py-2 shadow-lg shadow-sky-100/40 ring-1 ring-sky-100/60" style={{ transform: "rotate(-5deg)" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#0a66c2">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                  <span className="text-xs font-bold text-sky-700">LinkedIn</span>
+                </div>
+              </div>
+
+              {/* ── Mockup Container ── */}
               <div className="rounded-xl border border-slate-200/80 bg-white/50 p-2 shadow-2xl backdrop-blur-sm">
                 <div className="overflow-hidden rounded-lg border border-slate-200/60 bg-slate-100">
                   <div className="flex h-8 items-center gap-2 border-b border-slate-200/60 bg-white px-4">
@@ -334,7 +418,7 @@ function LogoMarquee() {
         key={`${item.name}-${suffix}-${i}`}
         src={item.logo}
         alt={item.name}
-        className="mx-6 h-5 w-auto opacity-40 grayscale transition-all duration-300 hover:opacity-90 hover:grayscale-0 shrink-0"
+        className="mx-6 h-5 w-auto opacity-50 grayscale transition-all duration-300 hover:opacity-100 hover:grayscale-0 shrink-0"
         draggable={false}
       />
     ));
@@ -427,8 +511,8 @@ function Features() {
         <div className="grid gap-4 sm:grid-cols-2">
           {features.map((f, i) => (
             <Reveal key={f.title} delay={i * 100}>
-              <div className="group rounded-2xl border border-slate-200/80 bg-white p-6 transition-all duration-200 hover:border-slate-300 hover:shadow-lg">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-white">
+              <div className="feature-card rounded-2xl border border-slate-200/80 p-6">
+                <div className="icon-box mb-4 flex h-11 w-11 items-center justify-center rounded-xl text-white">
                   {f.icon}
                 </div>
                 <h3 className="mb-2 text-base font-bold text-slate-900">{f.title}</h3>
@@ -469,9 +553,23 @@ function HowItWorks() {
         <div className="grid gap-8 sm:grid-cols-3">
           {steps.map((s, i) => (
             <Reveal key={s.number} delay={i * 150}>
-              <div className="text-center">
+              <div className="relative text-center">
+                {/* Connector line between steps */}
+                {i < steps.length - 1 && (
+                  <div className="absolute top-8 left-[calc(50%+40px)] hidden h-[2px] w-[calc(100%-80px)] sm:block">
+                    <svg width="100%" height="2" className="overflow-visible">
+                      <line
+                        x1="0" y1="1" x2="100%" y2="1"
+                        stroke="#cbd5e1"
+                        strokeWidth="2"
+                        strokeDasharray="6 4"
+                        strokeLinecap="round"
+                      />
+                    </svg>
+                  </div>
+                )}
                 <div
-                  className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-900 text-xl font-extrabold text-white"
+                  className="number-box mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-900 text-xl font-extrabold text-white cursor-default"
                   style={{ fontFamily: "var(--font-montserrat), sans-serif" }}
                 >
                   {s.number}
@@ -511,8 +609,8 @@ function Templates() {
             { name: "Advanced", desc: "Enhanced layout with contact icons, credential links, and rich details.", badge: "Detailed" },
           ].map((t, i) => (
             <Reveal key={t.name} delay={i * 150}>
-              <div className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white transition-all duration-200 hover:border-slate-300 hover:shadow-lg">
-                <div className="bg-slate-50 p-8">
+              <div className="template-card overflow-hidden rounded-2xl border border-slate-200/80 bg-white">
+                <div className="template-preview bg-slate-50 p-8">
                   <div className="mx-auto w-full max-w-xs rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
                     <div className="mb-3 flex justify-center">
                       <div className="h-3 w-28 rounded bg-slate-800" />
@@ -597,14 +695,14 @@ function FAQ() {
         <div className="space-y-3">
           {faqs.map((faq, i) => (
             <Reveal key={i} delay={i * 80}>
-              <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white">
+              <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white transition-all duration-200 hover:border-slate-300">
                 <button
                   onClick={() => setOpenIndex(openIndex === i ? null : i)}
                   className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-slate-50"
                 >
                   <span className="pr-4 text-sm font-semibold text-slate-900">{faq.q}</span>
                   <svg
-                    className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 ${
+                    className={`h-4 w-4 shrink-0 text-slate-400 transition-transform duration-300 ${
                       openIndex === i ? "rotate-180" : ""
                     }`}
                     fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
@@ -612,11 +710,13 @@ function FAQ() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
                   </svg>
                 </button>
-                {openIndex === i && (
-                  <div className="border-t border-slate-100 px-5 py-4">
-                    <p className="text-sm leading-relaxed text-slate-500">{faq.a}</p>
+                <div className={`faq-answer ${openIndex === i ? "open" : ""}`}>
+                  <div>
+                    <div className="border-t border-slate-100 px-5 py-4">
+                      <p className="text-sm leading-relaxed text-slate-500">{faq.a}</p>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             </Reveal>
           ))}
@@ -630,23 +730,31 @@ function FAQ() {
 
 function CTA() {
   return (
-    <section className="px-6 py-28">
+    <section className="relative px-6 py-28 overflow-hidden">
+      {/* Shimmer background */}
+      <div className="cta-shimmer absolute inset-0" />
+      {/* Subtle radial gradient */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(30,144,255,0.04)_0%,transparent_70%)]" />
+
       <Reveal>
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="relative mx-auto max-w-3xl text-center">
           <h2
             className="mb-6 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-5xl"
             style={{ fontFamily: "var(--font-montserrat), sans-serif" }}
           >
             Your next opportunity
             <br />
-            starts here.
+            starts{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              here
+            </span>.
           </h2>
           <p className="mb-10 text-lg text-slate-500">
             Join thousands of job seekers who build their resumes with easyATS.
           </p>
           <Link
-            href="/builder"
-            className="group inline-flex items-center gap-2 rounded-xl bg-slate-900 px-8 py-4 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:bg-slate-800 hover:shadow-xl"
+            href="/dashboard"
+            className="btn-primary group inline-flex items-center gap-2 rounded-xl bg-slate-900 px-8 py-4 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:bg-slate-800 hover:shadow-xl hover:scale-[1.02]"
           >
             Build Your Resume
             <svg
@@ -671,7 +779,7 @@ function Footer() {
         <Logo />
         <p className="text-sm text-slate-400">© 2025 easyATS. All rights reserved.</p>
         <a
-          href="https://github.com"
+          href="https://github.com/kutluyigitturk/ats-resume-builder"
           target="_blank"
           rel="noopener noreferrer"
           className="text-slate-400 transition-colors hover:text-slate-600"

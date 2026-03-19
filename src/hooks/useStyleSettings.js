@@ -4,9 +4,10 @@ import { useCallback } from "react";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { defaultStyleSettings } from "@/data/styleDefaults";
 
-export default function useStyleSettings() {
+export default function useStyleSettings(resumeId) {
+  const storageKey = resumeId ? `cv-${resumeId}-styleSettings` : "cv-builder-styleSettings";
   const [styleSettings, setStyleSettings] = useLocalStorage(
-    "cv-builder-styleSettings",
+    storageKey,
     defaultStyleSettings
   );
 

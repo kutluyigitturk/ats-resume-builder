@@ -34,8 +34,10 @@ function resolveItemIndex(items, itemIdentifier) {
 }
 
 // Central CV state management hook with localStorage persistence
-export default function useCVData() {
-  const [cv, setCv] = useLocalStorage("cv-builder-cvData", initialCV);
+// Accepts optional resumeId for multi-CV support
+export default function useCVData(resumeId) {
+  const storageKey = resumeId ? `cv-${resumeId}-cvData` : "cv-builder-cvData";
+  const [cv, setCv] = useLocalStorage(storageKey, initialCV);
 
   const updateField = (field, value) => {
     setCv((prev) => ({ ...prev, [field]: value }));

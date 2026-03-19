@@ -5,9 +5,10 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { buildPdfHtml } from "@/lib/pdfHtmlBuilder";
 
 // Handles PDF name editing, generation and download
-export default function usePdfExport(cv, hideReferences, styleSettings, templateId) {
+export default function usePdfExport(cv, hideReferences, styleSettings, templateId, resumeId) {
   const [downloading, setDownloading] = useState(false);
-  const [pdfName, setPdfName] = useLocalStorage("cv-builder-pdfName", "Untitled_CV");
+  const pdfStorageKey = resumeId ? `cv-${resumeId}-pdfName` : "cv-builder-pdfName";
+  const [pdfName, setPdfName] = useLocalStorage(pdfStorageKey, "Untitled_CV");
   const [editingName, setEditingName] = useState(false);
 
   const handleDownloadPDF = async () => {
