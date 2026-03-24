@@ -199,6 +199,7 @@ function BuilderInner() {
             updateStyle={updateStyle}
             reorderSections={reorderSections}
             onBack={() => setBuilderMode("editor")}
+            cv={cv}
           />
         )}
       </div>

@@ -11,6 +11,7 @@ export default function LayoutStylePanel({
   updateStyle,
   reorderSections,
   onBack,
+  cv,
 }) {
   return (
     <div>
@@ -40,6 +41,7 @@ export default function LayoutStylePanel({
       <ReorderSections
         sectionOrder={styleSettings.sectionOrder}
         onReorder={reorderSections}
+        cv={cv}
       />
 
       <MarginsSpacingSection

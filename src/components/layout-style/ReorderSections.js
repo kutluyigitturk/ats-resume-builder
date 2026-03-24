@@ -50,9 +50,25 @@ const sectionIcons = {
   languages: LanguagesIcon,
 };
 
+function isSectionEmpty(cv, sectionId) {
+  if (!cv) return false;
+  const map = {
+    summary: () => !(cv.summary && cv.summary.trim()),
+    experience: () => !(cv.experiences && cv.experiences.some(e => e.company?.trim() || e.position?.trim())),
+    education: () => !(cv.education && cv.education.some(e => e.school?.trim() || e.degree?.trim())),
+    skills: () => !(cv.skills && cv.skills.some(s => s.category?.trim() || s.items?.trim())),
+    projects: () => !(cv.projects && cv.projects.some(p => p.name?.trim())),
+    volunteering: () => !(cv.volunteering && cv.volunteering.some(v => v.organization?.trim() || v.role?.trim())),
+    certifications: () => !(cv.certifications && cv.certifications.some(c => c.name?.trim() || c.institution?.trim())),
+    languages: () => !(cv.languages && cv.languages.some(l => l.language?.trim())),
+    references: () => !(cv.references && cv.references.some(r => r.name?.trim())),
+  };
+  return map[sectionId] ? map[sectionId]() : false;
+}
+
 /* ─── Sortable Item ──────────────────────────────── */
 
-function SortableItem({ id }) {
+function SortableItem({ id, isEmpty }) {
   const section = sectionDefinitions.find((s) => s.id === id);
   const {
     attributes,
@@ -84,10 +100,10 @@ function SortableItem({ id }) {
       <span className="text-gray-400">
         <ListOrderedIcon size={16} />
       </span>
-      <span style={{ color: "rgb(37, 99, 235)" }}>
+      <span style={{ color: "rgb(37, 99, 235)" }} className={isEmpty ? "opacity-40" : ""}>
         {sectionIcons[id] && React.createElement(sectionIcons[id], { size: 18 })}
       </span>
-      <span className="text-sm font-medium text-gray-700 select-none">
+      <span className={`text-sm font-medium select-none ${isEmpty ? "text-gray-400" : "text-gray-700"}`}>
         {section?.label || id}
       </span>
     </div>
@@ -110,7 +126,7 @@ function FixedItem() {
 
 /* ─── Main Component ─────────────────────────────── */
 
-export default function ReorderSections({ sectionOrder, onReorder }) {
+export default function ReorderSections({ sectionOrder, onReorder, cv }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
@@ -161,7 +177,7 @@ export default function ReorderSections({ sectionOrder, onReorder }) {
             strategy={verticalListSortingStrategy}
           >
             {sectionOrder.map((id) => (
-              <SortableItem key={id} id={id} />
+              <SortableItem key={id} id={id} isEmpty={isSectionEmpty(cv, id)} />
             ))}
           </SortableContext>
         </DndContext>
