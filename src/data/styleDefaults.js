@@ -101,4 +101,6 @@ export const defaultStyleSettings = {
   betweenSections: 14,
   betweenTitleContent: 6,
   betweenContentBlocks: 10,
+  // Pagination
+  keepItemsTogether: false,
 };

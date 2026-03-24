@@ -134,6 +134,39 @@ export default function MarginsSpacingSection({ styleSettings, updateStyle }) {
             onChange={(v) => updateStyle("betweenContentBlocks", v)}
           />
         </div>
+
+        {/* Page Break Behavior */}
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
+            Page Breaks
+          </p>
+          <label className="flex items-center justify-between gap-3 cursor-pointer rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:bg-gray-50">
+            <div>
+              <span className="text-sm font-medium text-gray-800">Keep items together</span>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {styleSettings.keepItemsTogether
+                  ? "Entire entries stay on the same page"
+                  : "Bullet points can flow across pages"
+                }
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={styleSettings.keepItemsTogether}
+              onClick={() => updateStyle("keepItemsTogether", !styleSettings.keepItemsTogether)}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
+                styleSettings.keepItemsTogether ? "bg-blue-600" : "bg-gray-300"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                  styleSettings.keepItemsTogether ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </label>
+        </div>
       </div>
     </div>
   );

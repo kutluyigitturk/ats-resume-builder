@@ -113,7 +113,7 @@ function buildSummaryBlocks(cv, styles, isFirst) {
   ];
 }
 
-function buildExperienceBlocks(cv, styles, isFirst) {
+function buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether) {
   const visible = (cv.experiences || []).filter(
     (e) => hasValue(e.company) || hasValue(e.position)
   );
@@ -131,38 +131,84 @@ function buildExperienceBlocks(cv, styles, isFirst) {
   visible.forEach((exp, i) => {
     const visibleBullets = (exp.bullets || []).filter((b) => hasValue(b));
 
-    blocks.push({
-      key: `exp-${exp.id ?? i}`,
-      type: "item",
-      element: (
-        <div style={{ marginBottom: styles.blockGap }}>
-          <div style={styles.itemHeader}>
-            <span>{exp.company}</span>
-            <span style={styles.itemDate}>
-              {formatDateRange(exp.startDate, exp.endDate)}
-            </span>
+    if (keepTogether || visibleBullets.length <= 1) {
+      // Keep entire item as one block (original behavior)
+      blocks.push({
+        key: `exp-${exp.id ?? i}`,
+        type: "item",
+        element: (
+          <div style={{ marginBottom: styles.blockGap }}>
+            <div style={styles.itemHeader}>
+              <span>{exp.company}</span>
+              <span style={styles.itemDate}>
+                {formatDateRange(exp.startDate, exp.endDate)}
+              </span>
+            </div>
+
+            {(hasValue(exp.position) || hasValue(exp.location)) && (
+              <p style={styles.itemSubtitle}>
+                {exp.position}
+                {hasValue(exp.position) && hasValue(exp.location) ? " | " : ""}
+                {exp.location}
+              </p>
+            )}
+
+            {visibleBullets.length > 0 && (
+              <ul style={styles.bulletList}>
+                {visibleBullets.map((bullet, j) => (
+                  <li key={j} style={styles.bulletItem}>
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+        ),
+      });
+    } else {
+      // Split: header + first bullet together, remaining bullets separate
+      blocks.push({
+        key: `exp-${exp.id ?? i}-start`,
+        type: "item-start",
+        element: (
+          <div>
+            <div style={styles.itemHeader}>
+              <span>{exp.company}</span>
+              <span style={styles.itemDate}>
+                {formatDateRange(exp.startDate, exp.endDate)}
+              </span>
+            </div>
 
-          {(hasValue(exp.position) || hasValue(exp.location)) && (
-            <p style={styles.itemSubtitle}>
-              {exp.position}
-              {hasValue(exp.position) && hasValue(exp.location) ? " | " : ""}
-              {exp.location}
-            </p>
-          )}
+            {(hasValue(exp.position) || hasValue(exp.location)) && (
+              <p style={styles.itemSubtitle}>
+                {exp.position}
+                {hasValue(exp.position) && hasValue(exp.location) ? " | " : ""}
+                {exp.location}
+              </p>
+            )}
 
-          {visibleBullets.length > 0 && (
             <ul style={styles.bulletList}>
-              {visibleBullets.map((bullet, j) => (
-                <li key={j} style={styles.bulletItem}>
-                  {bullet}
-                </li>
-              ))}
+              <li style={styles.bulletItem}>{visibleBullets[0]}</li>
             </ul>
-          )}
-        </div>
-      ),
-    });
+          </div>
+        ),
+      });
+
+      visibleBullets.slice(1).forEach((bullet, j) => {
+        const isLast = j === visibleBullets.length - 2;
+        blocks.push({
+          key: `exp-${exp.id ?? i}-bullet-${j + 1}`,
+          type: "item-bullet",
+          element: (
+            <div style={isLast ? { marginBottom: styles.blockGap } : undefined}>
+              <ul style={{ ...styles.bulletList, marginTop: 0 }}>
+                <li style={styles.bulletItem}>{bullet}</li>
+              </ul>
+            </div>
+          ),
+        });
+      });
+    }
   });
 
   return blocks;
@@ -271,7 +317,7 @@ function buildSkillsBlocks(cv, styles, isFirst) {
   return blocks;
 }
 
-function buildProjectsBlocks(cv, styles, isFirst, templateId) {
+function buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether) {
   const visible = (cv.projects || []).filter((p) => hasValue(p.name));
   if (visible.length === 0) return [];
 
@@ -287,49 +333,98 @@ function buildProjectsBlocks(cv, styles, isFirst, templateId) {
   visible.forEach((project, i) => {
     const visibleBullets = (project.bullets || []).filter((b) => hasValue(b));
 
-    blocks.push({
-      key: `project-${project.id ?? i}`,
-      type: "item",
-      element: (
-        <div style={{ marginBottom: styles.blockGap }}>
-          <div style={styles.itemHeader}>
-            <span>{project.name}</span>
-            <span style={styles.itemDate}>
-              {formatDateRange(project.startDate, project.endDate)}
-            </span>
+    if (keepTogether || visibleBullets.length <= 1) {
+      blocks.push({
+        key: `project-${project.id ?? i}`,
+        type: "item",
+        element: (
+          <div style={{ marginBottom: styles.blockGap }}>
+            <div style={styles.itemHeader}>
+              <span>{project.name}</span>
+              <span style={styles.itemDate}>
+                {formatDateRange(project.startDate, project.endDate)}
+              </span>
+            </div>
+
+            {templateId === "advanced" && hasValue(project.url) && (
+              <p
+                style={{
+                  fontFamily: styles.page.fontFamily,
+                  fontSize: "9.5pt",
+                  color: "#555",
+                  marginBottom: "4px",
+                }}
+              >
+                {project.url}
+              </p>
+            )}
+
+            {visibleBullets.length > 0 && (
+              <ul style={styles.bulletList}>
+                {visibleBullets.map((bullet, j) => (
+                  <li key={j} style={styles.bulletItem}>
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+        ),
+      });
+    } else {
+      blocks.push({
+        key: `project-${project.id ?? i}-start`,
+        type: "item-start",
+        element: (
+          <div>
+            <div style={styles.itemHeader}>
+              <span>{project.name}</span>
+              <span style={styles.itemDate}>
+                {formatDateRange(project.startDate, project.endDate)}
+              </span>
+            </div>
 
-          {templateId === "advanced" && hasValue(project.url) && (
-            <p
-              style={{
-                fontFamily: styles.page.fontFamily,
-                fontSize: "9.5pt",
-                color: "#555",
-                marginBottom: "4px",
-              }}
-            >
-              {project.url}
-            </p>
-          )}
+            {templateId === "advanced" && hasValue(project.url) && (
+              <p
+                style={{
+                  fontFamily: styles.page.fontFamily,
+                  fontSize: "9.5pt",
+                  color: "#555",
+                  marginBottom: "4px",
+                }}
+              >
+                {project.url}
+              </p>
+            )}
 
-          {visibleBullets.length > 0 && (
             <ul style={styles.bulletList}>
-              {visibleBullets.map((bullet, j) => (
-                <li key={j} style={styles.bulletItem}>
-                  {bullet}
-                </li>
-              ))}
+              <li style={styles.bulletItem}>{visibleBullets[0]}</li>
             </ul>
-          )}
-        </div>
-      ),
-    });
+          </div>
+        ),
+      });
+
+      visibleBullets.slice(1).forEach((bullet, j) => {
+        const isLast = j === visibleBullets.length - 2;
+        blocks.push({
+          key: `project-${project.id ?? i}-bullet-${j + 1}`,
+          type: "item-bullet",
+          element: (
+            <div style={isLast ? { marginBottom: styles.blockGap } : undefined}>
+              <ul style={{ ...styles.bulletList, marginTop: 0 }}>
+                <li style={styles.bulletItem}>{bullet}</li>
+              </ul>
+            </div>
+          ),
+        });
+      });
+    }
   });
 
   return blocks;
 }
 
-function buildVolunteeringBlocks(cv, styles, isFirst) {
+function buildVolunteeringBlocks(cv, styles, isFirst, keepTogether) {
   const visible = (cv.volunteering || []).filter(
     (item) => hasValue(item.organization) || hasValue(item.role)
   );
@@ -347,38 +442,82 @@ function buildVolunteeringBlocks(cv, styles, isFirst) {
   visible.forEach((item, i) => {
     const visibleBullets = (item.bullets || []).filter((b) => hasValue(b));
 
-    blocks.push({
-      key: `vol-${item.id ?? i}`,
-      type: "item",
-      element: (
-        <div style={{ marginBottom: styles.blockGap }}>
-          <div style={styles.itemHeader}>
-            <span>{item.organization}</span>
-            <span style={styles.itemDate}>
-              {formatDateRange(item.startDate, item.endDate)}
-            </span>
+    if (keepTogether || visibleBullets.length <= 1) {
+      blocks.push({
+        key: `vol-${item.id ?? i}`,
+        type: "item",
+        element: (
+          <div style={{ marginBottom: styles.blockGap }}>
+            <div style={styles.itemHeader}>
+              <span>{item.organization}</span>
+              <span style={styles.itemDate}>
+                {formatDateRange(item.startDate, item.endDate)}
+              </span>
+            </div>
+
+            {(hasValue(item.role) || hasValue(item.location)) && (
+              <p style={styles.itemSubtitle}>
+                {item.role}
+                {hasValue(item.role) && hasValue(item.location) ? " | " : ""}
+                {item.location}
+              </p>
+            )}
+
+            {visibleBullets.length > 0 && (
+              <ul style={styles.bulletList}>
+                {visibleBullets.map((bullet, j) => (
+                  <li key={j} style={styles.bulletItem}>
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+        ),
+      });
+    } else {
+      blocks.push({
+        key: `vol-${item.id ?? i}-start`,
+        type: "item-start",
+        element: (
+          <div>
+            <div style={styles.itemHeader}>
+              <span>{item.organization}</span>
+              <span style={styles.itemDate}>
+                {formatDateRange(item.startDate, item.endDate)}
+              </span>
+            </div>
 
-          {(hasValue(item.role) || hasValue(item.location)) && (
-            <p style={styles.itemSubtitle}>
-              {item.role}
-              {hasValue(item.role) && hasValue(item.location) ? " | " : ""}
-              {item.location}
-            </p>
-          )}
+            {(hasValue(item.role) || hasValue(item.location)) && (
+              <p style={styles.itemSubtitle}>
+                {item.role}
+                {hasValue(item.role) && hasValue(item.location) ? " | " : ""}
+                {item.location}
+              </p>
+            )}
 
-          {visibleBullets.length > 0 && (
             <ul style={styles.bulletList}>
-              {visibleBullets.map((bullet, j) => (
-                <li key={j} style={styles.bulletItem}>
-                  {bullet}
-                </li>
-              ))}
+              <li style={styles.bulletItem}>{visibleBullets[0]}</li>
             </ul>
-          )}
-        </div>
-      ),
-    });
+          </div>
+        ),
+      });
+
+      visibleBullets.slice(1).forEach((bullet, j) => {
+        const isLast = j === visibleBullets.length - 2;
+        blocks.push({
+          key: `vol-${item.id ?? i}-bullet-${j + 1}`,
+          type: "item-bullet",
+          element: (
+            <div style={isLast ? { marginBottom: styles.blockGap } : undefined}>
+              <ul style={{ ...styles.bulletList, marginTop: 0 }}>
+                <li style={styles.bulletItem}>{bullet}</li>
+              </ul>
+            </div>
+          ),
+        });
+      });
+    }
   });
 
   return blocks;
@@ -539,11 +678,11 @@ function buildReferencesBlocks(cv, styles, isFirst, hideReferences) {
 
 const sectionBuilders = {
   summary: (cv, styles, isFirst) => buildSummaryBlocks(cv, styles, isFirst),
-  experience: (cv, styles, isFirst) => buildExperienceBlocks(cv, styles, isFirst),
+  experience: (cv, styles, isFirst, hideReferences, templateId, keepTogether) => buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether),
   education: (cv, styles, isFirst) => buildEducationBlocks(cv, styles, isFirst),
   skills: (cv, styles, isFirst) => buildSkillsBlocks(cv, styles, isFirst),
-  projects: (cv, styles, isFirst, hideReferences, templateId) => buildProjectsBlocks(cv, styles, isFirst, templateId),
-  volunteering: (cv, styles, isFirst) => buildVolunteeringBlocks(cv, styles, isFirst),
+  projects: (cv, styles, isFirst, hideReferences, templateId, keepTogether) => buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether),
+  volunteering: (cv, styles, isFirst, hideReferences, templateId, keepTogether) => buildVolunteeringBlocks(cv, styles, isFirst, keepTogether),
   certifications: (cv, styles, isFirst, hideReferences, templateId) => buildCertificationsBlocks(cv, styles, isFirst, templateId),
   languages: (cv, styles, isFirst) => buildLanguagesBlocks(cv, styles, isFirst),
   references: (cv, styles, isFirst, hideReferences) =>
@@ -552,7 +691,7 @@ const sectionBuilders = {
 
 /* ─── Block builder (order-aware) ────────────────── */
 
-function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "classic") {
+function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "classic", keepTogether = false) {
   const blocks = [];
 
   if (hasValue(cv.name) || hasValue(cv.title) || hasContactInfo(cv)) {
@@ -610,7 +749,7 @@ function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "cla
     const builder = sectionBuilders[sectionId];
     if (!builder) continue;
 
-    const sectionBlocks = builder(cv, styles, isFirstSection, hideReferences, templateId);
+    const sectionBlocks = builder(cv, styles, isFirstSection, hideReferences, templateId, keepTogether);
     if (sectionBlocks.length > 0) {
       blocks.push(...sectionBlocks);
       isFirstSection = false;
@@ -638,8 +777,11 @@ function paginateBlocks(heights, types, maxPageHeight) {
 
     if (currentPage.length > 0) {
       const lastIdx = currentPage[currentPage.length - 1];
+      const lastType = types[lastIdx];
 
-      if (types[lastIdx] === "section-header") {
+      // Only protect section-header from being alone at page bottom
+      // item-start already has content (header + first bullet) so it's fine to stay
+      if (lastType === "section-header") {
         currentPage.pop();
 
         if (currentPage.length > 0) pages.push([...currentPage]);
@@ -687,8 +829,8 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
   const rulerHeight = `${297 - 2 * settings.marginTopBottom}mm`;
 
   const blocks = useMemo(
-    () => buildBlocks(cv, hideReferences, resolvedStyles, settings.sectionOrder, templateId),
-    [cv, hideReferences, resolvedStyles, settings.sectionOrder, templateId]
+    () => buildBlocks(cv, hideReferences, resolvedStyles, settings.sectionOrder, templateId, settings.keepItemsTogether),
+    [cv, hideReferences, resolvedStyles, settings.sectionOrder, templateId, settings.keepItemsTogether]
   );
 
   useLayoutEffect(() => {

@@ -243,11 +243,17 @@ function buildDynamicCss(settings) {
       break-after: avoid;
     }
 
+    ${settings.keepItemsTogether ? `
     .mb-block,
     .mb-10,
     .mb-8 {
       break-inside: avoid;
     }
+    ` : `
+    .item-start-block {
+      break-inside: avoid;
+    }
+    `}
 
     @page {
       size: A4;
@@ -275,6 +281,8 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
   const sectionOrder =
     settings.sectionOrder || defaultStyleSettings.sectionOrder;
 
+  const keepTogether = settings.keepItemsTogether === true;
+
   const sectionBuilders = {
     summary: () =>
       summary
@@ -283,11 +291,11 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
           <div class="cv-summary">${summary}</div>
         `
         : "",
-    experience: () => buildExperienceHtml(cv.experiences || []),
+    experience: () => buildExperienceHtml(cv.experiences || [], keepTogether),
     education: () => buildEducationHtml(cv.education || []),
     skills: () => buildSkillsHtml(cv.skills || []),
-    projects: () => buildProjectsHtml(cv.projects || [], templateId),
-    volunteering: () => buildVolunteeringHtml(cv.volunteering || []),
+    projects: () => buildProjectsHtml(cv.projects || [], templateId, keepTogether),
+    volunteering: () => buildVolunteeringHtml(cv.volunteering || [], keepTogether),
     certifications: () => buildCertificationsHtml(cv.certifications || [], templateId),
     languages: () => buildLanguagesHtml(cv.languages || []),
     references: () => buildReferencesHtml(visibleReferences, hideReferences),
@@ -321,7 +329,7 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
 
 // ─── Section Builders ────────────────────────────────────────
 
-function buildExperienceHtml(experiences) {
+function buildExperienceHtml(experiences, keepTogether) {
   const filtered = experiences.filter(
     (exp) => hasValue(exp.company) || hasValue(exp.position)
   );
@@ -335,21 +343,39 @@ function buildExperienceHtml(experiences) {
         .map(escapeHtml)
         .join(" | ");
 
-      const bullets = (exp.bullets || [])
-        .filter(hasValue)
-        .map((b) => `<li>${escapeHtml(b)}</li>`)
-        .join("");
+      const bulletItems = (exp.bullets || []).filter(hasValue);
 
-      return `
-        <div class="mb-block">
-          <div class="item-header">
-            <span>${escapeHtml(exp.company || "")}</span>
-            <span class="item-date">${formatDateRange(exp.startDate, exp.endDate)}</span>
+      if (keepTogether || bulletItems.length <= 1) {
+        const bullets = bulletItems.map((b) => `<li>${escapeHtml(b)}</li>`).join("");
+        return `
+          <div class="mb-block">
+            <div class="item-header">
+              <span>${escapeHtml(exp.company || "")}</span>
+              <span class="item-date">${formatDateRange(exp.startDate, exp.endDate)}</span>
+            </div>
+            ${subtitle ? `<div class="item-subtitle">${subtitle}</div>` : ""}
+            ${bullets ? `<ul class="bullets">${bullets}</ul>` : ""}
           </div>
-          ${subtitle ? `<div class="item-subtitle">${subtitle}</div>` : ""}
-          ${bullets ? `<ul class="bullets">${bullets}</ul>` : ""}
-        </div>
-      `;
+        `;
+      } else {
+        const firstBullet = `<li>${escapeHtml(bulletItems[0])}</li>`;
+        const remainingBullets = bulletItems.slice(1).map((b, j) => {
+          const isLast = j === bulletItems.length - 2;
+          return `<div${isLast ? ' class="mb-block"' : ''}><ul class="bullets" style="margin-top:0">${`<li>${escapeHtml(b)}</li>`}</ul></div>`;
+        }).join("");
+
+        return `
+          <div class="item-start-block">
+            <div class="item-header">
+              <span>${escapeHtml(exp.company || "")}</span>
+              <span class="item-date">${formatDateRange(exp.startDate, exp.endDate)}</span>
+            </div>
+            ${subtitle ? `<div class="item-subtitle">${subtitle}</div>` : ""}
+            <ul class="bullets">${firstBullet}</ul>
+          </div>
+          ${remainingBullets}
+        `;
+      }
     })
     .join("");
 
@@ -414,37 +440,57 @@ function buildSkillsHtml(skills) {
   `;
 }
 
-function buildProjectsHtml(projects, templateId) {
+function buildProjectsHtml(projects, templateId, keepTogether) {
   const filtered = projects.filter((project) => hasValue(project.name));
 
   if (filtered.length === 0) return "";
 
   const items = filtered
     .map((project) => {
-      const bullets = (project.bullets || [])
-        .filter(hasValue)
-        .map((b) => `<li>${escapeHtml(b)}</li>`)
-        .join("");
+      const bulletItems = (project.bullets || []).filter(hasValue);
 
-      return `
-        <div class="mb-block">
-          <div class="item-header">
-            <span>${escapeHtml(project.name || "")}</span>
-            <span class="item-date">${formatDateRange(project.startDate, project.endDate)}</span>
+      if (keepTogether || bulletItems.length <= 1) {
+        const bullets = bulletItems.map((b) => `<li>${escapeHtml(b)}</li>`).join("");
+        return `
+          <div class="mb-block">
+            <div class="item-header">
+              <span>${escapeHtml(project.name || "")}</span>
+              <span class="item-date">${formatDateRange(project.startDate, project.endDate)}</span>
+            </div>
+            ${templateId === "advanced" && hasValue(project.url)
+              ? `<div class="item-meta">${escapeHtml(project.url)}</div>`
+              : ""}
+            ${bullets ? `<ul class="bullets">${bullets}</ul>` : ""}
           </div>
-          ${templateId === "advanced" && hasValue(project.url)
-            ? `<div class="item-meta">${escapeHtml(project.url)}</div>`
-            : ""}
-          ${bullets ? `<ul class="bullets">${bullets}</ul>` : ""}
-        </div>
-      `;
+        `;
+      } else {
+        const firstBullet = `<li>${escapeHtml(bulletItems[0])}</li>`;
+        const remainingBullets = bulletItems.slice(1).map((b, j) => {
+          const isLast = j === bulletItems.length - 2;
+          return `<div${isLast ? ' class="mb-block"' : ''}><ul class="bullets" style="margin-top:0">${`<li>${escapeHtml(b)}</li>`}</ul></div>`;
+        }).join("");
+
+        return `
+          <div class="item-start-block">
+            <div class="item-header">
+              <span>${escapeHtml(project.name || "")}</span>
+              <span class="item-date">${formatDateRange(project.startDate, project.endDate)}</span>
+            </div>
+            ${templateId === "advanced" && hasValue(project.url)
+              ? `<div class="item-meta">${escapeHtml(project.url)}</div>`
+              : ""}
+            <ul class="bullets">${firstBullet}</ul>
+          </div>
+          ${remainingBullets}
+        `;
+      }
     })
     .join("");
 
   return `<div class="cv-section-title">Technical Projects and Research</div>${items}`;
 }
 
-function buildVolunteeringHtml(volunteering) {
+function buildVolunteeringHtml(volunteering, keepTogether) {
   const filtered = volunteering.filter(
     (item) => hasValue(item.organization) || hasValue(item.role)
   );
@@ -458,21 +504,39 @@ function buildVolunteeringHtml(volunteering) {
         .map(escapeHtml)
         .join(" | ");
 
-      const bullets = (item.bullets || [])
-        .filter(hasValue)
-        .map((b) => `<li>${escapeHtml(b)}</li>`)
-        .join("");
+      const bulletItems = (item.bullets || []).filter(hasValue);
 
-      return `
-        <div class="mb-block">
-          <div class="item-header">
-            <span>${escapeHtml(item.organization || "")}</span>
-            <span class="item-date">${formatDateRange(item.startDate, item.endDate)}</span>
+      if (keepTogether || bulletItems.length <= 1) {
+        const bullets = bulletItems.map((b) => `<li>${escapeHtml(b)}</li>`).join("");
+        return `
+          <div class="mb-block">
+            <div class="item-header">
+              <span>${escapeHtml(item.organization || "")}</span>
+              <span class="item-date">${formatDateRange(item.startDate, item.endDate)}</span>
+            </div>
+            ${subtitle ? `<div class="item-subtitle">${subtitle}</div>` : ""}
+            ${bullets ? `<ul class="bullets">${bullets}</ul>` : ""}
           </div>
-          ${subtitle ? `<div class="item-subtitle">${subtitle}</div>` : ""}
-          ${bullets ? `<ul class="bullets">${bullets}</ul>` : ""}
-        </div>
-      `;
+        `;
+      } else {
+        const firstBullet = `<li>${escapeHtml(bulletItems[0])}</li>`;
+        const remainingBullets = bulletItems.slice(1).map((b, j) => {
+          const isLast = j === bulletItems.length - 2;
+          return `<div${isLast ? ' class="mb-block"' : ''}><ul class="bullets" style="margin-top:0">${`<li>${escapeHtml(b)}</li>`}</ul></div>`;
+        }).join("");
+
+        return `
+          <div class="item-start-block">
+            <div class="item-header">
+              <span>${escapeHtml(item.organization || "")}</span>
+              <span class="item-date">${formatDateRange(item.startDate, item.endDate)}</span>
+            </div>
+            ${subtitle ? `<div class="item-subtitle">${subtitle}</div>` : ""}
+            <ul class="bullets">${firstBullet}</ul>
+          </div>
+          ${remainingBullets}
+        `;
+      }
     })
     .join("");
 
