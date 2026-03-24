@@ -16,9 +16,10 @@ function hasContactInfo(cv) {
 }
 
 function formatContact(cv) {
-  return [cv.phone, cv.email, cv.location, cv.linkedin, cv.website]
-    .filter(hasValue)
-    .join(" | ");
+  const parts = [cv.phone, cv.email, cv.location].filter(hasValue);
+  if (hasValue(cv.linkedin)) parts.push("LinkedIn");
+  if (hasValue(cv.website)) parts.push("Portfolio");
+  return parts.join(" | ");
 }
 
 function getVisibleReferences(refs) {

@@ -268,13 +268,11 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
 
   const name = escapeHtml(cv.name || "");
   const title = escapeHtml(cv.title || "");
-  const contact = joinContact([
-    cv.phone,
-    cv.email,
-    cv.location,
-    cv.linkedin,
-    cv.website,
-  ]);
+  const contactParts = [cv.phone, cv.email, cv.location].filter(hasValue).map(escapeHtml);
+  if (hasValue(cv.linkedin)) contactParts.push(`<a href="${escapeHtml(cv.linkedin.startsWith('http') ? cv.linkedin : 'https://' + cv.linkedin)}" style="color:#333;text-decoration:none;">LinkedIn</a>`);
+  if (hasValue(cv.website)) contactParts.push(`<a href="${escapeHtml(cv.website.startsWith('http') ? cv.website : 'https://' + cv.website)}" style="color:#333;text-decoration:none;">Portfolio</a>`);
+  const contact = contactParts.join(" | ");
+
   const hasContact = hasValue(cv.email) || hasValue(cv.phone) || hasValue(cv.location) || hasValue(cv.linkedin) || hasValue(cv.website);
   const summary = escapeHtml(cv.summary || "");
   const visibleReferences = getVisibleReferences(cv.references || []);
