@@ -4,11 +4,12 @@ import { useState, useEffect, useRef } from "react";
 import { templates } from "@/data/templates";
 import { defaultStyleSettings } from "@/data/styleDefaults";
 import initialCV from "@/data/initialCV";
+import sampleCV from "@/data/sampleCV";
 import CVPreview from "@/components/cv-preview/CVPreview";
 
 /* ─── Mini Preview ───────────────────────────────── */
 
-function MiniPreview({ cv, hideReferences, styleSettings, isSelected }) {
+function MiniPreview({ cv, hideReferences, styleSettings, isSelected, templateId }) {
   return (
     <div
       className={`relative overflow-hidden rounded-lg transition-shadow duration-200 ${
@@ -40,6 +41,7 @@ function MiniPreview({ cv, hideReferences, styleSettings, isSelected }) {
           cv={cv}
           hideReferences={hideReferences}
           styleSettings={styleSettings}
+          templateId={templateId}
         />
       </div>
     </div>
@@ -124,8 +126,13 @@ function TemplateCard({
         <MiniPreview
           cv={cv}
           hideReferences={hideReferences}
-          styleSettings={styleSettings}
+          styleSettings={{
+            ...styleSettings,
+            primaryFont: template.defaultPrimaryFont,
+            secondaryFont: template.defaultSecondaryFont,
+          }}
           isSelected={isSelected}
+          templateId={template.id}
         />
       </div>
 
@@ -167,8 +174,16 @@ export default function TemplateModal({
 
   const isCreateMode = mode === "create";
 
-  // Use provided CV data or fallback to initialCV for create mode
-  const previewCv = cv || initialCV;
+  // Check if CV has any real content
+  const hasContent = cv && (
+    cv.name?.trim() || cv.email?.trim() || cv.summary?.trim() ||
+    cv.experiences?.some(e => e.company?.trim() || e.position?.trim()) ||
+    cv.education?.some(e => e.school?.trim() || e.degree?.trim()) ||
+    cv.skills?.some(s => s.category?.trim() || s.items?.trim())
+  );
+
+  // Use sample data for empty CVs or create mode without data
+  const previewCv = hasContent ? cv : sampleCV;
   const previewStyle = styleSettings || defaultStyleSettings;
 
   useEffect(() => {
