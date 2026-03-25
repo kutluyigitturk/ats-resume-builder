@@ -35,21 +35,23 @@ export default function LayoutStylePanel({
         </div>
       </div>
 
-      <FormattingSection
-        styleSettings={styleSettings}
-        updateStyle={updateStyle}
-      />
+      <div>
+        <FormattingSection
+          styleSettings={styleSettings}
+          updateStyle={updateStyle}
+        />
 
-      <ReorderSections
-        sectionOrder={styleSettings.sectionOrder}
-        onReorder={reorderSections}
-        cv={cv}
-      />
+        <ReorderSections
+          sectionOrder={styleSettings.sectionOrder}
+          onReorder={reorderSections}
+          cv={cv}
+        />
 
-      <MarginsSpacingSection
-        styleSettings={styleSettings}
-        updateStyle={updateStyle}
-      />
+        <MarginsSpacingSection
+          styleSettings={styleSettings}
+          updateStyle={updateStyle}
+        />
+      </div>
     </div>
   );
 }
