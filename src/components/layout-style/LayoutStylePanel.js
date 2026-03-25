@@ -35,7 +35,7 @@ export default function LayoutStylePanel({
         </div>
       </div>
 
-      <div>
+      <div className="-mt-1.5">
         <FormattingSection
           styleSettings={styleSettings}
           updateStyle={updateStyle}
