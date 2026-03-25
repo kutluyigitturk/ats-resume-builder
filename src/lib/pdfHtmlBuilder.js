@@ -442,7 +442,7 @@ function buildSkillsHtml(skills, templateId) {
         const skillItems = escapeHtml(skill.items || "");
         return `<div style="margin-bottom:4px">${
           category ? `<strong>${category}</strong>` : ""
-        }${category && skillItems ? "  " : ""}${skillItems}</div>`;
+        }${category && skillItems ? ": " : ""}${skillItems}</div>`;
       })
       .join("");
 

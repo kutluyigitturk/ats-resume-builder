@@ -315,7 +315,7 @@ function buildSkillsBlocks(cv, styles, isFirst, hideReferences, templateId) {
             }}
           >
             {hasValue(skill.category) && <strong>{skill.category}</strong>}
-            {hasValue(skill.category) && hasValue(skill.items) ? "  " : ""}
+            {hasValue(skill.category) && hasValue(skill.items) ? ": " : ""}
             {skill.items}
           </div>
         ),
