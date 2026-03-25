@@ -140,7 +140,7 @@ function TemplateCard({
             isSelected ? "text-blue-600" : "text-slate-400"
           }`}
         >
-          Default font: {template.defaultFont}, sans-serif
+          Default font: {template.defaultPrimaryFont}{template.defaultPrimaryFont !== template.defaultSecondaryFont ? ` / ${template.defaultSecondaryFont}` : ""}
         </span>
       </div>
     </button>

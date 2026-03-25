@@ -42,7 +42,7 @@ function resolveFontFamily(fontName) {
 
 /* ─── Build resolved styles from base + settings ─── */
 
-function buildResolvedStyles(settings) {
+function buildResolvedStyles(settings, templateId) {
   const headingFont = resolveFontFamily(settings.primaryFont);
   const bodyFont = resolveFontFamily(settings.secondaryFont);
   const headingSize = `${settings.headingSize}pt`;
@@ -51,6 +51,9 @@ function buildResolvedStyles(settings) {
   const sectionGap = `${settings.betweenSections}pt`;
   const titleGap = `${settings.betweenTitleContent}pt`;
   const blockGap = `${settings.betweenContentBlocks}pt`;
+
+  const isProfessional = templateId === "professional";
+  const sectionTitleExtra = isProfessional ? { letterSpacing: "2px" } : {};
 
   return {
     page: {
@@ -70,12 +73,14 @@ function buildResolvedStyles(settings) {
       fontSize: headingSize,
       marginTop: sectionGap,
       marginBottom: titleGap,
+      ...sectionTitleExtra,
     },
     sectionTitleFirst: {
       ...cvStyles.sectionTitleFirst,
       fontFamily: headingFont,
       fontSize: headingSize,
       marginBottom: titleGap,
+      ...sectionTitleExtra,
     },
     summary: { ...cvStyles.summary, fontFamily: bodyFont, fontSize: bodySize },
     itemHeader: { ...cvStyles.itemHeader, fontFamily: headingFont },
@@ -277,7 +282,7 @@ function buildEducationBlocks(cv, styles, isFirst) {
   return blocks;
 }
 
-function buildSkillsBlocks(cv, styles, isFirst) {
+function buildSkillsBlocks(cv, styles, isFirst, hideReferences, templateId) {
   const visible = (cv.skills || []).filter(
     (s) => hasValue(s.category) || hasValue(s.items)
   );
@@ -292,28 +297,52 @@ function buildSkillsBlocks(cv, styles, isFirst) {
     },
   ];
 
-  visible.forEach((skill, i) => {
-    blocks.push({
-      key: `skill-${skill.id ?? i}`,
-      type: "item",
-      element: (
-        <div
-          style={{
-            paddingLeft: "18px",
-            fontFamily: styles.page.fontFamily,
-            fontSize: styles.page.fontSize,
-            position: "relative",
-            marginBottom: "4px",
-          }}
-        >
-          <span style={{ position: "absolute", left: "4px" }}>•</span>
-          {hasValue(skill.category) && <strong>{skill.category}</strong>}
-          {hasValue(skill.category) && hasValue(skill.items) ? ": " : ""}
-          {skill.items}
-        </div>
-      ),
+  if (templateId === "professional") {
+    // Professional: inline format — "Category  skill1, skill2, skill3"
+    visible.forEach((skill, i) => {
+      blocks.push({
+        key: `skill-${skill.id ?? i}`,
+        type: "item",
+        element: (
+          <div
+            style={{
+              fontFamily: styles.page.fontFamily,
+              fontSize: styles.page.fontSize,
+              marginBottom: "4px",
+            }}
+          >
+            {hasValue(skill.category) && <strong>{skill.category}</strong>}
+            {hasValue(skill.category) && hasValue(skill.items) ? "  " : ""}
+            {skill.items}
+          </div>
+        ),
+      });
     });
-  });
+  } else {
+    // Classic & Advanced: bullet format
+    visible.forEach((skill, i) => {
+      blocks.push({
+        key: `skill-${skill.id ?? i}`,
+        type: "item",
+        element: (
+          <div
+            style={{
+              paddingLeft: "18px",
+              fontFamily: styles.page.fontFamily,
+              fontSize: styles.page.fontSize,
+              position: "relative",
+              marginBottom: "4px",
+            }}
+          >
+            <span style={{ position: "absolute", left: "4px" }}>•</span>
+            {hasValue(skill.category) && <strong>{skill.category}</strong>}
+            {hasValue(skill.category) && hasValue(skill.items) ? ": " : ""}
+            {skill.items}
+          </div>
+        ),
+      });
+    });
+  }
 
   return blocks;
 }
@@ -681,7 +710,7 @@ const sectionBuilders = {
   summary: (cv, styles, isFirst) => buildSummaryBlocks(cv, styles, isFirst),
   experience: (cv, styles, isFirst, hideReferences, templateId, keepTogether) => buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether),
   education: (cv, styles, isFirst) => buildEducationBlocks(cv, styles, isFirst),
-  skills: (cv, styles, isFirst) => buildSkillsBlocks(cv, styles, isFirst),
+  skills: (cv, styles, isFirst, hideReferences, templateId) => buildSkillsBlocks(cv, styles, isFirst, hideReferences, templateId),
   projects: (cv, styles, isFirst, hideReferences, templateId, keepTogether) => buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether),
   volunteering: (cv, styles, isFirst, hideReferences, templateId, keepTogether) => buildVolunteeringBlocks(cv, styles, isFirst, keepTogether),
   certifications: (cv, styles, isFirst, hideReferences, templateId) => buildCertificationsBlocks(cv, styles, isFirst, templateId),
@@ -696,13 +725,29 @@ function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "cla
   const blocks = [];
 
   if (hasValue(cv.name) || hasValue(cv.title) || hasContactInfo(cv)) {
+    const isProfessional = templateId === "professional";
+
     blocks.push({
       key: "personal",
       type: "personal",
       element: (
         <>
-          {hasValue(cv.name) && <h1 style={styles.name}>{cv.name}</h1>}
-          {hasValue(cv.title) && <p style={styles.title}>{cv.title}</p>}
+          {hasValue(cv.name) && (
+            <h1 style={{
+              ...styles.name,
+              ...(isProfessional ? { textTransform: "uppercase", letterSpacing: "3px", fontSize: "20pt" } : {}),
+            }}>
+              {cv.name}
+            </h1>
+          )}
+          {hasValue(cv.title) && (
+            <p style={{
+              ...styles.title,
+              ...(isProfessional ? { textTransform: "uppercase", letterSpacing: "1.5px", fontSize: "10pt" } : {}),
+            }}>
+              {cv.title}
+            </p>
+          )}
           {hasContactInfo(cv) && (
             <>
               {templateId === "advanced" ? (
@@ -812,7 +857,7 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
   const [pageGroups, setPageGroups] = useState(null);
 
   const settings = styleSettings || defaultStyleSettings;
-  const resolvedStyles = useMemo(() => buildResolvedStyles(settings), [settings]);
+  const resolvedStyles = useMemo(() => buildResolvedStyles(settings, templateId), [settings, templateId]);
 
   const pageBaseStyle = useMemo(
     () => ({

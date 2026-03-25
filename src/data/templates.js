@@ -7,7 +7,8 @@ export const templates = [
     name: "Classic",
     description: "Traditional single-column format trusted by recruiters worldwide.",
     badges: ["ATS-Friendly", "Single Column"],
-    defaultFont: "Inter",
+    defaultPrimaryFont: "Inter",
+    defaultSecondaryFont: "Inter",
     features: {
       projectUrl: false,
       certificationUrl: false,
@@ -18,7 +19,20 @@ export const templates = [
     name: "Advanced",
     description: "Enhanced layout with additional detail fields for experienced professionals.",
     badges: ["ATS-Friendly", "Detailed"],
-    defaultFont: "Inter",
+    defaultPrimaryFont: "Inter",
+    defaultSecondaryFont: "Inter",
+    features: {
+      projectUrl: true,
+      certificationUrl: true,
+    },
+  },
+  {
+    id: "professional",
+    name: "Professional",
+    description: "Executive-style layout with elegant formatting and letter-spaced headings.",
+    badges: ["ATS-Friendly", "Executive"],
+    defaultPrimaryFont: "Times New Roman",
+    defaultSecondaryFont: "Arial",
     features: {
       projectUrl: true,
       certificationUrl: true,

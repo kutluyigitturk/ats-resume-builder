@@ -37,7 +37,7 @@ import CVPreview from "@/components/cv-preview/CVPreview";
 
 // Templates
 import TemplateModal from "@/components/builder/TemplateModal";
-import { defaultTemplateId } from "@/data/templates";
+import { defaultTemplateId, getTemplate } from "@/data/templates";
 
 // Resume manager
 import { touchResume, getResumes } from "@/lib/resumeManager";
@@ -238,7 +238,12 @@ function BuilderInner() {
         isOpen={templateModalOpen}
         onClose={() => setTemplateModalOpen(false)}
         currentTemplateId={templateId}
-        onApply={setTemplateId}
+        onApply={(newTemplateId) => {
+          setTemplateId(newTemplateId);
+          const tpl = getTemplate(newTemplateId);
+          updateStyle("primaryFont", tpl.defaultPrimaryFont);
+          updateStyle("secondaryFont", tpl.defaultSecondaryFont);
+        }}
         cv={cv}
         hideReferences={hideReferences}
         styleSettings={styleSettings}

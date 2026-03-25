@@ -1,7 +1,7 @@
 import { createId } from "@/lib/createId";
 import initialCV from "@/data/initialCV";
 import { defaultStyleSettings } from "@/data/styleDefaults";
-import { defaultTemplateId } from "@/data/templates";
+import { defaultTemplateId, getTemplate } from "@/data/templates";
 
 const REGISTRY_KEY = "cv-builder-resumes";
 
@@ -55,8 +55,14 @@ export function createResume(name = "Untitled Resume", chosenTemplateId) {
   saveResumes(list);
 
   // Initialize resume data
+  const tpl = getTemplate(template);
+  const initialStyle = {
+    ...defaultStyleSettings,
+    primaryFont: tpl.defaultPrimaryFont,
+    secondaryFont: tpl.defaultSecondaryFont,
+  };
   writeJSON(cvDataKey(id), initialCV);
-  writeJSON(styleKey(id), defaultStyleSettings);
+  writeJSON(styleKey(id), initialStyle);
   writeJSON(templateKey(id), template);
   writeJSON(pdfNameKey(id), name);
 

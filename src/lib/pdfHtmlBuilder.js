@@ -62,7 +62,7 @@ function buildAdvancedContactHtml(cv) {
 
 /* ─── Build dynamic CSS from styleSettings ───────── */
 
-function buildDynamicCss(settings) {
+function buildDynamicCss(settings, templateId) {
   const headingFont = resolveFontFamily(settings.primaryFont);
   const bodyFont = resolveFontFamily(settings.secondaryFont);
   const headingSize = `${settings.headingSize}pt`;
@@ -73,6 +73,7 @@ function buildDynamicCss(settings) {
   const sectionGap = `${settings.betweenSections}pt`;
   const titleGap = `${settings.betweenTitleContent}pt`;
   const blockGap = `${settings.betweenContentBlocks}pt`;
+  const isProfessional = templateId === "professional";
 
   return `
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -90,20 +91,22 @@ function buildDynamicCss(settings) {
     }
 
     .cv-name {
-      font-size: 22pt;
+      font-size: ${isProfessional ? "20pt" : "22pt"};
       font-weight: bold;
       text-align: center;
       margin-bottom: 2px;
       color: #000;
       font-family: ${headingFont};
+      ${isProfessional ? "text-transform: uppercase; letter-spacing: 3px;" : ""}
     }
 
     .cv-title {
       text-align: center;
-      font-size: 11pt;
+      font-size: ${isProfessional ? "10pt" : "11pt"};
       color: #444;
       margin-bottom: 8px;
       font-family: ${bodyFont};
+      ${isProfessional ? "text-transform: uppercase; letter-spacing: 1.5px;" : ""}
     }
 
     .cv-contact {
@@ -130,6 +133,7 @@ function buildDynamicCss(settings) {
       margin-bottom: ${titleGap};
       margin-top: ${sectionGap};
       font-family: ${headingFont};
+      ${isProfessional ? "letter-spacing: 2px;" : ""}
     }
 
     .cv-section-title:first-of-type {
@@ -264,7 +268,7 @@ function buildDynamicCss(settings) {
 
 export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateId = "classic", pdfName = "Resume") {
   const settings = styleSettings || defaultStyleSettings;
-  const dynamicCss = buildDynamicCss(settings);
+  const dynamicCss = buildDynamicCss(settings, templateId);
 
   const name = escapeHtml(cv.name || "");
   const title = escapeHtml(cv.title || "");
@@ -272,7 +276,6 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
   if (hasValue(cv.linkedin)) contactParts.push(`<a href="${escapeHtml(cv.linkedin.startsWith('http') ? cv.linkedin : 'https://' + cv.linkedin)}" style="color:#333;text-decoration:none;">LinkedIn</a>`);
   if (hasValue(cv.website)) contactParts.push(`<a href="${escapeHtml(cv.website.startsWith('http') ? cv.website : 'https://' + cv.website)}" style="color:#333;text-decoration:none;">Portfolio</a>`);
   const contact = contactParts.join(" | ");
-
   const hasContact = hasValue(cv.email) || hasValue(cv.phone) || hasValue(cv.location) || hasValue(cv.linkedin) || hasValue(cv.website);
   const summary = escapeHtml(cv.summary || "");
   const visibleReferences = getVisibleReferences(cv.references || []);
@@ -291,7 +294,7 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
         : "",
     experience: () => buildExperienceHtml(cv.experiences || [], keepTogether),
     education: () => buildEducationHtml(cv.education || []),
-    skills: () => buildSkillsHtml(cv.skills || []),
+    skills: () => buildSkillsHtml(cv.skills || [], templateId),
     projects: () => buildProjectsHtml(cv.projects || [], templateId, keepTogether),
     volunteering: () => buildVolunteeringHtml(cv.volunteering || [], keepTogether),
     certifications: () => buildCertificationsHtml(cv.certifications || [], templateId),
@@ -414,12 +417,29 @@ function buildEducationHtml(education) {
   return `<div class="cv-section-title">Education</div>${items}`;
 }
 
-function buildSkillsHtml(skills) {
+function buildSkillsHtml(skills, templateId) {
   const filtered = skills.filter(
     (skill) => hasValue(skill.category) || hasValue(skill.items)
   );
 
   if (filtered.length === 0) return "";
+
+  if (templateId === "professional") {
+    const items = filtered
+      .map((skill) => {
+        const category = escapeHtml(skill.category || "");
+        const skillItems = escapeHtml(skill.items || "");
+        return `<div style="margin-bottom:4px">${
+          category ? `<strong>${category}</strong>` : ""
+        }${category && skillItems ? "  " : ""}${skillItems}</div>`;
+      })
+      .join("");
+
+    return `
+      <div class="cv-section-title">Technical Skills</div>
+      <div class="mb-10">${items}</div>
+    `;
+  }
 
   const items = filtered
     .map((skill) => {
