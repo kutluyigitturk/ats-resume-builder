@@ -185,7 +185,7 @@ function buildDynamicCss(settings, templateId) {
     }
 
     .bullets {
-      padding-left: 18px;
+      padding-left: ${isProfessional ? "30px" : "18px"};
       font-size: ${bodySize};
       list-style-type: disc;
       font-family: ${bodyFont};

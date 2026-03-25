@@ -86,7 +86,7 @@ function buildResolvedStyles(settings, templateId) {
     itemHeader: { ...cvStyles.itemHeader, fontFamily: headingFont },
     itemDate: { ...cvStyles.itemDate, fontFamily: bodyFont },
     itemSubtitle: { ...cvStyles.itemSubtitle, fontFamily: bodyFont },
-    bulletList: { ...cvStyles.bulletList, fontFamily: bodyFont, fontSize: bodySize },
+    bulletList: { ...cvStyles.bulletList, fontFamily: bodyFont, fontSize: bodySize, ...(isProfessional ? { paddingLeft: "30px" } : {}) },
     bulletItem: cvStyles.bulletItem,
     referenceTitle: { ...cvStyles.referenceTitle, fontFamily: headingFont },
     referenceContact: { ...cvStyles.referenceContact, fontFamily: bodyFont },
