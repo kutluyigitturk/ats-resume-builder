@@ -292,7 +292,7 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
           <div class="cv-summary">${summary}</div>
         `
         : "",
-    experience: () => buildExperienceHtml(cv.experiences || [], keepTogether),
+    experience: () => buildExperienceHtml(cv.experiences || [], keepTogether, templateId),
     education: () => buildEducationHtml(cv.education || []),
     skills: () => buildSkillsHtml(cv.skills || [], templateId),
     projects: () => buildProjectsHtml(cv.projects || [], templateId, keepTogether),
@@ -331,31 +331,45 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
 
 // ─── Section Builders ────────────────────────────────────────
 
-function buildExperienceHtml(experiences, keepTogether) {
+function buildExperienceHtml(experiences, keepTogether, templateId) {
   const filtered = experiences.filter(
     (exp) => hasValue(exp.company) || hasValue(exp.position)
   );
 
   if (filtered.length === 0) return "";
 
+  const isProfessional = templateId === "professional";
+
   const items = filtered
     .map((exp) => {
-      const subtitle = [exp.position, exp.location]
-        .filter(hasValue)
-        .map(escapeHtml)
-        .join(" | ");
-
       const bulletItems = (exp.bullets || []).filter(hasValue);
+
+      let headerHtml;
+      if (isProfessional) {
+        const leftParts = [exp.position, exp.company].filter(hasValue).map(escapeHtml);
+        const rightParts = [formatDateRange(exp.startDate, exp.endDate), exp.location].filter(hasValue).map(escapeHtml);
+        headerHtml = `
+          <div class="item-header">
+            <span>${leftParts.join(", ")}</span>
+            <span class="item-date">${rightParts.join(" | ")}</span>
+          </div>
+        `;
+      } else {
+        const subtitle = [exp.position, exp.location].filter(hasValue).map(escapeHtml).join(" | ");
+        headerHtml = `
+          <div class="item-header">
+            <span>${escapeHtml(exp.company || "")}</span>
+            <span class="item-date">${formatDateRange(exp.startDate, exp.endDate)}</span>
+          </div>
+          ${subtitle ? `<div class="item-subtitle">${subtitle}</div>` : ""}
+        `;
+      }
 
       if (keepTogether || bulletItems.length <= 1) {
         const bullets = bulletItems.map((b) => `<li>${escapeHtml(b)}</li>`).join("");
         return `
           <div class="mb-block">
-            <div class="item-header">
-              <span>${escapeHtml(exp.company || "")}</span>
-              <span class="item-date">${formatDateRange(exp.startDate, exp.endDate)}</span>
-            </div>
-            ${subtitle ? `<div class="item-subtitle">${subtitle}</div>` : ""}
+            ${headerHtml}
             ${bullets ? `<ul class="bullets">${bullets}</ul>` : ""}
           </div>
         `;
@@ -368,11 +382,7 @@ function buildExperienceHtml(experiences, keepTogether) {
 
         return `
           <div class="item-start-block">
-            <div class="item-header">
-              <span>${escapeHtml(exp.company || "")}</span>
-              <span class="item-date">${formatDateRange(exp.startDate, exp.endDate)}</span>
-            </div>
-            ${subtitle ? `<div class="item-subtitle">${subtitle}</div>` : ""}
+            ${headerHtml}
             <ul class="bullets">${firstBullet}</ul>
           </div>
           ${remainingBullets}
@@ -381,7 +391,7 @@ function buildExperienceHtml(experiences, keepTogether) {
     })
     .join("");
 
-  return `<div class="cv-section-title">Experience</div>${items}`;
+  return `<div class="cv-section-title">${isProfessional ? "Work Experience" : "Experience"}</div>${items}`;
 }
 
 function buildEducationHtml(education) {

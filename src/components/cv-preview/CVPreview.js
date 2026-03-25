@@ -125,40 +125,58 @@ function buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether) {
   );
   if (visible.length === 0) return [];
 
+  const isProfessional = templateId === "professional";
   const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
   const blocks = [
     {
       key: "exp-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>Experience</h2>,
+      element: <h2 style={titleStyle}>{isProfessional ? "Work Experience" : "Experience"}</h2>,
     },
   ];
+
+  // Professional: "Position, Company" (left) + "Date | Location" (right) — single line
+  // Classic/Advanced: "Company" (left) + "Date" (right), then "Position | Location" (italic, second line)
+  const renderExpHeader = (exp) => {
+    if (isProfessional) {
+      const leftParts = [exp.position, exp.company].filter(hasValue);
+      const rightParts = [formatDateRange(exp.startDate, exp.endDate), exp.location].filter(hasValue);
+      return (
+        <div style={styles.itemHeader}>
+          <span>{leftParts.join(", ")}</span>
+          <span style={styles.itemDate}>{rightParts.join(" | ")}</span>
+        </div>
+      );
+    }
+    return (
+      <>
+        <div style={styles.itemHeader}>
+          <span>{exp.company}</span>
+          <span style={styles.itemDate}>
+            {formatDateRange(exp.startDate, exp.endDate)}
+          </span>
+        </div>
+        {(hasValue(exp.position) || hasValue(exp.location)) && (
+          <p style={styles.itemSubtitle}>
+            {exp.position}
+            {hasValue(exp.position) && hasValue(exp.location) ? " | " : ""}
+            {exp.location}
+          </p>
+        )}
+      </>
+    );
+  };
 
   visible.forEach((exp, i) => {
     const visibleBullets = (exp.bullets || []).filter((b) => hasValue(b));
 
     if (keepTogether || visibleBullets.length <= 1) {
-      // Keep entire item as one block (original behavior)
       blocks.push({
         key: `exp-${exp.id ?? i}`,
         type: "item",
         element: (
           <div style={{ marginBottom: styles.blockGap }}>
-            <div style={styles.itemHeader}>
-              <span>{exp.company}</span>
-              <span style={styles.itemDate}>
-                {formatDateRange(exp.startDate, exp.endDate)}
-              </span>
-            </div>
-
-            {(hasValue(exp.position) || hasValue(exp.location)) && (
-              <p style={styles.itemSubtitle}>
-                {exp.position}
-                {hasValue(exp.position) && hasValue(exp.location) ? " | " : ""}
-                {exp.location}
-              </p>
-            )}
-
+            {renderExpHeader(exp)}
             {visibleBullets.length > 0 && (
               <ul style={styles.bulletList}>
                 {visibleBullets.map((bullet, j) => (
@@ -172,27 +190,12 @@ function buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether) {
         ),
       });
     } else {
-      // Split: header + first bullet together, remaining bullets separate
       blocks.push({
         key: `exp-${exp.id ?? i}-start`,
         type: "item-start",
         element: (
           <div>
-            <div style={styles.itemHeader}>
-              <span>{exp.company}</span>
-              <span style={styles.itemDate}>
-                {formatDateRange(exp.startDate, exp.endDate)}
-              </span>
-            </div>
-
-            {(hasValue(exp.position) || hasValue(exp.location)) && (
-              <p style={styles.itemSubtitle}>
-                {exp.position}
-                {hasValue(exp.position) && hasValue(exp.location) ? " | " : ""}
-                {exp.location}
-              </p>
-            )}
-
+            {renderExpHeader(exp)}
             <ul style={styles.bulletList}>
               <li style={styles.bulletItem}>{visibleBullets[0]}</li>
             </ul>
