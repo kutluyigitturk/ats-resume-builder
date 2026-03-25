@@ -318,6 +318,7 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
     ${name ? `<div class="cv-name">${name}</div>` : ""}
     ${title ? `<div class="cv-title">${title}</div>` : ""}
     ${hasContact ? `
+      ${templateId === "professional" ? '<hr class="cv-divider" />' : ""}
       <div class="cv-contact">${templateId === "advanced" ? buildAdvancedContactHtml(cv) : contact}</div>
       <hr class="cv-divider" />
     ` : ""}

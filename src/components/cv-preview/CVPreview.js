@@ -779,7 +779,10 @@ function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "cla
                   )}
                 </div>
               ) : (
-                <p style={styles.contact}>{formatContact(cv)}</p>
+                <>
+                  {isProfessional && <hr style={styles.divider} />}
+                  <p style={styles.contact}>{formatContact(cv)}</p>
+                </>
               )}
               <hr style={styles.divider} />
             </>
