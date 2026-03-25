@@ -391,7 +391,7 @@ function buildExperienceHtml(experiences, keepTogether, templateId) {
     })
     .join("");
 
-  return `<div class="cv-section-title">${isProfessional ? "Work Experience" : "Experience"}</div>${items}`;
+  return `<div class="cv-section-title">Work Experience</div>${items}`;
 }
 
 function buildEducationHtml(education) {

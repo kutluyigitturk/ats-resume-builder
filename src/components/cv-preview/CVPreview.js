@@ -131,7 +131,7 @@ function buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether) {
     {
       key: "exp-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>{isProfessional ? "Work Experience" : "Experience"}</h2>,
+      element: <h2 style={titleStyle}>Work Experience</h2>,
     },
   ];
 
