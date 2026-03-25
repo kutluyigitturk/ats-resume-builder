@@ -16,20 +16,22 @@ export default function LayoutStylePanel({
   return (
     <div>
       <div className="sticky top-0 z-20 bg-gradient-to-b from-[#f3f4f6] via-[#f3f4f6] to-transparent px-3 pb-2.5 pt-3">
-        <div className="mx-3 mt-2.5 mb-0 overflow-hidden rounded-[18px] border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05),0_1px_2px_rgba(15,23,42,0.05)]">
-          <button
-            type="button"
-            onClick={onBack}
-            className="flex w-full items-center gap-2.5 px-4 py-3.5 text-left transition-colors hover:bg-slate-50/80"
-          >
-            <span className="flex shrink-0 items-center justify-center text-slate-700">
+        <div className="w-full rounded-[18px] border border-slate-200 bg-white/95 px-4 py-2.5 shadow-[0_1px_2px_rgba(15,23,42,0.05),0_1px_2px_rgba(15,23,42,0.05)] backdrop-blur">
+          <div className="grid grid-cols-[36px_1fr_36px] items-center gap-2.5">
+            <button
+              type="button"
+              onClick={onBack}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-700 transition-colors hover:bg-slate-100"
+            >
               <BackArrowIcon />
-            </span>
+            </button>
 
-            <span className="truncate text-[15px] font-semibold tracking-[-0.01em] text-slate-900">
+            <span className="truncate text-center text-sm font-semibold tracking-[-0.01em] text-slate-900">
               Back to Editor
             </span>
-          </button>
+
+            <div className="h-8 w-8" />
+          </div>
         </div>
       </div>
 
