@@ -9,7 +9,6 @@ import CVPreview from "@/components/cv-preview/CVPreview";
 import initialCV from "@/data/initialCV";
 import sampleCV from "@/data/sampleCV";
 import { defaultStyleSettings } from "@/data/styleDefaults";
-import { parseResumeText } from "@/lib/resumeTextParser";
 import {
   getResumes,
   createResume,
@@ -34,6 +33,12 @@ import {
   TrashOutlineIcon as TrashIcon,
 } from "@/icons";
 
+/* ─── Constants ──────────────────────────────────── */
+
+const BG_COLOR = "#fafafa";
+
+/* ─── Helpers ────────────────────────────────────── */
+
 function formatTimeAgo(isoString) {
   const now = new Date();
   const date = new Date(isoString);
@@ -48,7 +53,7 @@ function formatTimeAgo(isoString) {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-/* ─── Mini CV Preview (real render) ──────────────── */
+/* ─── Mini CV Preview ────────────────────────────── */
 
 function MiniCVPreview({ resumeId }) {
   const [cvData, setCvData] = useState(null);
@@ -65,7 +70,7 @@ function MiniCVPreview({ resumeId }) {
 
   return (
     <div className="pointer-events-none select-none">
-      <div className="w-full h-full bg-gray-100 rounded-lg overflow-hidden flex items-start justify-center">
+      <div className="w-full h-full rounded-lg overflow-hidden flex items-start justify-center" style={{ background: BG_COLOR }}>
         <div className="relative w-full h-full">
           <div
             style={{
@@ -89,18 +94,18 @@ function MiniCVPreview({ resumeId }) {
   );
 }
 
-/* ─── Resume Card (Jobsuit-style, 4 buttons) ─────── */
+/* ─── Resume Card ────────────────────────────────── */
 
 function ResumeCard({ resume, onEdit, onRename, onDuplicate, onDelete }) {
   const timeAgo = formatTimeAgo(resume.updatedAt);
   const isAdvanced = resume.templateId === "advanced";
 
   return (
-    <div className="overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300 ease-in-out hover:shadow-lg">
+    <div className="overflow-hidden rounded-xl shadow-md transition-all duration-300 ease-in-out hover:shadow-lg" style={{ background: "#fff" }}>
       <div className="flex p-6" style={{ height: "300px" }}>
         {/* Left — Real CV Preview */}
         <div className="relative isolate w-48 h-64 mr-6 flex-shrink-0">
-          <div className="w-full h-full rounded-lg overflow-hidden border border-slate-200 bg-white shadow-sm">
+          <div className="w-full h-full rounded-lg overflow-hidden border border-slate-200 shadow-sm" style={{ background: "#fff" }}>
             <MiniCVPreview resumeId={resume.id} />
           </div>
         </div>
@@ -135,7 +140,8 @@ function ResumeCard({ resume, onEdit, onRename, onDuplicate, onDelete }) {
             </button>
             <button
               onClick={() => onRename(resume.id, resume.name)}
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50"
+              style={{ background: "#fff" }}
             >
               <RenameIcon />
               Rename
@@ -167,23 +173,23 @@ function CreateCard({ onClick }) {
   return (
     <button
       onClick={onClick}
-      className="group flex flex-col items-center justify-center overflow-hidden rounded-xl bg-white/60 border-2 border-dashed border-slate-200/80 shadow-sm transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/30 hover:shadow-md"
-      style={{ height: "300px" }}
+      className="group flex flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-slate-200/80 transition-all duration-200 hover:border-slate-300 hover:shadow-sm"
+      style={{ height: "300px", background: "transparent" }}
     >
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 transition-all duration-200 group-hover:bg-blue-100 group-hover:text-blue-600 group-hover:scale-105">
-        <PlusIcon size={24} />
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 transition-all duration-200 group-hover:bg-slate-200 group-hover:text-slate-600 group-hover:scale-105">
+        <PlusIcon size={22} />
       </div>
-      <span className="mt-3 text-sm font-bold text-slate-500 transition-colors group-hover:text-blue-600">
+      <span className="mt-3 text-sm font-semibold text-slate-500 transition-colors group-hover:text-slate-700">
         Create New Resume
       </span>
-      <span className="mt-1 text-xs text-slate-400 transition-colors group-hover:text-blue-500">
-        Classic or Advanced template
+      <span className="mt-1 text-xs text-slate-400">
+        Choose a template to start
       </span>
     </button>
   );
 }
 
-/* ─── Empty State (comprehensive onboarding) ─────── */
+/* ─── Empty State ────────────────────────────────── */
 
 function StepIndicator() {
   const steps = [
@@ -196,7 +202,7 @@ function StepIndicator() {
     <div className="flex items-center justify-center gap-2 mb-10">
       {steps.map((step, i) => (
         <div key={step.num} className="flex items-center gap-2">
-          <div className="flex items-center gap-2 rounded-full bg-white/80 border border-slate-200/60 px-3 py-1.5 shadow-sm">
+          <div className="flex items-center gap-2 rounded-full border border-slate-200/60 px-3 py-1.5" style={{ background: "#fff" }}>
             <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white">
               {step.num}
             </span>
@@ -213,15 +219,16 @@ function StepIndicator() {
   );
 }
 
-function EntryCard({ icon, title, description, onClick, highlight = false }) {
+function EntryCard({ icon, title, description, onClick, highlight = false, badge = null }) {
   return (
     <button
       onClick={onClick}
-      className={`group flex flex-col items-center gap-3 rounded-2xl border p-6 text-center transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${
+      className={`group flex flex-col items-center gap-3 rounded-2xl border p-6 text-center transition-all duration-200 hover:shadow-md hover:scale-[1.01] ${
         highlight
-          ? "border-blue-200 bg-blue-50/40 hover:border-blue-300 hover:bg-blue-50/70"
-          : "border-slate-200/80 bg-white/70 hover:border-slate-300 hover:bg-white"
+          ? "border-blue-200/80 hover:border-blue-300"
+          : "border-slate-200/70 hover:border-slate-300"
       }`}
+      style={{ background: highlight ? "rgba(239,246,255,0.5)" : "#fff" }}
     >
       <div
         className={`flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-200 ${
@@ -233,18 +240,18 @@ function EntryCard({ icon, title, description, onClick, highlight = false }) {
         {icon}
       </div>
       <div>
-        <h3
-          className={`text-sm font-bold mb-1 ${
-            highlight ? "text-blue-900" : "text-slate-800"
-          }`}
-        >
+        <h3 className={`text-sm font-bold mb-1 ${highlight ? "text-blue-900" : "text-slate-800"}`}>
           {title}
         </h3>
         <p className="text-xs text-slate-500 leading-relaxed">{description}</p>
       </div>
-      {highlight && (
-        <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-semibold text-blue-700">
-          Recommended
+      {badge && (
+        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
+          badge === "ai"
+            ? "bg-amber-50 text-amber-700 border border-amber-200/60"
+            : "bg-blue-50 text-blue-700"
+        }`}>
+          {badge === "ai" ? "AI Required" : badge}
         </span>
       )}
     </button>
@@ -262,40 +269,9 @@ function TrustBadge({ icon, label }) {
   );
 }
 
-function SamplePreview() {
-  return (
-    <div className="pointer-events-none select-none">
-      <div className="w-full rounded-xl overflow-hidden border border-slate-200/60 bg-white shadow-lg">
-        <div className="relative" style={{ height: "320px", overflow: "hidden" }}>
-          <div
-            style={{
-              transform: "scale(0.22)",
-              transformOrigin: "left top",
-              width: "210mm",
-              height: "297mm",
-              overflow: "hidden",
-            }}
-          >
-            <CVPreview
-              cv={sampleCV}
-              hideReferences={false}
-              styleSettings={defaultStyleSettings}
-              templateId="classic"
-            />
-          </div>
-        </div>
-      </div>
-      <p className="mt-2 text-center text-[11px] text-slate-400 font-medium">
-        Live preview — Classic template
-      </p>
-    </div>
-  );
-}
-
 function EmptyState({ onCreate, onSampleStart, onPasteStart }) {
   return (
-    <div className="mx-auto max-w-5xl py-4">
-      {/* ── Motivational Header ── */}
+    <div className="mx-auto max-w-3xl py-4">
       <div className="text-center mb-8">
         <h2
           className="text-3xl font-extrabold tracking-tight text-slate-900 mb-3"
@@ -304,182 +280,103 @@ function EmptyState({ onCreate, onSampleStart, onPasteStart }) {
           Your next career move starts here
         </h2>
         <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-          Build a professional, ATS-friendly resume in minutes — completely free, no hidden fees, no sign-up required.
+          Build a professional, ATS-friendly resume in minutes. Choose how you&apos;d like to get started.
         </p>
       </div>
 
-      {/* ── 3-Step Indicator ── */}
       <StepIndicator />
 
-      {/* ── Main: Entry Cards + Preview ── */}
-      <div className="flex gap-8 items-start">
-        {/* Left — 3 Entry Cards */}
-        <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <EntryCard
-            icon={
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            }
-            title="Start from scratch"
-            description="Blank canvas — pick a template and build your own resume step by step."
-            onClick={onCreate}
-          />
-          <EntryCard
-            icon={
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
-                <path d="M14 2v6h6" /><path d="M16 13H8" /><path d="M16 17H8" /><path d="M10 9H8" />
-              </svg>
-            }
-            title="Explore with sample"
-            description="Start with a pre-filled resume to see how it looks, then make it yours."
-            onClick={onSampleStart}
-            highlight
-          />
-          <EntryCard
-            icon={
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-                <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-              </svg>
-            }
-            title="Paste your resume"
-            description="Have an existing resume? Paste the text and we'll import it for you."
-            onClick={onPasteStart}
-          />
-        </div>
-
-        {/* Right — Live Preview (desktop only) */}
-        <div className="hidden lg:block w-44 flex-shrink-0">
-          <SamplePreview />
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-12">
+        <EntryCard
+          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>}
+          title="Start from scratch"
+          description="Pick a template and build your resume step by step."
+          onClick={onCreate}
+        />
+        <EntryCard
+          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" /><path d="M14 2v6h6" /><path d="M16 13H8" /><path d="M16 17H8" /><path d="M10 9H8" /></svg>}
+          title="Explore with sample"
+          description="Start with a pre-filled resume to see how it looks."
+          onClick={onSampleStart}
+          highlight
+          badge="Recommended"
+        />
+        <EntryCard
+          icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg>}
+          title="Upload your resume"
+          description="Import from an existing PDF and let AI fill in the fields."
+          onClick={onPasteStart}
+          badge="ai"
+        />
       </div>
 
-      {/* ── Trust Badges ── */}
-      <div className="flex flex-wrap items-center justify-center gap-6 mt-12 pt-8 border-t border-slate-200/60">
-        <TrustBadge
-          icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-          }
-          label="100% free forever"
-        />
-        <TrustBadge
-          icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-          }
-          label="ATS-optimized templates"
-        />
-        <TrustBadge
-          icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" />
-            </svg>
-          }
-          label="Live A4 preview"
-        />
-        <TrustBadge
-          icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" />
-            </svg>
-          }
-          label="One-click PDF export"
-        />
-        <TrustBadge
-          icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          }
-          label="No sign-up required"
-        />
+      <div className="flex flex-wrap items-center justify-center gap-6 pt-8 border-t border-slate-200/60">
+        <TrustBadge icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>} label="ATS-optimized templates" />
+        <TrustBadge icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>} label="Real-time A4 preview" />
+        <TrustBadge icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>} label="One-click PDF export" />
+        <TrustBadge icon={<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>} label="Your data stays in your browser" />
       </div>
     </div>
   );
 }
 
-/* ─── Paste Resume Modal ─────────────────────────── */
+/* ─── AI Required Modal ──────────────────────────── */
 
-function PasteResumeModal({ onConfirm, onCancel }) {
-  const [text, setText] = useState("");
-  const textareaRef = useRef(null);
-
-  useEffect(() => {
-    textareaRef.current?.focus();
-  }, []);
-
-  const handleSubmit = () => {
-    const parsed = parseResumeText(text);
-    if (parsed) {
-      onConfirm(parsed);
-    }
-  };
-
-  const charCount = text.trim().length;
-
+function AIRequiredModal({ onClose }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onCancel}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="mx-4 w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-xl"
+        className="mx-4 w-full max-w-sm rounded-3xl border border-slate-200/60 p-8 shadow-2xl text-center"
+        style={{ background: "#fff" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="mb-1 text-base font-bold text-slate-900">Paste your resume</h3>
-        <p className="mb-4 text-sm text-slate-500">
-          Paste your existing resume text below. We&apos;ll extract what we can — you can always edit afterwards.
-        </p>
-
-        <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="mb-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition-colors focus:border-blue-400 focus:ring-2 focus:ring-blue-100 resize-none"
-          rows={12}
-          placeholder={"John Doe\nSoftware Engineer\njohn@email.com | +1 555 0100 | San Francisco, CA\n\nSUMMARY\nExperienced software engineer with 5+ years...\n\nEXPERIENCE\nSenior Developer — Acme Corp\n06/2020 – Present\n• Led development of...\n\nEDUCATION\nB.Sc. Computer Science — MIT\n2016 – 2020"}
-        />
-
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-400">
-            {charCount > 0 ? `${charCount} characters` : "Paste your resume text"}
-          </span>
-          <div className="flex gap-2.5">
-            <button
-              onClick={onCancel}
-              className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={charCount < 20}
-              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Import & Choose Template
-            </button>
-          </div>
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 border border-amber-200/50">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9.663 17h4.674M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547Z" />
+          </svg>
         </div>
+        <h3 className="mb-2 text-lg font-bold text-slate-900">AI Update Required</h3>
+        <p className="mb-6 text-sm text-slate-500 leading-relaxed">
+          Uploading and parsing resumes requires AI integration, which is currently in development. This feature will be available soon.
+        </p>
+        <button
+          onClick={onClose}
+          className="w-full rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+        >
+          Got it
+        </button>
       </div>
     </div>
   );
 }
 
-/* ─── Delete Confirm Modal ───────────────────────── */
+/* ─── Delete Modal ───────────────────────────────── */
 
 function DeleteModal({ name, onConfirm, onCancel }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onCancel}>
-      <div className="mx-4 w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <h3 className="mb-2 text-base font-bold text-slate-900">Delete Resume</h3>
-        <p className="mb-6 text-sm text-slate-500">
-          Are you sure you want to delete <span className="font-semibold text-slate-700">&quot;{name}&quot;</span>? This action cannot be undone.
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm" onClick={onCancel}>
+      <div
+        className="mx-4 w-full max-w-sm rounded-3xl border border-slate-200/60 p-8 shadow-2xl text-center"
+        style={{ background: "#fff" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 border border-red-200/50">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <path d="M12 9v4" /><path d="M12 17h.01" />
+          </svg>
+        </div>
+        <h3 className="mb-2 text-lg font-bold text-slate-900">Delete Resume</h3>
+        <p className="mb-8 text-sm text-slate-500 leading-relaxed">
+          You are about to delete &ldquo;{name}&rdquo;.<br />Are you sure you want to proceed?
         </p>
-        <div className="flex justify-end gap-2.5">
-          <button onClick={onCancel} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100">Cancel</button>
-          <button onClick={onConfirm} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700">Delete</button>
+        <div className="flex gap-3">
+          <button onClick={onCancel} className="flex-1 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50">
+            No, keep it
+          </button>
+          <button onClick={onConfirm} className="flex-1 rounded-xl bg-red-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600">
+            Yes, delete it
+          </button>
         </div>
       </div>
     </div>
@@ -500,21 +397,35 @@ function RenameModal({ currentName, onConfirm, onCancel }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onCancel}>
-      <div className="mx-4 w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl" onClick={(e) => e.stopPropagation()}>
-        <h3 className="mb-4 text-base font-bold text-slate-900">Rename Resume</h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm" onClick={onCancel}>
+      <div
+        className="mx-4 w-full max-w-sm rounded-3xl border border-slate-200/60 p-8 shadow-2xl"
+        style={{ background: "#fff" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 border border-blue-200/50">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" /><path d="m15 5 4 4" />
+          </svg>
+        </div>
+        <h3 className="mb-4 text-center text-lg font-bold text-slate-900">Rename Resume</h3>
         <input
           ref={inputRef}
           value={name}
           onChange={(e) => setName(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-          className="mb-6 w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 outline-none transition-colors focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+          className="mb-6 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-colors focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+          style={{ background: BG_COLOR }}
           placeholder="Resume name"
           autoFocus
         />
-        <div className="flex justify-end gap-2.5">
-          <button onClick={onCancel} className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100">Cancel</button>
-          <button onClick={handleSubmit} className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800">Save</button>
+        <div className="flex gap-3">
+          <button onClick={onCancel} className="flex-1 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50">
+            Cancel
+          </button>
+          <button onClick={handleSubmit} className="flex-1 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800">
+            Save
+          </button>
         </div>
       </div>
     </div>
@@ -531,10 +442,8 @@ export default function Dashboard() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [renameTarget, setRenameTarget] = useState(null);
-
-  // New: import flow state (sample or paste)
+  const [showAIModal, setShowAIModal] = useState(false);
   const [pendingImportData, setPendingImportData] = useState(null);
-  const [showPasteModal, setShowPasteModal] = useState(false);
 
   useEffect(() => {
     migrateIfNeeded();
@@ -560,20 +469,12 @@ export default function Dashboard() {
     setShowCreateModal(true);
   };
 
-  const handlePasteConfirm = (parsedData) => {
-    setShowPasteModal(false);
-    setPendingImportData(parsedData);
-    setShowCreateModal(true);
-  };
-
   const handleCloseCreateModal = () => {
     setShowCreateModal(false);
     setPendingImportData(null);
   };
 
-  const handleEdit = (id) => {
-    router.push(`/builder?id=${id}`);
-  };
+  const handleEdit = (id) => { router.push(`/builder?id=${id}`); };
 
   const handleDuplicate = (id) => {
     duplicateResume(id);
@@ -596,7 +497,7 @@ export default function Dashboard() {
 
   if (!hydrated) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center" style={{ background: BG_COLOR }}>
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
       </div>
     );
@@ -605,27 +506,20 @@ export default function Dashboard() {
   const isEmpty = resumes.length === 0;
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gray-50">
-      {/* ── Background gradient ── */}
+    <div className="relative min-h-screen overflow-hidden" style={{ background: BG_COLOR }}>
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-blue-100/30 blur-[120px]" />
-        <div className="absolute top-1/3 -right-40 h-[400px] w-[400px] rounded-full bg-indigo-50/40 blur-[100px]" />
+        <div className="absolute -top-40 left-1/2 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-blue-50/40 blur-[140px]" />
+        <div className="absolute top-1/3 -right-40 h-[400px] w-[400px] rounded-full bg-indigo-50/30 blur-[120px]" />
       </div>
 
-      {/* ── Floating Navbar ── */}
       <Navbar maxWidth="1024px" baseRingClass="ring-slate-200/50" justify="justify-center">
         <Logo />
       </Navbar>
 
-      {/* ── Main Content ── */}
       <main className="relative z-10 mx-auto max-w-5xl px-6 pt-28 pb-16">
-        {/* Header — only show when user has resumes */}
         {!isEmpty && (
           <div className="mb-8">
-            <h1
-              className="text-2xl font-extrabold tracking-tight text-slate-900"
-              style={{ fontFamily: "var(--font-montserrat), sans-serif" }}
-            >
+            <h1 className="text-2xl font-extrabold tracking-tight text-slate-900" style={{ fontFamily: "var(--font-montserrat), sans-serif" }}>
               My Resumes
             </h1>
             <p className="mt-1 text-sm text-slate-500">
@@ -634,15 +528,14 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Grid or Empty State */}
         {isEmpty ? (
           <EmptyState
             onCreate={() => setShowCreateModal(true)}
             onSampleStart={handleSampleStart}
-            onPasteStart={() => setShowPasteModal(true)}
+            onPasteStart={() => setShowAIModal(true)}
           />
         ) : (
-          <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+          <div className="grid gap-5 grid-cols-1 lg:grid-cols-2">
             {resumes.map((resume) => (
               <ResumeCard
                 key={resume.id}
@@ -658,36 +551,10 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* ── Modals ── */}
-      <TemplateModal
-        isOpen={showCreateModal}
-        onClose={handleCloseCreateModal}
-        mode="create"
-        onCreate={handleCreate}
-      />
-
-      {showPasteModal && (
-        <PasteResumeModal
-          onConfirm={handlePasteConfirm}
-          onCancel={() => setShowPasteModal(false)}
-        />
-      )}
-
-      {deleteTarget && (
-        <DeleteModal
-          name={deleteTarget.name}
-          onConfirm={handleDelete}
-          onCancel={() => setDeleteTarget(null)}
-        />
-      )}
-
-      {renameTarget && (
-        <RenameModal
-          currentName={renameTarget.name}
-          onConfirm={handleRename}
-          onCancel={() => setRenameTarget(null)}
-        />
-      )}
+      <TemplateModal isOpen={showCreateModal} onClose={handleCloseCreateModal} mode="create" onCreate={handleCreate} />
+      {showAIModal && <AIRequiredModal onClose={() => setShowAIModal(false)} />}
+      {deleteTarget && <DeleteModal name={deleteTarget.name} onConfirm={handleDelete} onCancel={() => setDeleteTarget(null)} />}
+      {renameTarget && <RenameModal currentName={renameTarget.name} onConfirm={handleRename} onCancel={() => setRenameTarget(null)} />}
     </div>
   );
 }
