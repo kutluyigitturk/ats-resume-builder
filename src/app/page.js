@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import Navbar from "@/components/Navbar";
 import { RoughNotation } from "react-rough-notation";
 
 
@@ -111,40 +112,23 @@ function Reveal({ children, delay = 0, className = "" }) {
 
 /* ─── Navbar ─────────────────────────────────────── */
 
-function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
+function NavbarContent() {
   return (
-    <nav
-      className={`fixed top-4 left-1/2 z-50 -translate-x-1/2 w-full max-w-[1204px] rounded-2xl transition-all duration-300 ${
-        scrolled
-          ? "ring-1 ring-slate-900/5 bg-white/60 backdrop-blur-3xl shadow-[0_2px_16px_rgba(0,0,0,0.08)]"
-          : "ring-1 ring-transparent bg-white/40 backdrop-blur-3xl"
-      }`}
-    >
-      <div className="flex h-[56px] items-center justify-between px-8">
-        <Logo />
-
-        <div className="flex items-center gap-5">
-          <FeaturesDropdown />
-          <button className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
-            Log in
-          </button>
-          <Link
-            href="/dashboard"
-            className="btn-primary rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 hover:shadow-md"
-          >
-            Get Started
-          </Link>
-        </div>
+    <>
+      <Logo />
+      <div className="flex items-center gap-5">
+        <FeaturesDropdown />
+        <button className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
+          Log in
+        </button>
+        <Link
+          href="/dashboard"
+          className="btn-primary rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 hover:shadow-md"
+        >
+          Get Started
+        </Link>
       </div>
-    </nav>
+    </>
   );
 }
 
@@ -798,7 +782,9 @@ function Footer() {
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white">
-      <Navbar />
+      <Navbar>
+        <NavbarContent />
+      </Navbar>
       <Hero />
       <LogoMarquee />
       <Features />

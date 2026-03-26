@@ -7,7 +7,7 @@ const REGISTRY_KEY = "cv-builder-resumes";
 
 // ─── Helpers ──────────────────────────────────────
 
-function readJSON(key) {
+export function readJSON(key) {
   try {
     const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : null;

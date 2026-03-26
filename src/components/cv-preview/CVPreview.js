@@ -2,14 +2,11 @@
 
 import { useRef, useState, useLayoutEffect, useMemo } from "react";
 import { cvStyles } from "@/lib/constants";
-import { fontOptions, defaultStyleSettings } from "@/data/styleDefaults";
+import { hasValue, formatDateRange, getVisibleReferences, resolveFontFamily } from "@/lib/cvHelpers";
+import { defaultStyleSettings } from "@/data/styleDefaults";
 import { MailIcon, PhoneIcon, MapPinIcon, LinkedInIcon, LinkIcon } from "@/icons";
 
 /* ─── Helpers ────────────────────────────────────── */
-
-function hasValue(v) {
-  return typeof v === "string" && v.trim() !== "";
-}
 
 function hasContactInfo(cv) {
   return [cv.phone, cv.email, cv.location, cv.linkedin, cv.website].some(hasValue);
@@ -20,24 +17,6 @@ function formatContact(cv) {
   if (hasValue(cv.linkedin)) parts.push("LinkedIn");
   if (hasValue(cv.website)) parts.push("Portfolio");
   return parts.join(" | ");
-}
-
-function getVisibleReferences(refs) {
-  return refs.filter(
-    (r) => hasValue(r.name) || hasValue(r.company) || hasValue(r.phone) || hasValue(r.email)
-  );
-}
-
-function formatDateRange(start, end) {
-  if (hasValue(start) && hasValue(end)) return `${start} – ${end}`;
-  return start || end || "";
-}
-
-/* ─── Resolve font name to CSS font-family ───────── */
-
-function resolveFontFamily(fontName) {
-  const font = fontOptions.find((f) => f.name === fontName);
-  return font ? font.family : "Inter, sans-serif";
 }
 
 /* ─── Build resolved styles from base + settings ─── */

@@ -1,37 +1,14 @@
 import { escapeHtml } from "./htmlEscape";
-import { defaultStyleSettings, fontOptions } from "@/data/styleDefaults";
-
-function hasValue(value) {
-  return typeof value === "string" && value.trim() !== "";
-}
+import { hasValue, formatDateRange as _formatDateRange, getVisibleReferences, resolveFontFamily } from "./cvHelpers";
+import { defaultStyleSettings } from "@/data/styleDefaults";
 
 function joinContact(fields, separator = " | ") {
   return fields.filter(hasValue).map(escapeHtml).join(separator);
 }
 
+/** PDF-safe date range — escapes HTML entities before output */
 function formatDateRange(start, end) {
-  const s = escapeHtml(start || "");
-  const e = escapeHtml(end || "");
-
-  if (s && e) return `${s} – ${e}`;
-  return s || e;
-}
-
-function getVisibleReferences(references) {
-  return references.filter(
-    (ref) =>
-      hasValue(ref.name) ||
-      hasValue(ref.company) ||
-      hasValue(ref.phone) ||
-      hasValue(ref.email)
-  );
-}
-
-/* ─── Resolve font name to CSS font-family ───────── */
-
-function resolveFontFamily(fontName) {
-  const font = fontOptions.find((f) => f.name === fontName);
-  return font ? font.family : "Inter, sans-serif";
+  return escapeHtml(_formatDateRange(start, end));
 }
 
 /* ─── Contact SVG icons for Advanced template ────── */
