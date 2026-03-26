@@ -69,6 +69,32 @@ export function createResume(name = "Untitled Resume", chosenTemplateId) {
   return id;
 }
 
+/** Create a resume pre-filled with custom CV data (for sample or paste import) */
+export function createResumeWithData(name = "Untitled Resume", chosenTemplateId, cvData) {
+  const id = createId("resume");
+  const now = new Date().toISOString();
+  const template = chosenTemplateId || defaultTemplateId;
+
+  const list = getResumes();
+  list.unshift({ id, name, templateId: template, createdAt: now, updatedAt: now });
+  saveResumes(list);
+
+  const tpl = getTemplate(template);
+  const initialStyle = {
+    ...defaultStyleSettings,
+    primaryFont: tpl.defaultPrimaryFont,
+    secondaryFont: tpl.defaultSecondaryFont,
+  };
+
+  // Merge provided data with initialCV to ensure all fields exist
+  writeJSON(cvDataKey(id), { ...initialCV, ...cvData });
+  writeJSON(styleKey(id), initialStyle);
+  writeJSON(templateKey(id), template);
+  writeJSON(pdfNameKey(id), name);
+
+  return id;
+}
+
 export function deleteResume(id) {
   // Remove from registry
   const list = getResumes().filter((r) => r.id !== id);

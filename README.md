@@ -157,7 +157,8 @@ src/
     ├── cvHelpers.js               # Shared CV utilities (hasValue, formatDateRange, etc.)
     ├── htmlEscape.js              # XSS escape for PDF
     ├── pdfHtmlBuilder.js          # PDF HTML builder (template-aware)
-    └── resumeManager.js           # Multi-CV CRUD + migration
+    ├── resumeManager.js           # Multi-CV CRUD + migration
+    └── resumeTextParser.js        # Resume text parser for paste import
 ```
 
 ---
