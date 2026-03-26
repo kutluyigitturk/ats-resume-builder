@@ -122,6 +122,7 @@ src/
 │
 ├── components/
 │   ├── Logo.js                    # Animated easyATS logo
+│   ├── Navbar.js                  # Shared glassmorphism floating navbar
 │   ├── builder/
 │   │   ├── PdfNameEditor.js       # PDF filename editor header
 │   │   ├── Toolbar.js             # Templates, Layout & Style, Download
@@ -153,6 +154,7 @@ src/
 └── lib/
     ├── constants.js               # Shared styles, factories
     ├── createId.js                # Unique ID generator
+    ├── cvHelpers.js               # Shared CV utilities (hasValue, formatDateRange, etc.)
     ├── htmlEscape.js              # XSS escape for PDF
     ├── pdfHtmlBuilder.js          # PDF HTML builder (template-aware)
     └── resumeManager.js           # Multi-CV CRUD + migration
