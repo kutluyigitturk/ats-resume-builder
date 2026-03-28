@@ -16,7 +16,8 @@ export default function Toolbar({
   redoFlash,
 }) {
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center">
+      {/* Left */}
       <div className="flex items-center gap-2">
         <button
           type="button"
@@ -41,45 +42,49 @@ export default function Toolbar({
         </button>
       </div>
 
+      {/* Center — undo/redo */}
       <div className="flex items-center gap-1">
         <button
           type="button"
           onClick={onUndo}
           disabled={!canUndo}
-          className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-150 ${
+          className={`inline-flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-150 ${
             canUndo
               ? "text-slate-500 hover:bg-slate-100 hover:text-slate-700 active:scale-95"
               : "text-slate-300 cursor-not-allowed"
           } ${undoFlash ? "bg-slate-100 scale-90" : ""}`}
           title="Undo (Ctrl+Z)"
         >
-          <UndoIcon size={18} />
+          <UndoIcon size={14} />
         </button>
 
         <button
           type="button"
           onClick={onRedo}
           disabled={!canRedo}
-          className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-150 ${
+          className={`inline-flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-150 ${
             canRedo
               ? "text-slate-500 hover:bg-slate-100 hover:text-slate-700 active:scale-95"
               : "text-slate-300 cursor-not-allowed"
           } ${redoFlash ? "bg-slate-100 scale-90" : ""}`}
           title="Redo (Ctrl+Y)"
         >
-          <RedoIcon size={18} />
+          <RedoIcon size={14} />
         </button>
       </div>
 
-      <button
-        type="button"
-        onClick={onDownloadPDF}
-        disabled={downloading}
-        className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(15,23,42,0.16)] transition-all duration-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
-      >
-        <DownloadIcon />
-        <span>{downloading ? "Generating..." : "Download PDF"}</span>
-      </button>
+      {/* Right */}
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={onDownloadPDF}
+          disabled={downloading}
+          className="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(15,23,42,0.16)] transition-all duration-200 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+        >
+          <DownloadIcon />
+          <span>{downloading ? "Generating..." : "Download PDF"}</span>
+        </button>
+      </div>
     </div>
   );
 }

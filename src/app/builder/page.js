@@ -218,7 +218,7 @@ function BuilderInner() {
 
       <div className="flex-1 h-screen overflow-y-auto bg-gray-100">
         <div className="sticky top-0 z-20 bg-gray-100 pb-[25px]">
-          <div className="mx-auto max-w-[200mm] rounded-b-lg border-x border-b border-slate-300 bg-white px-6 py-3">
+          <div className="mx-auto max-w-[240mm] rounded-b-lg border-x border-b border-slate-300 bg-white px-6 py-3">
             <Toolbar
               downloading={pdfExport.downloading}
               onDownloadPDF={pdfExport.handleDownloadPDF}
