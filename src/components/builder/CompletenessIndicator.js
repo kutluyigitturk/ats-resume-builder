@@ -64,6 +64,7 @@ function CircleIcon() {
 
 export default function CompletenessIndicator({ cv }) {
   const [expanded, setExpanded] = useState(false);
+  const [hasBeenToggled, setHasBeenToggled] = useState(false);
 
   const { score, sections } = useMemo(
     () => calculateCompleteness(cv),
@@ -76,7 +77,10 @@ export default function CompletenessIndicator({ cv }) {
     <div className="relative">
       {/* Circular trigger button */}
       <button
-        onClick={() => setExpanded((prev) => !prev)}
+        onClick={() => {
+            setHasBeenToggled(true);
+            setExpanded((prev) => !prev);
+        }}
         className="relative flex items-center justify-center cursor-pointer transition-transform duration-200 hover:scale-110 active:scale-95"
         title="Resume completeness"
         style={{ width: "36px", height: "36px" }}
@@ -105,8 +109,13 @@ export default function CompletenessIndicator({ cv }) {
       >
         <div
           className={`overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg ${
-            expanded ? "completeness-enter" : "completeness-exit"
-          }`}
+              !hasBeenToggled
+                ? "hidden"
+                : expanded
+                ? "completeness-enter"
+                : "completeness-exit"
+           }`}
+          
         >
           {/* Header */}
           <div className="px-4 pt-4 pb-3">
