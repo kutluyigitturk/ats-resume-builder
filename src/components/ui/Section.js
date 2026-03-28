@@ -1,13 +1,16 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronDownIcon, PencilIcon } from "@/icons";
 
 export default function Section({ title, icon, isOpen, onToggle, onTitleChange, tips, children }) {
   const [tipsOpen, setTipsOpen] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [editValue, setEditValue] = useState(title);
+  const [pencilOpacity, setPencilOpacity] = useState(0);
   const inputRef = useRef(null);
+  const pencilRef = useRef(null);
+  const headerRef = useRef(null);
 
   useEffect(() => {
     setEditValue(title);
@@ -34,6 +37,35 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
     setEditingTitle(false);
   };
 
+  const handleMouseMove = useCallback((e) => {
+    if (!pencilRef.current || !onTitleChange || editingTitle) return;
+
+    const pencilRect = pencilRef.current.getBoundingClientRect();
+    const pencilCenterX = pencilRect.left + pencilRect.width / 2;
+    const pencilCenterY = pencilRect.top + pencilRect.height / 2;
+
+    const dx = e.clientX - pencilCenterX;
+    const dy = e.clientY - pencilCenterY;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    const maxDistance = 250;
+    const minOpacity = 0.08;
+    const maxOpacity = 0.9;
+
+    if (distance >= maxDistance) {
+      setPencilOpacity(minOpacity);
+    } else {
+      const ratio = 1 - distance / maxDistance;
+      const raw = minOpacity + ratio * (maxOpacity - minOpacity);
+      const stepped = Math.round(raw * 10) / 10;
+      setPencilOpacity(stepped);
+    }
+  }, [onTitleChange, editingTitle]);
+
+  const handleMouseLeave = useCallback(() => {
+    setPencilOpacity(0);
+  }, []);
+
   return (
     <section
       className={`overflow-hidden rounded-[18px] border bg-white transition-all duration-200 ${
@@ -42,10 +74,15 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
           : "border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.05),0_1px_2px_rgba(15,23,42,0.05)]"
       }`}
     >
-      <button
-        type="button"
-        onClick={onToggle}
-        className={`group flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors ${
+      <div
+        ref={headerRef}
+        role="button"
+        tabIndex={0}
+        onClick={() => { if (!editingTitle) onToggle(); }}
+        onKeyDown={(e) => { if (!editingTitle && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onToggle(); } }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className={`flex w-full cursor-pointer items-center justify-between px-4 py-3.5 text-left transition-colors ${
           isOpen ? "bg-blue-50/[0.35]" : "hover:bg-slate-50/80"
         }`}
       >
@@ -59,11 +96,12 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
               onChange={(e) => setEditValue(e.target.value)}
               onBlur={saveTitle}
               onKeyDown={(e) => {
+                e.stopPropagation();
                 if (e.key === "Enter") saveTitle();
                 if (e.key === "Escape") setEditingTitle(false);
               }}
               onClick={(e) => e.stopPropagation()}
-              className="min-w-0 border-b border-slate-300 bg-transparent text-[15px] font-semibold tracking-[-0.01em] text-slate-900 outline-none"
+              className="min-w-0 bg-transparent text-[15px] font-semibold tracking-[-0.01em] text-slate-900 outline-none"
             />
           ) : (
             <span className="flex items-center gap-1.5">
@@ -72,8 +110,13 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
               </span>
               {onTitleChange && (
                 <span
+                  ref={pencilRef}
                   onClick={startEditing}
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded opacity-0 transition-opacity group-hover:opacity-60 hover:!opacity-100 cursor-pointer"
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-slate-400 cursor-pointer"
+                  style={{
+                    opacity: pencilOpacity,
+                    transition: "opacity 0.15s ease",
+                  }}
                 >
                   <PencilIcon size={11} />
                 </span>
@@ -89,7 +132,7 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
         >
           <ChevronDownIcon size={17} />
         </span>
-      </button>
+      </div>
 
       {isOpen && (
         <div className="border-t border-slate-100 bg-white px-4 pb-4 pt-3">
