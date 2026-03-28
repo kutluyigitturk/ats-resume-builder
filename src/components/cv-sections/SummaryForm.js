@@ -18,6 +18,7 @@ export default function SummaryForm({ cv, updateField, isOpen, onToggle }) {
         placeholder="Briefly introduce yourself. Mention your years of experience, areas of expertise, and career objectives."
         value={cv.summary}
         onChange={(v) => updateField("summary", v)}
+        resizable
       />
     </Section>
   );
