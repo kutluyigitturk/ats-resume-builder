@@ -101,7 +101,7 @@ export default function CompletenessPanel({ cv, isOpen }) {
               : score >= 50
               ? "#bfdbfe"
               : score >= 25
-              ? "#fde68a"
+              ? "#F5F5DC"
               : "#fecaca"
           }`,
           boxShadow:
@@ -112,7 +112,7 @@ export default function CompletenessPanel({ cv, isOpen }) {
               : score >= 50
               ? "inset 0 2px 0 rgba(59,130,246,0.85), 0 10px 24px rgba(37,99,235,0.06)"
               : score >= 25
-              ? "inset 0 2px 0 rgba(245,158,11,0.85), 0 10px 24px rgba(245,158,11,0.06)"
+              ? "inset 0 2px 0 rgba(192,88,0,0.85), 0 10px 24px rgba(192,88,0,0.06)"
               : "inset 0 2px 0 rgba(239,68,68,0.85), 0 10px 24px rgba(239,68,68,0.06)",
         }}
       >

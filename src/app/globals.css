@@ -247,57 +247,23 @@ body {
 
 /* ─── Completeness Indicator ─────────────────────── */
 
-@keyframes completeness-scale-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-  70% {
-    opacity: 1;
-    transform: scale(1.04);
-  }
-  85% {
-    transform: scale(0.98);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes completeness-scale-out {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-}
-
-.completeness-enter {
-  animation: completeness-scale-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-}
-
-.completeness-exit {
-  animation: completeness-scale-out 0.2s ease-in forwards;
-}
-
 .completeness-card-wrapper {
   display: grid;
-  transition: grid-template-rows 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
-              opacity 0.25s ease;
   overflow: hidden;
 }
 
 .completeness-card-open {
   grid-template-rows: 1fr;
   opacity: 1;
+  transition: grid-template-rows 0.4s cubic-bezier(0.25, 1, 0.5, 1),
+              opacity 0.3s ease;
 }
 
 .completeness-card-closed {
   grid-template-rows: 0fr;
   opacity: 0;
+  transition: grid-template-rows 0.3s cubic-bezier(0.5, 0, 0.75, 0),
+              opacity 0.2s ease;
 }
 
 .completeness-card-wrapper > div {
