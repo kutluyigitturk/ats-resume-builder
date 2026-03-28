@@ -121,12 +121,10 @@ function BuilderInner() {
               onCompletenessToggle={() => setCompletenessOpen((prev) => !prev)}
             />
 
-            <div className="px-3">
-              <CompletenessPanel cv={cv} isOpen={completenessOpen} />
-            </div>
-
             <div className="w-full px-3 pb-5">
               <div className="space-y-2.5">
+                <CompletenessPanel cv={cv} isOpen={completenessOpen} />
+                
                 <PersonalInfoForm
                   cv={cv}
                   updateField={cvData.updateField}
