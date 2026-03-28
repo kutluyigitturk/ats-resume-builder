@@ -113,7 +113,7 @@ function BuilderInner() {
       >
         {builderMode === "editor" ? (
           <>
-            <PdfNameEditor {...pdfExport} />
+            <PdfNameEditor {...pdfExport} cv={cv} />
 
             <div className="w-full px-3 pb-5">
               <div className="space-y-2.5">

@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { BackArrowIcon, PencilIcon } from "@/icons";
+import CompletenessIndicator from "@/components/builder/CompletenessIndicator";
 
 export default function PdfNameEditor({
   pdfName,
   setPdfName,
   editingName,
   setEditingName,
+  cv,
 }) {
   return (
     <div className="sticky top-0 z-20 bg-gradient-to-b from-[#f3f4f6] via-[#f3f4f6] to-transparent px-3 pb-2.5 pt-3">
@@ -49,7 +51,7 @@ export default function PdfNameEditor({
             </button>
           </div>
 
-          <div className="h-8 w-8" />
+          <CompletenessIndicator cv={cv} />
         </div>
       </div>
     </div>
