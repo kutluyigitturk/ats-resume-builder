@@ -1,14 +1,42 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronDownIcon } from "@/icons";
+import { useState, useRef, useEffect } from "react";
+import { ChevronDownIcon, PencilIcon } from "@/icons";
 
-export default function Section({ title, icon, isOpen, onToggle, tips, children }) {
+export default function Section({ title, icon, isOpen, onToggle, onTitleChange, tips, children }) {
   const [tipsOpen, setTipsOpen] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [editValue, setEditValue] = useState(title);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    setEditValue(title);
+  }, [title]);
+
+  useEffect(() => {
+    if (editingTitle && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingTitle]);
+
+  const startEditing = (e) => {
+    e.stopPropagation();
+    setEditValue(title);
+    setEditingTitle(true);
+  };
+
+  const saveTitle = () => {
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed !== title && onTitleChange) {
+      onTitleChange(trimmed);
+    }
+    setEditingTitle(false);
+  };
 
   return (
     <section
-      className={`mx-3 my-2.5 overflow-hidden rounded-[18px] border bg-white transition-all duration-200 ${
+      className={`overflow-hidden rounded-[18px] border bg-white transition-all duration-200 ${
         isOpen
           ? "border-blue-200 shadow-[inset_0_2px_0_rgba(59,130,246,0.85),0_10px_24px_rgba(37,99,235,0.06)]"
           : "border-slate-200 shadow-[0_1px_2px_rgba(15,23,42,0.05),0_1px_2px_rgba(15,23,42,0.05)]"
@@ -17,16 +45,41 @@ export default function Section({ title, icon, isOpen, onToggle, tips, children 
       <button
         type="button"
         onClick={onToggle}
-        className={`flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors ${
+        className={`group flex w-full items-center justify-between px-4 py-3.5 text-left transition-colors ${
           isOpen ? "bg-blue-50/[0.35]" : "hover:bg-slate-50/80"
         }`}
       >
         <div className="flex min-w-0 items-center gap-2.5">
           {icon && <span className="flex shrink-0 items-center justify-center text-blue-600">{icon}</span>}
 
-          <span className="truncate text-[15px] font-semibold tracking-[-0.01em] text-slate-900">
-            {title}
-          </span>
+          {editingTitle ? (
+            <input
+              ref={inputRef}
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={saveTitle}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveTitle();
+                if (e.key === "Escape") setEditingTitle(false);
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="min-w-0 border-b border-slate-300 bg-transparent text-[15px] font-semibold tracking-[-0.01em] text-slate-900 outline-none"
+            />
+          ) : (
+            <span className="flex items-center gap-1.5">
+              <span className="truncate text-[15px] font-semibold tracking-[-0.01em] text-slate-900">
+                {title}
+              </span>
+              {onTitleChange && (
+                <span
+                  onClick={startEditing}
+                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded opacity-0 transition-opacity group-hover:opacity-60 hover:!opacity-100 cursor-pointer"
+                >
+                  <PencilIcon size={11} />
+                </span>
+              )}
+            </span>
+          )}
         </div>
 
         <span

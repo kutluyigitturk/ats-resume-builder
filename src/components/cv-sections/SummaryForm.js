@@ -5,10 +5,11 @@ import { FormTextarea } from "@/components/ui/FormInput";
 import sectionTips from "@/data/sectionTips";
 import { DocumentIcon } from "@/icons";
 
-export default function SummaryForm({ cv, updateField, isOpen, onToggle }) {
+export default function SummaryForm({ cv, updateField, isOpen, onToggle, sectionTitle, onSectionTitleChange }) {
   return (
     <Section
-      title="Professional Summary"
+      title={sectionTitle}
+      onTitleChange={onSectionTitleChange}
       icon={<DocumentIcon />}
       tips={sectionTips.summary}
       isOpen={isOpen}

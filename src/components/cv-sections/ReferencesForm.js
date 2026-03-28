@@ -16,10 +16,13 @@ export default function ReferencesForm({
   moveItemDown,
   isOpen,
   onToggle,
+  sectionTitle, 
+  onSectionTitleChange,
 }) {
   return (
     <Section
-      title="References"
+      title={sectionTitle}
+      onTitleChange={onSectionTitleChange}
       icon={<UsersIcon />}
       tips={sectionTips.references}
       isOpen={isOpen}

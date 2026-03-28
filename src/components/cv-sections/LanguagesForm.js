@@ -16,10 +16,13 @@ export default function LanguagesForm({
   moveItemDown,
   isOpen,
   onToggle,
+  sectionTitle, 
+  onSectionTitleChange,
 }) {
   return (
     <Section
-      title="Languages"
+      title={sectionTitle}
+      onTitleChange={onSectionTitleChange}
       icon={<LanguagesIcon />}
       tips={sectionTips.languages}
       isOpen={isOpen}

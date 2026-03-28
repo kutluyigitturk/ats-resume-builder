@@ -18,10 +18,13 @@ export default function EducationForm({
   moveItemDown,
   isOpen,
   onToggle,
+  sectionTitle, 
+  onSectionTitleChange,
 }) {
   return (
     <Section
-      title="Education"
+      title={sectionTitle}
+      onTitleChange={onSectionTitleChange}
       icon={<GraduationCapIcon />}
       tips={sectionTips.education}
       isOpen={isOpen}

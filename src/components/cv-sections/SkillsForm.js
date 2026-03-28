@@ -16,10 +16,13 @@ export default function SkillsForm({
   moveItemDown,
   isOpen,
   onToggle,
+  sectionTitle, 
+  onSectionTitleChange,
 }) {
   return (
     <Section
-      title="Technical Skills"
+      title={sectionTitle}
+      onTitleChange={onSectionTitleChange}
       icon={<WrenchIcon />}
       tips={sectionTips.skills}
       isOpen={isOpen}

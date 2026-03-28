@@ -109,6 +109,16 @@ function BuilderInner() {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
+  const getSectionTitle = (key, fallback) =>
+    cv.sectionTitles?.[key] || fallback;
+
+  const updateSectionTitle = (key, value) => {
+      cvData.updateField("sectionTitles", {
+        ...cv.sectionTitles,
+        [key]: value,
+      });
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-200">
       <div
@@ -128,77 +138,97 @@ function BuilderInner() {
                 <CompletenessPanel cv={cv} isOpen={completenessOpen} />
 
                 <PersonalInfoForm
-                  cv={cv}
-                  updateField={cvData.updateField}
-                  isOpen={openSections.personal}
-                  onToggle={() => toggleSection("personal")}
+                    cv={cv}
+                    updateField={cvData.updateField}
+                    isOpen={openSections.personal}
+                    onToggle={() => toggleSection("personal")}
+                    sectionTitle={getSectionTitle("personal", "Personal Information")}
+                    onSectionTitleChange={(v) => updateSectionTitle("personal", v)}
                 />
 
                 <SummaryForm
-                  cv={cv}
-                  updateField={cvData.updateField}
-                  isOpen={openSections.summary}
-                  onToggle={() => toggleSection("summary")}
+                    cv={cv}
+                    updateField={cvData.updateField}
+                    isOpen={openSections.summary}
+                    onToggle={() => toggleSection("summary")}
+                    sectionTitle={getSectionTitle("summary", "Professional Summary")}
+                    onSectionTitleChange={(v) => updateSectionTitle("summary", v)}
                 />
 
                 <ExperienceForm
-                  experiences={cv.experiences}
-                  {...cvData}
-                  isOpen={openSections.experience}
-                  onToggle={() => toggleSection("experience")}
+                    experiences={cv.experiences}
+                    {...cvData}
+                    isOpen={openSections.experience}
+                    onToggle={() => toggleSection("experience")}
+                    sectionTitle={getSectionTitle("experience", "Work Experience")}
+                    onSectionTitleChange={(v) => updateSectionTitle("experience", v)}
                 />
 
                 <EducationForm
-                  education={cv.education}
-                  {...cvData}
-                  isOpen={openSections.education}
-                  onToggle={() => toggleSection("education")}
+                    education={cv.education}
+                    {...cvData}
+                    isOpen={openSections.education}
+                    onToggle={() => toggleSection("education")}
+                    sectionTitle={getSectionTitle("education", "Education")}
+                    onSectionTitleChange={(v) => updateSectionTitle("education", v)}
                 />
 
                 <SkillsForm
-                  skills={cv.skills}
-                  {...cvData}
-                  isOpen={openSections.skills}
-                  onToggle={() => toggleSection("skills")}
+                    skills={cv.skills}
+                    {...cvData}
+                    isOpen={openSections.skills}
+                    onToggle={() => toggleSection("skills")}
+                    sectionTitle={getSectionTitle("skills", "Technical Skills")}
+                    onSectionTitleChange={(v) => updateSectionTitle("skills", v)}
                 />
 
                 <ProjectsForm
-                  projects={cv.projects}
-                  {...cvData}
-                  isOpen={openSections.projects}
-                  onToggle={() => toggleSection("projects")}
-                  templateId={templateId}
+                    projects={cv.projects}
+                    {...cvData}
+                    isOpen={openSections.projects}
+                    onToggle={() => toggleSection("projects")}
+                    templateId={templateId}
+                    sectionTitle={getSectionTitle("projects", "Technical Projects and Research")}
+                    onSectionTitleChange={(v) => updateSectionTitle("projects", v)}
                 />
 
                 <VolunteeringForm
-                  volunteering={cv.volunteering}
-                  {...cvData}
-                  isOpen={openSections.volunteering}
-                  onToggle={() => toggleSection("volunteering")}
+                    volunteering={cv.volunteering}
+                    {...cvData}
+                    isOpen={openSections.volunteering}
+                    onToggle={() => toggleSection("volunteering")}
+                    sectionTitle={getSectionTitle("volunteering", "Volunteering & Leadership")}
+                    onSectionTitleChange={(v) => updateSectionTitle("volunteering", v)}
                 />
 
                 <CertificationsForm
-                  certifications={cv.certifications}
-                  {...cvData}
-                  isOpen={openSections.certifications}
-                  onToggle={() => toggleSection("certifications")}
-                  templateId={templateId}
+                    certifications={cv.certifications}
+                    {...cvData}
+                    isOpen={openSections.certifications}
+                    onToggle={() => toggleSection("certifications")}
+                    templateId={templateId}
+                    sectionTitle={getSectionTitle("certifications", "Certifications")}
+                    onSectionTitleChange={(v) => updateSectionTitle("certifications", v)}
                 />
 
                 <LanguagesForm
-                  languages={cv.languages}
-                  {...cvData}
-                  isOpen={openSections.languages}
-                  onToggle={() => toggleSection("languages")}
+                    languages={cv.languages}
+                    {...cvData}
+                    isOpen={openSections.languages}
+                    onToggle={() => toggleSection("languages")}
+                    sectionTitle={getSectionTitle("languages", "Languages")}
+                    onSectionTitleChange={(v) => updateSectionTitle("languages", v)}
                 />
 
                 <ReferencesForm
-                  references={cv.references}
-                  hideReferences={hideReferences}
-                  setHideReferences={setHideReferences}
-                  {...cvData}
-                  isOpen={openSections.references}
-                  onToggle={() => toggleSection("references")}
+                    references={cv.references}
+                    hideReferences={hideReferences}
+                    setHideReferences={setHideReferences}
+                    {...cvData}
+                    isOpen={openSections.references}
+                    onToggle={() => toggleSection("references")}
+                    sectionTitle={getSectionTitle("references", "References")}
+                    onSectionTitleChange={(v) => updateSectionTitle("references", v)}
                 />
               </div>
             </div>

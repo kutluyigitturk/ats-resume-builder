@@ -22,10 +22,13 @@ export default function ProjectsForm({
   isOpen,
   onToggle,
   templateId,
+  sectionTitle, 
+  onSectionTitleChange,
 }) {
   return (
     <Section
-      title="Projects and Research"
+      title={sectionTitle}
+      onTitleChange={onSectionTitleChange}
       icon={<FolderIcon />}
       tips={sectionTips.projects}
       isOpen={isOpen}

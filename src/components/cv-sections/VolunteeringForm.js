@@ -21,10 +21,13 @@ export default function VolunteeringForm({
   updateBullet,
   isOpen,
   onToggle,
+  sectionTitle, 
+  onSectionTitleChange,
 }) {
   return (
     <Section
-      title="Volunteering & Leadership"
+      title={sectionTitle}
+      onTitleChange={onSectionTitleChange}
       icon={<VolunteeringIcon />}
       tips={sectionTips.volunteering}
       isOpen={isOpen}

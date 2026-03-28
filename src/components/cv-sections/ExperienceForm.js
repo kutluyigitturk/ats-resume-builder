@@ -21,10 +21,13 @@ export default function ExperienceForm({
   updateBullet,
   isOpen,
   onToggle,
+  sectionTitle,
+  onSectionTitleChange,
 }) {
   return (
     <Section
-      title="Work Experience"
+      title={sectionTitle}
+      onTitleChange={onSectionTitleChange}
       icon={<BriefcaseIcon />}
       tips={sectionTips.experience}
       isOpen={isOpen}

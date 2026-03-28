@@ -5,10 +5,11 @@ import FormInput from "@/components/ui/FormInput";
 import sectionTips from "@/data/sectionTips";
 import { PersonIcon } from "@/icons";
 
-export default function PersonalInfoForm({ cv, updateField, isOpen, onToggle }) {
+export default function PersonalInfoForm({ cv, updateField, isOpen, onToggle, sectionTitle, onSectionTitleChange }) {
   return (
     <Section
-      title="Personal Information"
+      title={sectionTitle}
+      onTitleChange={onSectionTitleChange}
       icon={<PersonIcon />}
       tips={sectionTips.personal}
       isOpen={isOpen}

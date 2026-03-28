@@ -19,10 +19,13 @@ export default function CertificationsForm({
   isOpen,
   onToggle,
   templateId,
+  sectionTitle, 
+  onSectionTitleChange,
 }) {
   return (
     <Section
-      title="Certifications"
+      title={sectionTitle}
+      onTitleChange={onSectionTitleChange}
       icon={<CertificationIcon />}
       tips={sectionTips.certifications}
       isOpen={isOpen}
