@@ -16,6 +16,7 @@ import PdfNameEditor from "@/components/builder/PdfNameEditor";
 import Toolbar from "@/components/builder/Toolbar";
 import ZoomControls from "@/components/builder/ZoomControls";
 import ResizableDivider from "@/components/builder/ResizableDivider";
+import CompletenessPanel from "@/components/builder/CompletenessPanel";
 
 // CV section forms
 import PersonalInfoForm from "@/components/cv-sections/PersonalInfoForm";
@@ -79,6 +80,7 @@ function BuilderInner() {
   const [hideReferences, setHideReferences] = useState(false);
   const [zoom, setZoom] = useState(100);
   const [builderMode, setBuilderMode] = useState("editor");
+  const [completenessOpen, setCompletenessOpen] = useState(false);
 
   const { styleSettings, updateStyle, reorderSections } = useStyleSettings(resumeId);
 
@@ -113,7 +115,15 @@ function BuilderInner() {
       >
         {builderMode === "editor" ? (
           <>
-            <PdfNameEditor {...pdfExport} cv={cv} />
+            <PdfNameEditor
+              {...pdfExport}
+              cv={cv}
+              onCompletenessToggle={() => setCompletenessOpen((prev) => !prev)}
+            />
+
+            <div className="px-3">
+              <CompletenessPanel cv={cv} isOpen={completenessOpen} />
+            </div>
 
             <div className="w-full px-3 pb-5">
               <div className="space-y-2.5">

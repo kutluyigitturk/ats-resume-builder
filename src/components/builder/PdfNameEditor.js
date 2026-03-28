@@ -10,6 +10,7 @@ export default function PdfNameEditor({
   editingName,
   setEditingName,
   cv,
+  onCompletenessToggle,
 }) {
   return (
     <div className="sticky top-0 z-20 bg-gradient-to-b from-[#f3f4f6] via-[#f3f4f6] to-transparent px-3 pb-2.5 pt-3">
@@ -51,7 +52,7 @@ export default function PdfNameEditor({
             </button>
           </div>
 
-          <CompletenessIndicator cv={cv} />
+          <CompletenessIndicator cv={cv} onToggle={onCompletenessToggle} />
         </div>
       </div>
     </div>
