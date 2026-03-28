@@ -1,8 +1,20 @@
 "use client";
 
-import { TemplatesIcon, SettingsIcon, DownloadIcon } from "@/icons";
+import { TemplatesIcon, SettingsIcon, DownloadIcon, UndoIcon, RedoIcon } from "@/icons";
 
-export default function Toolbar({ downloading, onDownloadPDF, onLayoutStyle, onTemplates, builderMode }) {
+export default function Toolbar({
+  downloading,
+  onDownloadPDF,
+  onLayoutStyle,
+  onTemplates,
+  builderMode,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
+  undoFlash,
+  redoFlash,
+}) {
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-2">
@@ -26,6 +38,36 @@ export default function Toolbar({ downloading, onDownloadPDF, onLayoutStyle, onT
         >
           <SettingsIcon />
           <span>Layout & Style</span>
+        </button>
+      </div>
+
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={onUndo}
+          disabled={!canUndo}
+          className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-150 ${
+            canUndo
+              ? "text-slate-500 hover:bg-slate-100 hover:text-slate-700 active:scale-95"
+              : "text-slate-300 cursor-not-allowed"
+          } ${undoFlash ? "bg-slate-100 scale-90" : ""}`}
+          title="Undo (Ctrl+Z)"
+        >
+          <UndoIcon size={18} />
+        </button>
+
+        <button
+          type="button"
+          onClick={onRedo}
+          disabled={!canRedo}
+          className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-150 ${
+            canRedo
+              ? "text-slate-500 hover:bg-slate-100 hover:text-slate-700 active:scale-95"
+              : "text-slate-300 cursor-not-allowed"
+          } ${redoFlash ? "bg-slate-100 scale-90" : ""}`}
+          title="Redo (Ctrl+Y)"
+        >
+          <RedoIcon size={18} />
         </button>
       </div>
 

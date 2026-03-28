@@ -10,6 +10,7 @@ import useResizablePanel from "@/hooks/useResizablePanel";
 import usePdfExport from "@/hooks/usePdfExport";
 import useStyleSettings from "@/hooks/useStyleSettings";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import useUndoRedo from "@/hooks/useUndoRedo";
 
 // Builder components
 import PdfNameEditor from "@/components/builder/PdfNameEditor";
@@ -64,6 +65,7 @@ function BuilderInner() {
 
   const cvData = useCVData(resumeId);
   const { cv } = cvData;
+  const undoRedo = useUndoRedo(cv, cvData.setCv);
 
   // Update "last edited" timestamp when CV data changes
   useEffect(() => {
@@ -124,7 +126,7 @@ function BuilderInner() {
             <div className="w-full px-3 pb-5">
               <div className="space-y-2.5">
                 <CompletenessPanel cv={cv} isOpen={completenessOpen} />
-                
+
                 <PersonalInfoForm
                   cv={cv}
                   updateField={cvData.updateField}
@@ -223,6 +225,12 @@ function BuilderInner() {
               onLayoutStyle={() => setBuilderMode("layout")}
               onTemplates={() => setTemplateModalOpen(true)}
               builderMode={builderMode}
+              onUndo={undoRedo.undo}
+              onRedo={undoRedo.redo}
+              canUndo={undoRedo.canUndo}
+              canRedo={undoRedo.canRedo}
+              undoFlash={undoRedo.undoFlash}
+              redoFlash={undoRedo.redoFlash}
             />
           </div>
 
