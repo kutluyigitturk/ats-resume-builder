@@ -853,6 +853,8 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
       lineHeight: resolvedStyles.page.lineHeight,
       color: "#333",
       boxSizing: "border-box",
+      overflowWrap: "break-word",
+      wordBreak: "break-word",
     }),
     [resolvedStyles]
   );

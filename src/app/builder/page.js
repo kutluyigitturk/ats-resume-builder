@@ -40,7 +40,7 @@ import TemplateModal from "@/components/builder/TemplateModal";
 import { defaultTemplateId, getTemplate } from "@/data/templates";
 
 // Resume manager
-import { touchResume, getResumes } from "@/lib/resumeManager";
+import { touchResume, getResumes, updateResumeTemplateId } from "@/lib/resumeManager";
 
 function BuilderInner() {
   const searchParams = useSearchParams();
@@ -243,6 +243,7 @@ function BuilderInner() {
           const tpl = getTemplate(newTemplateId);
           updateStyle("primaryFont", tpl.defaultPrimaryFont);
           updateStyle("secondaryFont", tpl.defaultSecondaryFont);
+          if (resumeId) updateResumeTemplateId(resumeId, newTemplateId);
         }}
         cv={cv}
         hideReferences={hideReferences}

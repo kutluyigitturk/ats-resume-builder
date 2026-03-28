@@ -123,6 +123,13 @@ export function touchResume(id) {
   saveResumes(list);
 }
 
+export function updateResumeTemplateId(id, templateId) {
+  const list = getResumes().map((r) =>
+    r.id === id ? { ...r, templateId, updatedAt: new Date().toISOString() } : r
+  );
+  saveResumes(list);
+}
+
 export function duplicateResume(id) {
   const source = getResumes().find((r) => r.id === id);
   if (!source) return null;
@@ -134,7 +141,7 @@ export function duplicateResume(id) {
   // Add to registry
   const list = getResumes();
   const sourceIndex = list.findIndex((r) => r.id === id);
-  list.splice(sourceIndex + 1, 0, { id: newId, name: newName, createdAt: now, updatedAt: now });
+  list.splice(sourceIndex + 1, 0, { id: newId, name: newName, templateId: source.templateId, createdAt: now, updatedAt: now });
   saveResumes(list);
 
   // Copy all data
@@ -217,8 +224,13 @@ function isEmptyCV(cvData) {
 export function cleanupEmptyResumes() {
   const list = getResumes();
   const toDelete = [];
+  const GRACE_PERIOD_MS = 60_000; // Don't delete resumes created less than 60s ago
+  const now = Date.now();
 
   for (const resume of list) {
+    const createdAt = new Date(resume.createdAt).getTime();
+    if (now - createdAt < GRACE_PERIOD_MS) continue;
+
     const cvData = readJSON(cvDataKey(resume.id));
     if (isEmptyCV(cvData)) {
       toDelete.push(resume.id);

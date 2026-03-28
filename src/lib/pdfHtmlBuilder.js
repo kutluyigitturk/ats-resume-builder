@@ -60,6 +60,8 @@ function buildDynamicCss(settings, templateId) {
       font-size: ${bodySize};
       line-height: ${lineHeight};
       color: #333;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .cv-page {

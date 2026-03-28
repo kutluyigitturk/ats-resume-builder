@@ -17,6 +17,8 @@ export const cvStyles = {
     fontSize: "11pt",
     lineHeight: "1.5",
     color: "#333",
+    overflowWrap: "break-word",
+    wordBreak: "break-word",
   },
 
   name: {

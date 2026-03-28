@@ -98,7 +98,13 @@ function MiniCVPreview({ resumeId }) {
 
 function ResumeCard({ resume, onEdit, onRename, onDuplicate, onDelete }) {
   const timeAgo = formatTimeAgo(resume.updatedAt);
-  const isAdvanced = resume.templateId === "advanced";
+
+  const templateBadge = {
+    classic: { label: "Classic", className: "bg-slate-100 text-slate-500" },
+    advanced: { label: "Advanced", className: "bg-blue-50 text-blue-600" },
+    professional: { label: "Professional", className: "bg-violet-50 text-violet-600" },
+  };
+  const badge = templateBadge[resume.templateId] || templateBadge.classic;
 
   return (
     <div className="overflow-hidden rounded-xl shadow-md transition-all duration-300 ease-in-out hover:shadow-lg" style={{ background: "#fff" }}>
@@ -115,10 +121,8 @@ function ResumeCard({ resume, onEdit, onRename, onDuplicate, onDelete }) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-medium text-slate-400">Resume Title:</span>
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                isAdvanced ? "bg-blue-50 text-blue-600" : "bg-slate-100 text-slate-500"
-              }`}>
-                {isAdvanced ? "Advanced" : "Classic"}
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${badge.className}`}>
+                  {badge.label}
               </span>
             </div>
             <h3 className="text-base font-bold text-slate-900 truncate mb-1">
