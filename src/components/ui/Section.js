@@ -50,7 +50,7 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
 
     const maxDistance = 250;
     const minOpacity = 0.08;
-    const maxOpacity = 0.9;
+    const maxOpacity = 1;
 
     if (distance >= maxDistance) {
       setPencilOpacity(minOpacity);
@@ -110,13 +110,13 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
               </span>
               {onTitleChange && (
                 <span
-                  ref={pencilRef}
-                  onClick={startEditing}
-                  className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-slate-400 cursor-pointer"
-                  style={{
-                    opacity: pencilOpacity,
-                    transition: "opacity 0.15s ease",
-                  }}
+                    ref={pencilRef}
+                    onClick={startEditing}
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md cursor-pointer transition-colors text-slate-400 hover:text-slate-700 active:text-slate-900"
+                    style={{
+                      opacity: pencilOpacity,
+                      transition: "opacity 0.15s ease",
+                    }}
                 >
                   <PencilIcon size={11} />
                 </span>
