@@ -90,19 +90,22 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
           {icon && <span className="flex shrink-0 items-center justify-center text-blue-600">{icon}</span>}
 
           {editingTitle ? (
-            <input
-              ref={inputRef}
-              value={editValue}
-              onChange={(e) => setEditValue(e.target.value)}
-              onBlur={saveTitle}
-              onKeyDown={(e) => {
-                e.stopPropagation();
-                if (e.key === "Enter") saveTitle();
-                if (e.key === "Escape") setEditingTitle(false);
-              }}
-              onClick={(e) => e.stopPropagation()}
-              className="min-w-0 bg-transparent text-[15px] font-semibold tracking-[-0.01em] text-slate-900 outline-none"
-            />
+              <span className="flex items-center gap-1.5">
+                <input
+                  ref={inputRef}
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onBlur={saveTitle}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    if (e.key === "Enter") saveTitle();
+                    if (e.key === "Escape") setEditingTitle(false);
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="min-w-0 bg-transparent text-[15px] font-semibold tracking-[-0.01em] text-slate-900 outline-none"
+                />
+                <span className="h-6 w-6 shrink-0" />
+              </span>
           ) : (
             <span className="flex items-center gap-1.5">
               <span className="truncate text-[15px] font-semibold tracking-[-0.01em] text-slate-900">
