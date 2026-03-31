@@ -16,7 +16,7 @@ export default function ReferencesForm({
   moveItemDown,
   isOpen,
   onToggle,
-  sectionTitle, 
+  sectionTitle,
   onSectionTitleChange,
 }) {
   return (
@@ -56,13 +56,13 @@ export default function ReferencesForm({
             <div className="grid grid-cols-2 gap-3">
               <FormInput
                 label="Phone"
-                placeholder="Phone"
+                placeholder="+90 5XX XXX XXXX"
                 value={ref.phone}
-                onChange={(v) => updateItem("references", ref.id, "phone", v)}
+                onChange={(v) => updateItem("references", ref.id, "phone", v.replace(/[^0-9+\-\s()]/g, ""))}
               />
               <FormInput
                 label="Email"
-                placeholder="Email"
+                placeholder="email@example.com"
                 value={ref.email}
                 onChange={(v) => updateItem("references", ref.id, "email", v)}
               />
