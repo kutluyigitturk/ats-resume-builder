@@ -36,9 +36,9 @@ export default function PersonalInfoForm({ cv, updateField, isOpen, onToggle, se
         />
         <FormInput
           label="Phone"
-          placeholder="+90 5XX XXX XX XX"
+          placeholder="+90 5XX XXX XXXX"
           value={cv.phone}
-          onChange={(v) => updateField("phone", v)}
+          onChange={(v) => updateField("phone", v.replace(/[^0-9+\-\s()]/g, ""))}
         />
         <FormInput
           label="City"
