@@ -635,7 +635,7 @@ function buildReferencesHtml(visibleReferences, hideReferences, t = {}) {
       return `
         <div class="mb-8">
           <div class="reference-title">
-            ${escapeHtml(ref.name || "")}${hasValue(ref.company) ? ` — ${escapeHtml(ref.company)}` : ""}
+            ${hasValue(ref.company) ? ` | ${escapeHtml(ref.company)}` : ""}
           </div>
           ${contact ? `<div class="reference-contact">${contact}</div>` : ""}
         </div>

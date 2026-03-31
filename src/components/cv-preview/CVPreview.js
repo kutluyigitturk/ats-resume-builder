@@ -670,7 +670,7 @@ function buildReferencesBlocks(cv, styles, isFirst, hideReferences) {
           <div style={{ marginBottom: "8px" }}>
             <div style={styles.referenceTitle}>
               {ref.name}
-              {hasValue(ref.company) ? ` — ${ref.company}` : ""}
+              {hasValue(ref.company) ? ` | ${ref.company}` : ""}
             </div>
             <div style={styles.referenceContact}>
               {ref.phone}
