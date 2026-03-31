@@ -14,8 +14,8 @@ function hasContactInfo(cv) {
 
 function formatContact(cv) {
   const parts = [cv.phone, cv.email, cv.location].filter(hasValue);
-  if (hasValue(cv.linkedin)) parts.push("LinkedIn");
-  if (hasValue(cv.website)) parts.push("Portfolio");
+  if (hasValue(cv.linkedin)) parts.push(cv.sectionTitles?.linkedinLabel || "LinkedIn");
+  if (hasValue(cv.website)) parts.push(cv.sectionTitles?.portfolioLabel || "Portfolio");
   return parts.join(" | ");
 }
 
@@ -88,7 +88,7 @@ function buildSummaryBlocks(cv, styles, isFirst) {
     {
       key: "summary-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>Professional Summary</h2>,
+      element: <h2 style={titleStyle}>{cv.sectionTitles?.summary || "Professional Summary"}</h2>,
     },
     {
       key: "summary-content",
@@ -110,7 +110,7 @@ function buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether) {
     {
       key: "exp-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>Work Experience</h2>,
+      element: <h2 style={titleStyle}>{cv.sectionTitles?.experience || "Work Experience"}</h2>,
     },
   ];
 
@@ -213,7 +213,7 @@ function buildEducationBlocks(cv, styles, isFirst) {
     {
       key: "edu-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>Education</h2>,
+      element: <h2 style={titleStyle}>{cv.sectionTitles?.education || "Education"}</h2>,
     },
   ];
 
@@ -275,7 +275,7 @@ function buildSkillsBlocks(cv, styles, isFirst, hideReferences, templateId) {
     {
       key: "skills-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>Technical Skills</h2>,
+      element: <h2 style={titleStyle}>{cv.sectionTitles?.skills || "Technical Skills"}</h2>,
     },
   ];
 
@@ -338,7 +338,7 @@ function buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether) {
     {
       key: "projects-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>Technical Projects and Research</h2>,
+      element: <h2 style={titleStyle}>{cv.sectionTitles?.projects || "Technical Projects and Research"}</h2>,
     },
   ];
 
@@ -447,7 +447,7 @@ function buildVolunteeringBlocks(cv, styles, isFirst, keepTogether) {
     {
       key: "volunteering-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>Volunteering & Leadership</h2>,
+      element: <h2 style={titleStyle}>{cv.sectionTitles?.volunteering || "Volunteering & Leadership"}</h2>,
     },
   ];
 
@@ -546,7 +546,7 @@ function buildCertificationsBlocks(cv, styles, isFirst, templateId) {
     {
       key: "certifications-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>Certifications</h2>,
+      element: <h2 style={titleStyle}>{cv.sectionTitles?.certifications || "Certifications"}</h2>,
     },
   ];
 
@@ -602,7 +602,7 @@ function buildLanguagesBlocks(cv, styles, isFirst) {
     {
       key: "languages-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>Languages</h2>,
+      element: <h2 style={titleStyle}>{cv.sectionTitles?.languages || "Languages"}</h2>,
     },
   ];
 
@@ -641,7 +641,7 @@ function buildReferencesBlocks(cv, styles, isFirst, hideReferences) {
     {
       key: "ref-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>References</h2>,
+      element: <h2 style={titleStyle}>{cv.sectionTitles?.references || "References"}</h2>,
     },
   ];
 
@@ -751,12 +751,12 @@ function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "cla
                   )}
                   {hasValue(cv.linkedin) && (
                     <a href={cv.linkedin.startsWith("http") ? cv.linkedin : `https://${cv.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#555", textDecoration: "none" }}>
-                      <LinkedInIcon size={13} /> LinkedIn
+                      <LinkedInIcon size={13} /> {cv.sectionTitles?.linkedinLabel || "LinkedIn"}
                     </a>
                   )}
                   {hasValue(cv.website) && (
                     <a href={cv.website.startsWith("http") ? cv.website : `https://${cv.website}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#555", textDecoration: "none" }}>
-                      <LinkIcon size={13} /> Portfolio
+                      <LinkIcon size={13} /> {cv.sectionTitles?.portfolioLabel || "Portfolio"}
                     </a>
                   )}
                 </div>

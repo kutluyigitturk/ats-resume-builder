@@ -21,18 +21,18 @@ const contactIcons = {
   website: '<svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 3px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
 };
 
-function buildAdvancedContactHtml(cv) {
+function buildAdvancedContactHtml(cv, t) {
   const items = [];
   if (hasValue(cv.email)) items.push(`<span>${contactIcons.email}${escapeHtml(cv.email)}</span>`);
   if (hasValue(cv.phone)) items.push(`<span>${contactIcons.phone}${escapeHtml(cv.phone)}</span>`);
   if (hasValue(cv.location)) items.push(`<span>${contactIcons.location}${escapeHtml(cv.location)}</span>`);
   if (hasValue(cv.linkedin)) {
     const linkedinHref = cv.linkedin.startsWith("http") ? escapeHtml(cv.linkedin) : `https://${escapeHtml(cv.linkedin)}`;
-    items.push(`<a href="${linkedinHref}" target="_blank" style="color:#555;text-decoration:none;">${contactIcons.linkedin}LinkedIn</a>`);
+    items.push(`<a href="${linkedinHref}" target="_blank" style="color:#555;text-decoration:none;">${contactIcons.linkedin}${escapeHtml(t.linkedinLabel || "LinkedIn")}</a>`);
   }
   if (hasValue(cv.website)) {
     const websiteHref = cv.website.startsWith("http") ? escapeHtml(cv.website) : `https://${escapeHtml(cv.website)}`;
-    items.push(`<a href="${websiteHref}" target="_blank" style="color:#555;text-decoration:none;">${contactIcons.website}Portfolio</a>`);
+    items.push(`<a href="${websiteHref}" target="_blank" style="color:#555;text-decoration:none;">${contactIcons.website}${escapeHtml(t.portfolioLabel || "Portfolio")}</a>`);
   }
   return items.join('&nbsp;&nbsp;&nbsp;');
 }
@@ -248,12 +248,13 @@ function buildDynamicCss(settings, templateId) {
 export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateId = "classic", pdfName = "Resume") {
   const settings = styleSettings || defaultStyleSettings;
   const dynamicCss = buildDynamicCss(settings, templateId);
+  const t = cv.sectionTitles || {};
 
   const name = escapeHtml(cv.name || "");
   const title = escapeHtml(cv.title || "");
   const contactParts = [cv.phone, cv.email, cv.location].filter(hasValue).map(escapeHtml);
-  if (hasValue(cv.linkedin)) contactParts.push(`<a href="${escapeHtml(cv.linkedin.startsWith('http') ? cv.linkedin : 'https://' + cv.linkedin)}" style="color:#333;text-decoration:none;">LinkedIn</a>`);
-  if (hasValue(cv.website)) contactParts.push(`<a href="${escapeHtml(cv.website.startsWith('http') ? cv.website : 'https://' + cv.website)}" style="color:#333;text-decoration:none;">Portfolio</a>`);
+  if (hasValue(cv.linkedin)) contactParts.push(`<a href="${escapeHtml(cv.linkedin.startsWith('http') ? cv.linkedin : 'https://' + cv.linkedin)}" style="color:#333;text-decoration:none;">${escapeHtml(t.linkedinLabel || "LinkedIn")}</a>`);
+  if (hasValue(cv.website)) contactParts.push(`<a href="${escapeHtml(cv.website.startsWith('http') ? cv.website : 'https://' + cv.website)}" style="color:#333;text-decoration:none;">${escapeHtml(t.portfolioLabel || "Portfolio")}</a>`);
   const contact = contactParts.join(" | ");
   const hasContact = hasValue(cv.email) || hasValue(cv.phone) || hasValue(cv.location) || hasValue(cv.linkedin) || hasValue(cv.website);
   const summary = escapeHtml(cv.summary || "");
@@ -267,18 +268,18 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
     summary: () =>
       summary
         ? `
-          <div class="cv-section-title">Professional Summary</div>
+          <div class="cv-section-title">${escapeHtml(t.summary || "Professional Summary")}</div>
           <div class="cv-summary">${summary}</div>
         `
         : "",
-    experience: () => buildExperienceHtml(cv.experiences || [], keepTogether, templateId),
-    education: () => buildEducationHtml(cv.education || []),
-    skills: () => buildSkillsHtml(cv.skills || [], templateId),
-    projects: () => buildProjectsHtml(cv.projects || [], templateId, keepTogether),
-    volunteering: () => buildVolunteeringHtml(cv.volunteering || [], keepTogether),
-    certifications: () => buildCertificationsHtml(cv.certifications || [], templateId),
-    languages: () => buildLanguagesHtml(cv.languages || []),
-    references: () => buildReferencesHtml(visibleReferences, hideReferences),
+    experience: () => buildExperienceHtml(cv.experiences || [], keepTogether, templateId, t),
+    education: () => buildEducationHtml(cv.education || [], t),
+    skills: () => buildSkillsHtml(cv.skills || [], templateId, t),
+    projects: () => buildProjectsHtml(cv.projects || [], templateId, keepTogether, t),
+    volunteering: () => buildVolunteeringHtml(cv.volunteering || [], keepTogether, t),
+    certifications: () => buildCertificationsHtml(cv.certifications || [], templateId, t),
+    languages: () => buildLanguagesHtml(cv.languages || [], t),
+    references: () => buildReferencesHtml(visibleReferences, hideReferences, t),
   };
 
   const orderedSections = sectionOrder
@@ -298,7 +299,7 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
     ${title ? `<div class="cv-title">${title}</div>` : ""}
     ${hasContact ? `
       ${templateId === "professional" ? '<hr class="cv-divider" />' : ""}
-      <div class="cv-contact">${templateId === "advanced" ? buildAdvancedContactHtml(cv) : contact}</div>
+      <div class="cv-contact">${templateId === "advanced" ? buildAdvancedContactHtml(cv, t) : contact}</div>
       <hr class="cv-divider" />
     ` : ""}
 
@@ -310,7 +311,7 @@ export function buildPdfHtml(cv, hideReferences, styleSettings = null, templateI
 
 // ─── Section Builders ────────────────────────────────────────
 
-function buildExperienceHtml(experiences, keepTogether, templateId) {
+function buildExperienceHtml(experiences, keepTogether, templateId, t = {}) {
   const filtered = experiences.filter(
     (exp) => hasValue(exp.company) || hasValue(exp.position)
   );
@@ -370,10 +371,10 @@ function buildExperienceHtml(experiences, keepTogether, templateId) {
     })
     .join("");
 
-  return `<div class="cv-section-title">Work Experience</div>${items}`;
+  return `<div class="cv-section-title">${escapeHtml(t.experience || "Work Experience")}</div>${items}`;
 }
 
-function buildEducationHtml(education) {
+function buildEducationHtml(education, t = {}) {
   const filtered = education.filter(
     (edu) => hasValue(edu.school) || hasValue(edu.degree)
   );
@@ -404,15 +405,17 @@ function buildEducationHtml(education) {
     })
     .join("");
 
-  return `<div class="cv-section-title">Education</div>${items}`;
+  return `<div class="cv-section-title">${escapeHtml(t.education || "Education")}</div>${items}`;
 }
 
-function buildSkillsHtml(skills, templateId) {
+function buildSkillsHtml(skills, templateId, t = {}) {
   const filtered = skills.filter(
     (skill) => hasValue(skill.category) || hasValue(skill.items)
   );
 
   if (filtered.length === 0) return "";
+
+  const sectionTitle = `<div class="cv-section-title">${escapeHtml(t.skills || "Technical Skills")}</div>`;
 
   if (templateId === "professional") {
     const items = filtered
@@ -426,7 +429,7 @@ function buildSkillsHtml(skills, templateId) {
       .join("");
 
     return `
-      <div class="cv-section-title">Technical Skills</div>
+      ${sectionTitle}
       <div class="mb-10">${items}</div>
     `;
   }
@@ -443,12 +446,12 @@ function buildSkillsHtml(skills, templateId) {
     .join("");
 
   return `
-    <div class="cv-section-title">Technical Skills</div>
+    ${sectionTitle}
     <ul class="skills-list mb-10">${items}</ul>
   `;
 }
 
-function buildProjectsHtml(projects, templateId, keepTogether) {
+function buildProjectsHtml(projects, templateId, keepTogether, t = {}) {
   const filtered = projects.filter((project) => hasValue(project.name));
 
   if (filtered.length === 0) return "";
@@ -495,10 +498,10 @@ function buildProjectsHtml(projects, templateId, keepTogether) {
     })
     .join("");
 
-  return `<div class="cv-section-title">Technical Projects and Research</div>${items}`;
+  return `<div class="cv-section-title">${escapeHtml(t.projects || "Technical Projects and Research")}</div>${items}`;
 }
 
-function buildVolunteeringHtml(volunteering, keepTogether) {
+function buildVolunteeringHtml(volunteering, keepTogether, t = {}) {
   const filtered = volunteering.filter(
     (item) => hasValue(item.organization) || hasValue(item.role)
   );
@@ -548,10 +551,10 @@ function buildVolunteeringHtml(volunteering, keepTogether) {
     })
     .join("");
 
-  return `<div class="cv-section-title">Volunteering & Leadership</div>${items}`;
+  return `<div class="cv-section-title">${escapeHtml(t.volunteering || "Volunteering & Leadership")}</div>${items}`;
 }
 
-function buildCertificationsHtml(certifications, templateId) {
+function buildCertificationsHtml(certifications, templateId, t = {}) {
   const filtered = certifications.filter(
     (item) => hasValue(item.name) || hasValue(item.institution)
   );
@@ -583,10 +586,10 @@ function buildCertificationsHtml(certifications, templateId) {
     })
     .join("");
 
-  return `<div class="cv-section-title">Certifications</div>${items}`;
+  return `<div class="cv-section-title">${escapeHtml(t.certifications || "Certifications")}</div>${items}`;
 }
 
-function buildLanguagesHtml(languages) {
+function buildLanguagesHtml(languages, t = {}) {
   const filtered = languages.filter(
     (item) => hasValue(item.language) || hasValue(item.fluencyLevel)
   );
@@ -605,17 +608,19 @@ function buildLanguagesHtml(languages) {
     .join("");
 
   return `
-    <div class="cv-section-title">Languages</div>
+    <div class="cv-section-title">${escapeHtml(t.languages || "Languages")}</div>
     <ul class="skills-list mb-10">${items}</ul>
   `;
 }
 
-function buildReferencesHtml(visibleReferences, hideReferences) {
+function buildReferencesHtml(visibleReferences, hideReferences, t = {}) {
   if (!hideReferences && visibleReferences.length === 0) return "";
+
+  const sectionTitle = `<div class="cv-section-title">${escapeHtml(t.references || "References")}</div>`;
 
   if (hideReferences) {
     return `
-      <div class="cv-section-title">References</div>
+      ${sectionTitle}
       <div class="mb-10"><em>Available upon request</em></div>
     `;
   }
@@ -638,5 +643,5 @@ function buildReferencesHtml(visibleReferences, hideReferences) {
     })
     .join("");
 
-  return `<div class="cv-section-title">References</div>${items}`;
+  return `${sectionTitle}${items}`;
 }
