@@ -31,7 +31,7 @@ export default function PdfNameEditor({
                 onChange={(e) => setPdfName(e.target.value)}
                 onBlur={() => setEditingName(false)}
                 onKeyDown={(e) => e.key === "Enter" && setEditingName(false)}
-                className="w-full max-w-[240px] border-b border-slate-300 bg-transparent px-1 py-0.5 text-center text-sm font-semibold text-slate-900 outline-none"
+                className="w-full max-w-[240px] border-none bg-transparent px-1 py-0.5 text-center text-sm font-semibold tracking-[-0.01em] text-slate-900 outline-none"
               />
             ) : (
               <button
