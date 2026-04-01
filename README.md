@@ -34,11 +34,13 @@ easyATS is a web-based resume builder designed for job seekers who want clean, p
 
 ### Resume Builder (`/builder`)
 - **10 CV sections**: Personal Information, Professional Summary, Work Experience, Education, Technical Skills, Projects & Research, Volunteering & Leadership, Certifications, Languages, and References
+- **Editable section titles**: Customize any section heading (e.g. rename "Work Experience" to "Professional Experience") — changes reflected instantly in both live preview and PDF export
 - **Reorderable items**: Move entries up/down within each section
 - **Auto-formatted date inputs**: Type `102024` → `10/2024`
 - **Bullet point editor**: Add, remove, and reorder responsibilities
 - **Collapsible sections**: Accordion-style with tips and recommendations
 - **Resizable panel**: Drag divider to adjust editor/preview width ratio
+- **Phone input validation**: Phone fields accept only numeric and phone characters (+, -, spaces, parentheses)
 - **URL guard**: Direct `/builder` access without valid ID redirects to dashboard
 
 ### Template System
@@ -67,6 +69,7 @@ easyATS is a web-based resume builder designed for job seekers who want clean, p
 ### PDF Export
 - **Puppeteer-based**: Server-side generation with @sparticuz/chromium
 - **Full parity**: PDF matches preview exactly — fonts, sizes, margins, spacing, section order, template differences
+- **Dynamic section titles**: Custom section titles carry over to PDF output with XSS-safe escaping
 - **Smart page breaks in PDF**: Same split logic via CSS `break-inside` rules
 - **Contact shortening**: LinkedIn and Website displayed as clickable "LinkedIn" / "Portfolio" labels instead of full URLs
 
@@ -124,6 +127,8 @@ src/
 │   ├── Logo.js                    # Animated easyATS logo
 │   ├── Navbar.js                  # Shared glassmorphism floating navbar
 │   ├── builder/
+│   │   ├── CompletenessIndicator.js # CV completeness score icon
+│   │   ├── CompletenessPanel.js   # Detailed completeness breakdown
 │   │   ├── PdfNameEditor.js       # PDF filename editor header
 │   │   ├── Toolbar.js             # Templates, Layout & Style, Download
 │   │   ├── ZoomControls.js        # Zoom in/out
@@ -147,6 +152,7 @@ src/
 │   ├── useStyleSettings.js        # Style state + localStorage (resumeId aware)
 │   ├── usePdfExport.js            # PDF generation (resumeId aware)
 │   ├── useResizablePanel.js       # Panel resize
+│   ├── useUndoRedo.js             # Undo/redo state management
 │   └── useLocalStorage.js         # Generic localStorage hook
 │
 ├── icons/index.js                 # All SVG icon components
@@ -206,12 +212,15 @@ executablePath: "/usr/bin/google-chrome"
 
 ## Roadmap
 
+- [ ] Auto-save indicator for long text fields
+- [ ] JSON import/export for CV data backup & portability
 - [ ] Dark/light theme toggle
 - [ ] Database + authentication (user accounts, cloud storage)
 - [ ] AI-powered content suggestions
 - [ ] Responsive mobile layout
 - [ ] DOCX export format
 - [ ] Additional templates
+- [ ] Accessibility improvements (aria labels, focus traps)
 - [ ] Pricing page, blog, about page
 
 ---
