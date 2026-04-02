@@ -51,7 +51,6 @@ export const cvStyles = {
   sectionTitle: {
     fontSize: "12pt",
     fontWeight: "bold",
-    textTransform: "uppercase",
     borderBottom: "1px solid #999",
     paddingBottom: "2px",
     marginBottom: "6px",
@@ -61,7 +60,6 @@ export const cvStyles = {
   sectionTitleFirst: {
     fontSize: "12pt",
     fontWeight: "bold",
-    textTransform: "uppercase",
     borderBottom: "1px solid #999",
     paddingBottom: "2px",
     marginBottom: "6px",

@@ -106,7 +106,6 @@ function buildDynamicCss(settings, templateId) {
     .cv-section-title {
       font-size: ${headingSize};
       font-weight: bold;
-      text-transform: uppercase;
       border-bottom: 1px solid #999;
       padding-bottom: 2px;
       margin-bottom: ${titleGap};
@@ -635,7 +634,7 @@ function buildReferencesHtml(visibleReferences, hideReferences, t = {}) {
       return `
         <div class="mb-8">
           <div class="reference-title">
-            ${hasValue(ref.company) ? ` | ${escapeHtml(ref.company)}` : ""}
+            ${escapeHtml(ref.name || "")}${hasValue(ref.company) ? ` — ${escapeHtml(ref.company)}` : ""}
           </div>
           ${contact ? `<div class="reference-contact">${contact}</div>` : ""}
         </div>

@@ -31,8 +31,9 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
 
   const saveTitle = () => {
     const trimmed = editValue.trim();
-    if (trimmed && trimmed !== title && onTitleChange) {
-      onTitleChange(trimmed);
+    if (!trimmed && onTitleChange) {
+      onTitleChange(title);
+      setEditValue(title);
     }
     setEditingTitle(false);
   };
@@ -94,7 +95,11 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
                 <input
                   ref={inputRef}
                   value={editValue}
-                  onChange={(e) => setEditValue(e.target.value)}
+                  onChange={(e) => {
+                    const filtered = e.target.value.replace(/[0-9]/g, "");
+                    setEditValue(filtered);
+                    if (filtered.trim() && onTitleChange) onTitleChange(filtered);
+                  }}
                   onBlur={saveTitle}
                   onKeyDown={(e) => {
                     e.stopPropagation();
