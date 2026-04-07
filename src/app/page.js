@@ -60,30 +60,27 @@ function NavbarContent() {
   return (
     <>
       <Logo />
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1" style={{ fontFamily: "var(--font-geist), sans-serif" }}>
         <Link
           href="/dashboard"
-          className="rounded-lg px-3.5 py-2 text-sm font-medium text-slate-500 transition-colors duration-200 hover:text-slate-900"
+          className="rounded-lg px-3.5 py-2 text-base font-medium text-slate-500 transition-colors duration-200 hover:text-slate-900"
         >
           Resume Builder
         </Link>
-        <span className="cursor-default rounded-lg px-3.5 py-2 text-sm font-medium text-slate-400">
+        <span className="cursor-default rounded-lg px-3.5 py-2 text-base font-medium text-slate-400">
           Cover Letter
         </span>
-        <span className="cursor-default rounded-lg px-3.5 py-2 text-sm font-medium text-slate-400">
+        <span className="cursor-default rounded-lg px-3.5 py-2 text-base font-medium text-slate-400">
           Pricing
         </span>
       </div>
-      <div className="flex items-center gap-3">
-        <button className="rounded-lg px-4 py-2 text-sm font-medium text-slate-500 transition-colors duration-200 hover:text-slate-900">
+      <div className="flex items-center gap-3" style={{ fontFamily: "var(--font-geist), sans-serif" }}>
+        <button className="rounded-lg px-4 py-2 text-base font-medium text-slate-500 transition-colors duration-200 hover:text-slate-900">
           Log in
         </button>
-        <Link
-          href="/dashboard"
-          className="btn-primary rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:bg-slate-800 hover:shadow-md"
-        >
-          Get Started
-        </Link>
+        <span className="btn-primary cursor-default rounded-xl bg-slate-900 px-4 py-2 text-base font-semibold text-white shadow-sm">
+          Sign up
+        </span>
       </div>
     </>
   );
@@ -392,12 +389,12 @@ function Footer() {
     <footer className="border-t border-slate-200 px-6 py-10">
       <div className="mx-auto flex items-center justify-between" style={{ maxWidth: "1204px" }}>
         <Logo />
-        <div className="flex items-center gap-6">
-          <span className="cursor-default text-sm text-slate-400 transition-colors duration-200 hover:text-slate-600">Privacy Policy</span>
-          <span className="cursor-default text-sm text-slate-400 transition-colors duration-200 hover:text-slate-600">Terms & Conditions</span>
-          <span className="cursor-default text-sm text-slate-400 transition-colors duration-200 hover:text-slate-600">Refund Policy</span>
-          <span className="cursor-default text-sm text-slate-400 transition-colors duration-200 hover:text-slate-600">Pricing</span>
-          <span className="cursor-default text-sm text-slate-400 transition-colors duration-200 hover:text-slate-600">Contact</span>
+        <div className="flex items-center gap-6" style={{ fontFamily: "var(--font-geist), sans-serif" }}>
+          <span className="cursor-default text-base font-medium text-slate-400 transition-colors duration-200 hover:text-slate-600">Privacy Policy</span>
+          <span className="cursor-default text-base font-medium text-slate-400 transition-colors duration-200 hover:text-slate-600">Terms & Conditions</span>
+          <span className="cursor-default text-base font-medium text-slate-400 transition-colors duration-200 hover:text-slate-600">Refund Policy</span>
+          <span className="cursor-default text-base font-medium text-slate-400 transition-colors duration-200 hover:text-slate-600">Pricing</span>
+          <span className="cursor-default text-base font-medium text-slate-400 transition-colors duration-200 hover:text-slate-600">Contact</span>
         </div>
       </div>
     </footer>
