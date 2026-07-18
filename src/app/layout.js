@@ -48,9 +48,11 @@ const geist = Geist({
   variable: "--font-geist",
 });
 
+import { brand } from "@/config/brand";
+
 export const metadata = {
-  title: "ATS Resume Builder",
-  description: "ATS-friendly resume builder with live preview and text-based PDF export",
+  title: `${brand.name} — ${brand.tagline}`,
+  description: brand.description,
 };
 
 export default function RootLayout({ children }) {

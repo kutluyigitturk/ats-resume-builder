@@ -2,89 +2,34 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { brand, accent } from "@/config/brand";
 
+// Name-agnostic wordmark: the brand name in the display face, followed by a
+// signal-green accent dot. Works for ANY name — swapping brand.name is enough.
 export default function Logo({ size = "text-xl" }) {
   const [hovered, setHovered] = useState(false);
-
-  const fontStyle = { fontFamily: "var(--font-montserrat), sans-serif" };
-  const transition = "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)";
 
   return (
     <Link
       href="/"
-      className={`relative select-none ${size} font-extrabold tracking-tight`}
-      style={fontStyle}
+      aria-label={brand.name}
+      className={`group relative inline-flex select-none items-baseline ${size} font-extrabold tracking-tight`}
+      style={{ fontFamily: "var(--font-montserrat), sans-serif", color: accent.ink }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* "e" — always visible, changes color */}
+      <span>{brand.name}</span>
       <span
+        aria-hidden="true"
         style={{
-          transition,
-          color: hovered ? "#94a3b8" : "#0f172a",
           display: "inline-block",
+          marginLeft: "2px",
+          color: accent.signal,
+          transform: hovered ? "translateY(-2px) scale(1.25)" : "none",
+          transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
         }}
       >
-        e
-      </span>
-
-      {/* "as" — visible normally, collapses on hover */}
-      <span
-        style={{
-          transition,
-          display: "inline-block",
-          maxWidth: hovered ? "0px" : "200px",
-          opacity: hovered ? 0 : 1,
-          overflow: "hidden",
-          verticalAlign: "top",
-          whiteSpace: "nowrap",
-          color: "#0f172a",
-        }}
-      >
-        as
-      </span>
-
-      {/* first "y" — the y in "easy", collapses on hover */}
-      <span
-        style={{
-          transition,
-          display: "inline-block",
-          maxWidth: hovered ? "0px" : "200px",
-          opacity: hovered ? 0 : 1,
-          overflow: "hidden",
-          verticalAlign: "top",
-          whiteSpace: "nowrap",
-          color: "#0f172a",
-        }}
-      >
-        y
-      </span>
-
-      {/* "ATS" — always visible, changes color */}
-      <span
-        style={{
-          transition,
-          color: hovered ? "#0f172a" : "#94a3b8",
-          display: "inline-block",
-        }}
-      >
-        ATS
-      </span>
-
-      {/* second "y" — hidden normally, expands on hover */}
-      <span
-        style={{
-          transition,
-          display: "inline-block",
-          maxWidth: hovered ? "200px" : "0px",
-          opacity: hovered ? 1 : 0,
-          overflow: "hidden",
-          verticalAlign: "top",
-          whiteSpace: "nowrap",
-          color: "#94a3b8",
-        }}
-      >
-        y
+        .
       </span>
     </Link>
   );
