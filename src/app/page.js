@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
 import Logo from "@/components/Logo";
-import Navbar from "@/components/Navbar";
+import SiteNav from "@/components/SiteNav";
 import { RoughNotation } from "react-rough-notation";
 import { brand, accent } from "@/config/brand";
 
@@ -50,31 +49,6 @@ function Reveal({ children, delay = 0, className = "" }) {
 const display = { fontFamily: "var(--font-montserrat), sans-serif" };
 const body = { fontFamily: "var(--font-geist), sans-serif" };
 
-/* ─── Navbar ─────────────────────────────────────── */
-
-function NavbarContent() {
-  return (
-    <>
-      <Logo />
-      <div className="flex items-center gap-2.5" style={body}>
-        <Link
-          href="/login"
-          className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-[15px] font-medium text-slate-900 transition-colors duration-200 hover:bg-slate-50"
-        >
-          Log in
-        </Link>
-        <Link
-          href="/signup"
-          className="rounded-xl px-4 py-2 text-[15px] font-semibold text-white transition-transform duration-200 hover:scale-[1.02]"
-          style={{ backgroundColor: accent.ink }}
-        >
-          Sign up
-        </Link>
-      </div>
-    </>
-  );
-}
-
 /* ─── Hero ───────────────────────────────────────── */
 
 function Hero() {
@@ -114,13 +88,13 @@ function Hero() {
             style={{ ...body, fontSize: "clamp(1.05rem, 2.2vw, 1.3rem)", lineHeight: 1.5 }}
           >
             Clean, ATS-parseable resumes with a live A4 preview and pixel-perfect PDF
-            export. No Word wrestling, no paywall.
+            export. No Word wrestling.
           </p>
         </Reveal>
 
         <Reveal delay={340}>
           <p className="mt-5 text-[13px] text-slate-400" style={body}>
-            Free forever · No sign-up · Exports a real text-based PDF
+            ATS-safe layouts · Live A4 preview · Real text-based PDF
           </p>
         </Reveal>
 
@@ -232,7 +206,7 @@ function FloatingBadges() {
     { label: "PDF", color: "#dc2626", bg: "bg-red-50", ring: "ring-red-100/60", pos: { top: "-18px", left: "-60px" }, rot: "-6deg", anim: "float-slow", delay: "0s" },
     { label: "A4", color: "#2563eb", bg: "bg-blue-50", ring: "ring-blue-100/60", pos: { top: "34%", left: "-70px" }, rot: "-4deg", anim: "float-fast", delay: "1.5s" },
     { label: "Live preview", color: "#7c3aed", bg: "bg-violet-50", ring: "ring-violet-100/60", pos: { top: "40%", right: "-84px" }, rot: "4deg", anim: "float-slow", delay: "0.5s" },
-    { label: "Free", color: "#1d4ed8", bg: "bg-blue-50", ring: "ring-blue-100/60", pos: { bottom: "34px", left: "-46px" }, rot: "6deg", anim: "float-medium", delay: "2s" },
+    { label: "ATS-safe", color: "#1d4ed8", bg: "bg-blue-50", ring: "ring-blue-100/60", pos: { bottom: "34px", left: "-46px" }, rot: "6deg", anim: "float-medium", delay: "2s" },
   ];
   return (
     <>
@@ -314,9 +288,7 @@ function Footer() {
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white">
-      <Navbar>
-        <NavbarContent />
-      </Navbar>
+      <SiteNav />
       <Hero />
       <LogoMarquee />
       <Footer />
