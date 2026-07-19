@@ -1,231 +1,9 @@
-"use client";
-
-import { useState, useEffect, useRef } from "react";
 import Logo from "@/components/Logo";
 import SiteNav from "@/components/SiteNav";
-import { RoughNotation } from "react-rough-notation";
-import { brand, accent } from "@/config/brand";
+import Link from "next/link";
+import { brand } from "@/config/brand";
 
-/* ─── Scroll Reveal ──────────────────────────────── */
-
-function useScrollReveal() {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.unobserve(el);
-        }
-      },
-      { threshold: 0.15 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  return [ref, visible];
-}
-
-function Reveal({ children, delay = 0, className = "" }) {
-  const [ref, visible] = useScrollReveal();
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-700 ease-out ${
-        visible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-      } ${className}`}
-      style={{ transitionDelay: `${delay}ms` }}
-    >
-      {children}
-    </div>
-  );
-}
-
-const display = { fontFamily: "var(--font-montserrat), sans-serif" };
 const body = { fontFamily: "var(--font-geist), sans-serif" };
-
-/* ─── Hero ───────────────────────────────────────── */
-
-function Hero() {
-  return (
-    <section className="relative flex min-h-[92vh] items-center justify-center overflow-hidden px-6 pt-40 pb-16">
-      {/* Ambient background */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="blob-1 absolute -left-24 -top-24 h-[600px] w-[600px] rounded-full bg-blue-200/25 blur-[110px]" />
-        <div className="blob-2 absolute -right-24 top-1/4 h-[500px] w-[500px] rounded-full bg-sky-200/20 blur-[110px]" />
-        <div className="blob-3 absolute -bottom-24 left-1/4 h-[400px] w-[400px] rounded-full bg-slate-200/40 blur-[90px]" />
-      </div>
-
-      <div className="relative z-10 mx-auto w-full max-w-4xl text-center">
-        <Reveal delay={120}>
-          <h1
-            className="mx-auto mb-6 max-w-3xl font-extrabold leading-[1.05] tracking-tight text-slate-900"
-            style={{ ...display, fontSize: "clamp(2.5rem, 6vw, 4.5rem)" }}
-          >
-            The resume builder that gets you{" "}
-            <RoughNotation
-              type="highlight"
-              show={true}
-              color={accent.signalSoft}
-              animationDelay={600}
-              animationDuration={800}
-              multiline
-            >
-              read
-            </RoughNotation>
-            .
-          </h1>
-        </Reveal>
-
-        <Reveal delay={200}>
-          <p
-            className="mx-auto mb-9 max-w-xl text-slate-600"
-            style={{ ...body, fontSize: "clamp(1.05rem, 2.2vw, 1.3rem)", lineHeight: 1.5 }}
-          >
-            Clean, ATS-parseable resumes with a live A4 preview and pixel-perfect PDF
-            export. No Word wrestling.
-          </p>
-        </Reveal>
-
-        <Reveal delay={340}>
-          <p className="mt-5 text-[13px] text-slate-400" style={body}>
-            ATS-safe layouts · Live A4 preview · Real text-based PDF
-          </p>
-        </Reveal>
-
-        {/* Signature: builder mockup with the ATS scan-and-pass moment */}
-        <Reveal delay={420}>
-          <div className="mt-16 sm:mt-20">
-            <div className="relative mx-auto max-w-5xl">
-              <FloatingBadges />
-
-              <div className="rounded-xl border border-slate-200/80 bg-white/60 p-2 shadow-2xl backdrop-blur-sm">
-                <div className="overflow-hidden rounded-lg border border-slate-200/60 bg-slate-100">
-                  {/* window chrome */}
-                  <div className="flex h-8 items-center gap-2 border-b border-slate-200/60 bg-white px-4">
-                    <div className="flex gap-1.5">
-                      <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-                      <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-                      <div className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-                    </div>
-                    <div className="mx-auto h-4 w-48 rounded bg-slate-100" />
-                  </div>
-
-                  <div className="flex h-[420px] sm:h-[500px]">
-                    {/* editor panel */}
-                    <div className="hidden w-2/5 border-r border-slate-200/60 bg-white p-5 sm:block">
-                      <div className="mb-6 h-10 w-full rounded-lg bg-slate-100" />
-                      <div className="space-y-4">
-                        <div className="rounded-xl border border-slate-200 p-4">
-                          <div className="mb-3 h-3 w-24 rounded bg-slate-200" />
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="h-8 rounded-md bg-slate-100" />
-                            <div className="h-8 rounded-md bg-slate-100" />
-                            <div className="h-8 rounded-md bg-slate-100" />
-                            <div className="h-8 rounded-md bg-slate-100" />
-                          </div>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 p-4">
-                          <div className="mb-3 h-3 w-32 rounded bg-slate-200" />
-                          <div className="h-20 rounded-md bg-slate-100" />
-                        </div>
-                        <div className="rounded-xl border border-slate-200 p-4">
-                          <div className="mb-3 h-3 w-28 rounded bg-slate-200" />
-                          <div className="space-y-2">
-                            <div className="h-8 rounded-md bg-slate-100" />
-                            <div className="h-8 rounded-md bg-slate-100" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* A4 preview + scan line */}
-                    <div className="relative flex flex-1 items-start justify-center overflow-hidden bg-slate-50 p-6">
-                      <div className="scan-line" />
-                      <div className="relative w-full max-w-sm rounded border border-slate-200 bg-white p-6 shadow-sm">
-                        <div className="mb-4 flex justify-center">
-                          <div className="h-4 w-36 rounded bg-slate-800" />
-                        </div>
-                        <div className="mb-1 flex justify-center">
-                          <div className="h-2 w-48 rounded bg-slate-200" />
-                        </div>
-                        <div className="mb-4 flex justify-center">
-                          <div className="h-1.5 w-56 rounded bg-slate-100" />
-                        </div>
-                        <div className="mb-3 h-px w-full bg-slate-900" />
-                        <div className="mb-2 h-2.5 w-28 rounded bg-slate-300" />
-                        <div className="mb-1 h-1.5 w-full rounded bg-slate-100" />
-                        <div className="mb-1 h-1.5 w-full rounded bg-slate-100" />
-                        <div className="mb-4 h-1.5 w-3/4 rounded bg-slate-100" />
-                        <div className="mb-2 h-2.5 w-20 rounded bg-slate-300" />
-                        <div className="mb-2 flex justify-between">
-                          <div className="h-2 w-32 rounded bg-slate-200" />
-                          <div className="h-2 w-16 rounded bg-slate-200" />
-                        </div>
-                        <div className="mb-1 h-1.5 w-full rounded bg-slate-100" />
-                        <div className="mb-1 h-1.5 w-full rounded bg-slate-100" />
-                        <div className="mb-4 h-1.5 w-5/6 rounded bg-slate-100" />
-                        <div className="mb-2 h-2.5 w-16 rounded bg-slate-300" />
-                        <div className="mb-2 flex justify-between">
-                          <div className="h-2 w-40 rounded bg-slate-200" />
-                          <div className="h-2 w-14 rounded bg-slate-200" />
-                        </div>
-                        <div className="mb-1 h-1.5 w-full rounded bg-slate-100" />
-                        <div className="h-1.5 w-2/3 rounded bg-slate-100" />
-                      </div>
-
-                      {/* the pass moment */}
-                      <div
-                        className="chip-pop absolute bottom-5 right-5 flex items-center gap-1.5 rounded-lg px-3 py-2 shadow-lg"
-                        style={{ backgroundColor: accent.signal }}
-                      >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20 6 9 17l-5-5" />
-                        </svg>
-                        <span className="text-xs font-bold text-white" style={body}>ATS parsed</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-function FloatingBadges() {
-  const badges = [
-    { label: "PDF", color: "#dc2626", bg: "bg-red-50", ring: "ring-red-100/60", pos: { top: "-18px", left: "-60px" }, rot: "-6deg", anim: "float-slow", delay: "0s" },
-    { label: "A4", color: "#2563eb", bg: "bg-blue-50", ring: "ring-blue-100/60", pos: { top: "34%", left: "-70px" }, rot: "-4deg", anim: "float-fast", delay: "1.5s" },
-    { label: "Live preview", color: "#7c3aed", bg: "bg-violet-50", ring: "ring-violet-100/60", pos: { top: "40%", right: "-84px" }, rot: "4deg", anim: "float-slow", delay: "0.5s" },
-    { label: "ATS-safe", color: "#1d4ed8", bg: "bg-blue-50", ring: "ring-blue-100/60", pos: { bottom: "34px", left: "-46px" }, rot: "6deg", anim: "float-medium", delay: "2s" },
-  ];
-  return (
-    <>
-      {badges.map((b) => (
-        <div
-          key={b.label}
-          className={`floating-badge visible ${b.anim} hidden sm:block`}
-          style={{ ...b.pos, "--badge-rotate": b.rot, animationDelay: b.delay }}
-        >
-          <div className={`rounded-xl ${b.bg} px-3.5 py-2 shadow-lg ring-1 ${b.ring}`} style={{ transform: `rotate(${b.rot})` }}>
-            <span className="text-xs font-bold" style={{ color: b.color, fontFamily: "var(--font-geist), sans-serif" }}>{b.label}</span>
-          </div>
-        </div>
-      ))}
-    </>
-  );
-}
-
-/* ─── Logo Marquee ───────────────────────────────── */
 
 const platforms = [
   "linkedin", "indeed", "glassdoor", "monster", "michael-page", "randstad",
@@ -233,6 +11,13 @@ const platforms = [
   "hired", "career-builder", "zip-recruiter",
 ];
 
+const Check = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20 6 9 17l-5-5" />
+  </svg>
+);
+
+/* ─── Scrolling logo marquee (kept — the strip you wanted) ─── */
 function LogoMarquee() {
   const renderLogos = (suffix) =>
     platforms.map((name, i) => (
@@ -246,10 +31,10 @@ function LogoMarquee() {
     ));
 
   return (
-    <section className="overflow-hidden py-16">
-      <div className="mx-auto max-w-[976px] px-6">
-        <p className="mb-5 text-left text-sm font-semibold text-slate-400" style={body}>
-          Built to be read by the systems that screen you
+    <section className="overflow-hidden py-14">
+      <div className="mx-auto max-w-[976px] px-8">
+        <p className="mb-5 text-center text-sm font-semibold text-slate-400" style={body}>
+          Read cleanly by the systems that screen you
         </p>
       </div>
       <div
@@ -268,29 +53,148 @@ function LogoMarquee() {
   );
 }
 
-/* ─── Footer ─────────────────────────────────────── */
+function Hero() {
+  return (
+    <section className="tl-hero">
+      <div className="tl-wrap">
+        <span className="tl-eyebrow">ATS-ready resume builder</span>
+        <h1 className="tl-h1">
+          The simplest way to build a resume that <span className="tl-mark">gets read</span>.
+        </h1>
+        <p className="tl-sub">
+          Clean, ATS-parseable resumes with a live A4 preview and a real, text-based PDF. No Word wrestling.
+        </p>
+        <Link href="/signup" className="tl-cta">
+          Start building — it&apos;s free
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </Link>
+        <div className="tl-note">Your first resume is free — no card required</div>
+
+        <div className="tl-stage">
+          <div className="tl-badge g"><span className="tl-dot" style={{ background: "#0e9f6e" }} /> ATS parsed</div>
+          <div className="tl-badge b"><span className="tl-dot" style={{ background: "#1d4ed8" }} /> Live preview</div>
+          <div className="tl-paper">
+            <div className="tl-pname">Elena Voss</div>
+            <div className="tl-prole">Senior Product Designer</div>
+            <div className="tl-pcontact">Amsterdam · elena.voss@email.com</div>
+            <div className="tl-prule" />
+            <div className="tl-psec">Experience</div>
+            <div className="tl-prow"><span className="tl-pstrong">Senior Product Designer</span><span className="tl-pdate">2021—Now</span></div>
+            <div className="tl-pline" style={{ width: "100%", marginTop: "6px" }} />
+            <div className="tl-pline" style={{ width: "88%" }} />
+            <div className="tl-pline" style={{ width: "72%" }} />
+            <div className="tl-psec">Education</div>
+            <div className="tl-prow"><span className="tl-pstrong">MA, Interaction Design</span><span className="tl-pdate">2016—2018</span></div>
+            <div className="tl-pline" style={{ width: "100%", marginTop: "6px" }} />
+            <div className="tl-pline" style={{ width: "60%" }} />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Features() {
+  return (
+    <div className="tl-wrap">
+      <section className="tl-feat">
+        <div className="tl-copy">
+          <h2>Built to be <span className="tl-mark">read</span>.</h2>
+          <p>Single-column, text-based layouts that applicant tracking systems parse without fail — so your experience reaches a human.</p>
+          <ul className="tl-flist">
+            <li><Check /> No tables or columns to confuse the scanner</li>
+            <li><Check /> Selectable, text-based PDF — not an image</li>
+          </ul>
+        </div>
+        <div className="tl-visual">
+          <div className="tl-scanwrap">
+            <div className="tl-scanline" />
+            <div className="tl-mini-page" style={{ maxWidth: "100%", padding: "22px" }}>
+              <div className="tl-pname" style={{ fontSize: "16px" }}>Elena Voss</div>
+              <div className="tl-prule" style={{ margin: "10px 0" }} />
+              <div className="tl-pline" style={{ width: "100%" }} />
+              <div className="tl-pline" style={{ width: "92%" }} />
+              <div className="tl-pline" style={{ width: "78%" }} />
+              <div className="tl-pline" style={{ width: "100%", marginTop: "14px" }} />
+              <div className="tl-pline" style={{ width: "64%" }} />
+            </div>
+            <div className="tl-checkchip">✓ Parsed</div>
+          </div>
+        </div>
+      </section>
+
+      <section className="tl-feat rev">
+        <div className="tl-copy">
+          <h2>See it <span className="tl-mark">as you build it</span>.</h2>
+          <p>Every keystroke lands on a real A4 page, paginated exactly like the final PDF. What you see is what you export.</p>
+          <ul className="tl-flist">
+            <li><Check /> Live preview, no surprises on export</li>
+            <li><Check /> Full control over fonts, spacing and order</li>
+          </ul>
+        </div>
+        <div className="tl-visual">
+          <div className="tl-miniapp">
+            <div className="tl-minibar"><i /><i /><i /></div>
+            <div className="tl-minibody">
+              <div className="tl-mini-ed">
+                <div className="tl-mini-field" />
+                <div className="tl-mini-field" />
+                <div className="tl-mini-field" style={{ height: "50px" }} />
+              </div>
+              <div className="tl-mini-prev">
+                <div className="tl-mini-page">
+                  <div className="tl-pline" style={{ width: "60%", height: "6px", background: "#334155" }} />
+                  <div className="tl-prule" style={{ margin: "8px 0" }} />
+                  <div className="tl-pline" style={{ width: "100%" }} />
+                  <div className="tl-pline" style={{ width: "85%" }} />
+                  <div className="tl-pline" style={{ width: "70%" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function FinalCta() {
+  return (
+    <div className="tl-wrap">
+      <section className="tl-final">
+        <div className="tl-final-card">
+          <h2>Ready to get <span className="tl-mark-strong">read</span>?</h2>
+          <p>Build a resume that makes it past the filter — and onto a recruiter&apos;s screen.</p>
+          <Link href="/signup" className="tl-cta">Start building — it&apos;s free</Link>
+        </div>
+      </section>
+    </div>
+  );
+}
 
 function Footer() {
   return (
-    <footer className="border-t border-slate-200 px-6 py-12">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 sm:flex-row">
+    <footer className="tl-footer">
+      <div className="tl-wrap">
         <div className="flex items-center gap-3">
           <Logo />
-          <span className="text-sm text-slate-400" style={body}>· {brand.tagline}</span>
+          <span className="tl-tag">· {brand.tagline}</span>
         </div>
       </div>
     </footer>
   );
 }
 
-/* ─── Page ───────────────────────────────────────── */
-
 export default function LandingPage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="tl min-h-screen">
       <SiteNav />
       <Hero />
       <LogoMarquee />
+      <Features />
+      <FinalCta />
       <Footer />
     </main>
   );
