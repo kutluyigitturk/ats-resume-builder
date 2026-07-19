@@ -30,9 +30,9 @@ export const brand = {
 // Signature accent — the "passed the ATS scan" green. Kept in one place so
 // the whole identity can be re-tinted later.
 export const accent = {
-  signal: "#0ea968",
-  signalDark: "#065f46",
-  signalSoft: "#d1fae5",
+  signal: "#1d4ed8",
+  signalDark: "#1e3a8a",
+  signalSoft: "#dbeafe",
   ink: "#0b0f14",
 };
 

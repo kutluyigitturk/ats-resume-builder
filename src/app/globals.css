@@ -7,9 +7,9 @@
   /* Brand identity tokens (see src/config/brand.js) */
   --ink: #0b0f14;
   --canvas: #f5f6f4;
-  --signal: #0ea968;
-  --signal-dark: #065f46;
-  --signal-soft: #d1fae5;
+  --signal: #1d4ed8;
+  --signal-dark: #1e3a8a;
+  --signal-soft: #dbeafe;
 }
 
 @theme inline {
@@ -293,9 +293,9 @@ body {
   background: linear-gradient(
     to bottom,
     transparent,
-    rgba(14, 169, 104, 0.16) 45%,
-    rgba(14, 169, 104, 0.28) 50%,
-    rgba(14, 169, 104, 0.16) 55%,
+    rgba(29, 78, 216, 0.16) 45%,
+    rgba(29, 78, 216, 0.28) 50%,
+    rgba(29, 78, 216, 0.16) 55%,
     transparent
   );
   border-radius: 999px;

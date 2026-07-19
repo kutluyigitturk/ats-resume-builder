@@ -56,32 +56,19 @@ function NavbarContent() {
   return (
     <>
       <Logo />
-      <div className="hidden items-center gap-1 md:flex" style={body}>
-        {brand.nav.map((item) => (
-          <a
-            key={item.href}
-            href={item.href}
-            className="rounded-lg px-3.5 py-2 text-[15px] font-medium text-slate-500 transition-colors duration-200 hover:text-slate-900"
-          >
-            {item.label}
-          </a>
-        ))}
-      </div>
-      <div className="flex items-center gap-3" style={body}>
-        <a
-          href={brand.links.github}
-          target="_blank"
-          rel="noreferrer"
-          className="hidden rounded-lg px-3 py-2 text-[15px] font-medium text-slate-500 transition-colors duration-200 hover:text-slate-900 sm:inline"
-        >
-          GitHub
-        </a>
+      <div className="flex items-center gap-2.5" style={body}>
         <Link
-          href={brand.primaryCta.href}
-          className="btn-primary rounded-xl px-4 py-2 text-[15px] font-semibold text-white shadow-sm transition-transform duration-200 hover:scale-[1.02]"
+          href="/login"
+          className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-[15px] font-medium text-slate-900 transition-colors duration-200 hover:bg-slate-50"
+        >
+          Log in
+        </Link>
+        <Link
+          href="/signup"
+          className="rounded-xl px-4 py-2 text-[15px] font-semibold text-white transition-transform duration-200 hover:scale-[1.02]"
           style={{ backgroundColor: accent.ink }}
         >
-          Start free
+          Sign up
         </Link>
       </div>
     </>
@@ -95,22 +82,12 @@ function Hero() {
     <section className="relative flex min-h-[92vh] items-center justify-center overflow-hidden px-6 pt-40 pb-16">
       {/* Ambient background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="blob-1 absolute -left-24 -top-24 h-[600px] w-[600px] rounded-full bg-emerald-200/25 blur-[110px]" />
-        <div className="blob-2 absolute -right-24 top-1/4 h-[500px] w-[500px] rounded-full bg-teal-200/20 blur-[110px]" />
+        <div className="blob-1 absolute -left-24 -top-24 h-[600px] w-[600px] rounded-full bg-blue-200/25 blur-[110px]" />
+        <div className="blob-2 absolute -right-24 top-1/4 h-[500px] w-[500px] rounded-full bg-sky-200/20 blur-[110px]" />
         <div className="blob-3 absolute -bottom-24 left-1/4 h-[400px] w-[400px] rounded-full bg-slate-200/40 blur-[90px]" />
       </div>
 
       <div className="relative z-10 mx-auto w-full max-w-4xl text-center">
-        <Reveal delay={50}>
-          <span
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 backdrop-blur"
-            style={body}
-          >
-            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: accent.signal }} />
-            ATS-friendly resume builder · Free
-          </span>
-        </Reveal>
-
         <Reveal delay={120}>
           <h1
             className="mx-auto mb-6 max-w-3xl font-extrabold leading-[1.05] tracking-tight text-slate-900"
@@ -139,28 +116,6 @@ function Hero() {
             Clean, ATS-parseable resumes with a live A4 preview and pixel-perfect PDF
             export. No Word wrestling, no paywall.
           </p>
-        </Reveal>
-
-        <Reveal delay={280}>
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href={brand.primaryCta.href}
-              className="btn-primary group inline-flex w-full items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-[15px] font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] sm:w-auto"
-              style={{ backgroundColor: accent.signal, boxShadow: "0 10px 30px -8px rgba(14,169,104,0.5)" }}
-            >
-              {brand.primaryCta.label}
-              <svg className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </Link>
-            <a
-              href="#how"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-7 py-3.5 text-[15px] font-semibold text-slate-700 transition-colors duration-200 hover:border-slate-300 hover:bg-slate-50 sm:w-auto"
-              style={body}
-            >
-              See how it works
-            </a>
-          </div>
         </Reveal>
 
         <Reveal delay={340}>
@@ -277,7 +232,7 @@ function FloatingBadges() {
     { label: "PDF", color: "#dc2626", bg: "bg-red-50", ring: "ring-red-100/60", pos: { top: "-18px", left: "-60px" }, rot: "-6deg", anim: "float-slow", delay: "0s" },
     { label: "A4", color: "#2563eb", bg: "bg-blue-50", ring: "ring-blue-100/60", pos: { top: "34%", left: "-70px" }, rot: "-4deg", anim: "float-fast", delay: "1.5s" },
     { label: "Live preview", color: "#7c3aed", bg: "bg-violet-50", ring: "ring-violet-100/60", pos: { top: "40%", right: "-84px" }, rot: "4deg", anim: "float-slow", delay: "0.5s" },
-    { label: "Free", color: "#0ea968", bg: "bg-emerald-50", ring: "ring-emerald-100/60", pos: { bottom: "34px", left: "-46px" }, rot: "6deg", anim: "float-medium", delay: "2s" },
+    { label: "Free", color: "#1d4ed8", bg: "bg-blue-50", ring: "ring-blue-100/60", pos: { bottom: "34px", left: "-46px" }, rot: "6deg", anim: "float-medium", delay: "2s" },
   ];
   return (
     <>
@@ -339,286 +294,6 @@ function LogoMarquee() {
   );
 }
 
-/* ─── Problem band ───────────────────────────────── */
-
-function Problem() {
-  return (
-    <section className="px-6 py-20">
-      <div className="mx-auto max-w-3xl text-center">
-        <Reveal>
-          <span className="mb-4 inline-block text-xs font-semibold uppercase tracking-[0.14em] text-slate-400" style={body}>
-            Why most resumes never get a reply
-          </span>
-          <h2 className="mb-5 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl" style={display}>
-            Three out of four resumes are filtered out{" "}
-            <span style={{ color: accent.signalDark }}>before a human sees them</span>.
-          </h2>
-          <p className="mx-auto max-w-xl text-lg text-slate-600" style={body}>
-            Applicant tracking systems read your resume before any recruiter does. Fancy
-            columns, tables and graphics that look nice in Word often come out as garbled
-            text. This builder produces the clean, single-column format those systems read
-            reliably — so your experience actually makes it through.
-          </p>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Features ───────────────────────────────────── */
-
-const features = [
-  { title: "Live A4 preview", desc: "Every keystroke lands on a real A4 page, paginated exactly like the final PDF.", icon: "M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z M12 9a3 3 0 100 6 3 3 0 000-6" },
-  { title: "ATS-friendly templates", desc: "Single-column, text-based layouts — no tables or columns to confuse the scanner.", icon: "M9 12l2 2 4-4 M12 3l7 4v5c0 5-3 8-7 9-4-1-7-4-7-9V7l7-4z" },
-  { title: "Pixel-perfect PDF", desc: "What you see is what exports. Selectable text, recruiter-ready, one click.", icon: "M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M9 15l3 3 3-3" },
-  { title: "Full style control", desc: "Fonts, sizes, margins, spacing and section order — tune every detail to fit one page.", icon: "M4 6h16 M4 12h10 M4 18h7 M18 15v6 M15 18h6" },
-  { title: "Multiple resumes", desc: "Keep a tailored version for every role, organized in one dashboard.", icon: "M12 3l9 5-9 5-9-5 9-5z M3 13l9 5 9-5" },
-  { title: "Completeness score", desc: "A live score shows what's missing and what to strengthen before you send.", icon: "M12 20V10 M18 20V4 M6 20v-4" },
-];
-
-function Features() {
-  return (
-    <section className="px-6 py-20">
-      <div className="mx-auto max-w-6xl">
-        <Reveal>
-          <div className="mb-12 max-w-2xl">
-            <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.14em] text-slate-400" style={body}>
-              Everything you need
-            </span>
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl" style={display}>
-              A focused builder, not a bloated editor.
-            </h2>
-          </div>
-        </Reveal>
-
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f, i) => (
-            <Reveal key={f.title} delay={(i % 3) * 80}>
-              <div className="feature-card h-full rounded-2xl border border-slate-200 p-6">
-                <div className="icon-box mb-4 flex h-11 w-11 items-center justify-center rounded-xl">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d={f.icon} />
-                  </svg>
-                </div>
-                <h3 className="mb-1.5 text-lg font-bold text-slate-900" style={display}>{f.title}</h3>
-                <p className="text-[15px] leading-relaxed text-slate-600" style={body}>{f.desc}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── How it works ───────────────────────────────── */
-
-const steps = [
-  { n: "01", title: "Pick a template", desc: "Start from Classic, Advanced or Professional — all ATS-ready out of the box." },
-  { n: "02", title: "Fill in your sections", desc: "Guided forms with tips for each section. The A4 preview updates as you type." },
-  { n: "03", title: "Export your PDF", desc: "Download a clean, text-based PDF that matches the preview exactly." },
-];
-
-function HowItWorks() {
-  return (
-    <section id="how" className="scroll-mt-24 px-6 py-20">
-      <div className="mx-auto max-w-6xl">
-        <Reveal>
-          <div className="mb-14 text-center">
-            <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.14em] text-slate-400" style={body}>
-              How it works
-            </span>
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl" style={display}>
-              From blank page to PDF in three steps.
-            </h2>
-          </div>
-        </Reveal>
-
-        <div className="grid gap-8 md:grid-cols-3">
-          {steps.map((s, i) => (
-            <Reveal key={s.n} delay={i * 100}>
-              <div className="text-center md:text-left">
-                <div
-                  className="number-box mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl text-lg font-extrabold text-white"
-                  style={{ ...display, backgroundColor: accent.ink }}
-                >
-                  {s.n}
-                </div>
-                <h3 className="mb-2 text-xl font-bold text-slate-900" style={display}>{s.title}</h3>
-                <p className="text-[15px] leading-relaxed text-slate-600" style={body}>{s.desc}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Templates ──────────────────────────────────── */
-
-const templateCards = [
-  { name: "Classic", tag: "Single column", desc: "Clean and trusted. The safest bet for any ATS." },
-  { name: "Advanced", tag: "Detailed", desc: "Icons, project links and description fields for depth." },
-  { name: "Professional", tag: "Executive", desc: "Letter-spaced headings and a refined, senior feel." },
-];
-
-function TemplatePreview({ variant }) {
-  return (
-    <div className="template-preview flex h-56 items-start justify-center overflow-hidden rounded-t-2xl bg-slate-50 p-5">
-      <div className="w-full max-w-[190px] rounded border border-slate-200 bg-white p-4 shadow-sm">
-        <div className={`mb-3 flex ${variant === "professional" ? "justify-center" : "justify-center"}`}>
-          <div className={`h-2.5 rounded bg-slate-800 ${variant === "professional" ? "w-28" : "w-24"}`} />
-        </div>
-        <div className="mb-3 flex justify-center">
-          <div className="h-1 w-32 rounded bg-slate-200" />
-        </div>
-        <div className={`mb-3 w-full ${variant === "professional" ? "h-0.5 bg-slate-900" : "h-px bg-slate-300"}`} />
-        <div className="mb-1.5 h-1.5 w-16 rounded bg-slate-300" />
-        <div className="mb-1 h-1 w-full rounded bg-slate-100" />
-        <div className="mb-1 h-1 w-full rounded bg-slate-100" />
-        <div className="mb-3 h-1 w-2/3 rounded bg-slate-100" />
-        <div className="mb-1.5 h-1.5 w-20 rounded bg-slate-300" />
-        <div className="mb-1 flex justify-between">
-          <div className="h-1 w-20 rounded bg-slate-200" />
-          <div className="h-1 w-10 rounded bg-slate-200" />
-        </div>
-        <div className="mb-1 h-1 w-full rounded bg-slate-100" />
-        <div className="h-1 w-4/5 rounded bg-slate-100" />
-      </div>
-    </div>
-  );
-}
-
-function Templates() {
-  return (
-    <section id="templates" className="scroll-mt-24 px-6 py-20">
-      <div className="mx-auto max-w-6xl">
-        <Reveal>
-          <div className="mb-12 text-center">
-            <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.14em] text-slate-400" style={body}>
-              Templates
-            </span>
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl" style={display}>
-              Three layouts. All parseable.
-            </h2>
-          </div>
-        </Reveal>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          {templateCards.map((t, i) => (
-            <Reveal key={t.name} delay={i * 90}>
-              <div className="template-card overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                <TemplatePreview variant={t.name.toLowerCase()} />
-                <div className="border-t border-slate-100 p-5">
-                  <div className="mb-1 flex items-center gap-2">
-                    <h3 className="text-lg font-bold text-slate-900" style={display}>{t.name}</h3>
-                    <span
-                      className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-                      style={{ backgroundColor: accent.signalSoft, color: accent.signalDark, ...body }}
-                    >
-                      {t.tag}
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-600" style={body}>{t.desc}</p>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── FAQ ────────────────────────────────────────── */
-
-const faqs = [
-  { q: "Is it really free?", a: "Yes. You can build and export resumes without paying or creating an account." },
-  { q: "Will my resume pass ATS?", a: "Templates are single-column and text-based — the format applicant tracking systems read most reliably. There is no such thing as a guaranteed pass, but this avoids the layout traps that break parsing." },
-  { q: "Do I need to sign up?", a: "No. Your resumes are saved locally in your browser, so you can start right away." },
-  { q: "Can I keep more than one resume?", a: "Yes. The dashboard holds as many versions as you need, so you can tailor one per role." },
-  { q: "What does the export look like?", a: "A real, text-based PDF with selectable text — not a screenshot — that matches the on-screen preview exactly." },
-];
-
-function FaqItem({ q, a }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border-b border-slate-200">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between gap-4 py-5 text-left"
-        aria-expanded={open}
-      >
-        <span className="text-[17px] font-semibold text-slate-900" style={display}>{q}</span>
-        <svg
-          className={`h-5 w-5 shrink-0 text-slate-400 transition-transform duration-300 ${open ? "rotate-45" : ""}`}
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14M5 12h14" />
-        </svg>
-      </button>
-      <div className={`faq-answer ${open ? "open" : ""}`}>
-        <div>
-          <p className="pb-5 pr-8 text-[15px] leading-relaxed text-slate-600" style={body}>{a}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Faq() {
-  return (
-    <section id="faq" className="scroll-mt-24 px-6 py-20">
-      <div className="mx-auto max-w-3xl">
-        <Reveal>
-          <div className="mb-10 text-center">
-            <span className="mb-3 inline-block text-xs font-semibold uppercase tracking-[0.14em] text-slate-400" style={body}>
-              FAQ
-            </span>
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl" style={display}>
-              Questions, answered.
-            </h2>
-          </div>
-        </Reveal>
-        <Reveal delay={80}>
-          <div>
-            {faqs.map((f) => (
-              <FaqItem key={f.q} {...f} />
-            ))}
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Final CTA ──────────────────────────────────── */
-
-function FinalCta() {
-  return (
-    <section className="px-6 py-20">
-      <div className="cta-shimmer relative mx-auto max-w-4xl overflow-hidden rounded-3xl border border-slate-200 bg-white px-8 py-16 text-center shadow-sm">
-        <Reveal>
-          <h2 className="mx-auto mb-4 max-w-xl text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl" style={display}>
-            Ready to get read?
-          </h2>
-          <p className="mx-auto mb-8 max-w-md text-lg text-slate-600" style={body}>
-            Build a resume that makes it past the filter — and onto a recruiter's screen.
-          </p>
-          <Link
-            href={brand.primaryCta.href}
-            className="btn-primary inline-flex items-center gap-2 rounded-xl px-8 py-4 text-base font-semibold text-white shadow-lg transition-transform duration-200 hover:scale-[1.02]"
-            style={{ backgroundColor: accent.signal, boxShadow: "0 10px 30px -8px rgba(14,169,104,0.5)" }}
-          >
-            {brand.primaryCta.label}
-          </Link>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
 /* ─── Footer ─────────────────────────────────────── */
 
 function Footer() {
@@ -628,16 +303,6 @@ function Footer() {
         <div className="flex items-center gap-3">
           <Logo />
           <span className="text-sm text-slate-400" style={body}>· {brand.tagline}</span>
-        </div>
-        <div className="flex items-center gap-6" style={body}>
-          {brand.nav.map((item) => (
-            <a key={item.href} href={item.href} className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900">
-              {item.label}
-            </a>
-          ))}
-          <a href={brand.links.github} target="_blank" rel="noreferrer" className="text-sm font-medium text-slate-500 transition-colors hover:text-slate-900">
-            GitHub
-          </a>
         </div>
       </div>
     </footer>
@@ -654,12 +319,6 @@ export default function LandingPage() {
       </Navbar>
       <Hero />
       <LogoMarquee />
-      <Problem />
-      <Features />
-      <HowItWorks />
-      <Templates />
-      <Faq />
-      <FinalCta />
       <Footer />
     </main>
   );
