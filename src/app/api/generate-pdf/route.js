@@ -1,5 +1,22 @@
 import puppeteerCore from "puppeteer-core";
 
+// Chrome lives in a different location on each OS, so resolve it at runtime
+// instead of hardcoding a path. Override with CHROME_PATH in .env.local.
+function getLocalChromePath() {
+  if (process.env.CHROME_PATH) {
+    return process.env.CHROME_PATH;
+  }
+
+  switch (process.platform) {
+    case "darwin":
+      return "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+    case "win32":
+      return "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
+    default:
+      return "/usr/bin/google-chrome";
+  }
+}
+
 export async function POST(request) {
   // Get HTML content from the request body
   const { html } = await request.json();
@@ -22,9 +39,8 @@ export async function POST(request) {
       // Local development - use installed Chrome
       launchOptions = {
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
-        executablePath:
-          "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-        headless: "new",
+        executablePath: getLocalChromePath(),
+        headless: true,
       };
     }
 
