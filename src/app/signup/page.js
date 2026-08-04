@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { GoogleIcon } from "@/components/SocialIcons";
@@ -10,12 +13,45 @@ const inputCls =
 const labelCls = "mb-1.5 block text-[13px] font-medium text-slate-500";
 
 export default function SignupPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [created, setCreated] = useState(false);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error ?? "Something went wrong.");
+        return;
+      }
+
+      setCreated(true);
+    } catch {
+      setError("Could not reach the server. Check your connection.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <main
       className="relative flex min-h-screen flex-col items-center justify-center bg-[#f6f6f4] px-5 py-20"
       style={{ fontFamily: "var(--font-geist), sans-serif" }}
     >
-      <div className="absolute left-8 top-7">
+      <div className="absolute top-7 left-8">
         <Logo />
       </div>
 
@@ -23,58 +59,109 @@ export default function SignupPage() {
         className="w-full max-w-[400px] rounded-2xl border border-[#e6e6e3] bg-white p-9"
         style={{ boxShadow: cardShadow }}
       >
-        <h1 className="text-center text-[25px] font-semibold tracking-tight text-slate-900">
-          Create your account
-        </h1>
-        <p className="mb-6 mt-1.5 text-center text-[14.5px] text-slate-500">
-          Start building a resume that gets read.
-        </p>
+        {created ? (
+          <div className="text-center">
+            <h1 className="text-[25px] font-semibold tracking-tight text-slate-900">
+              Account created
+            </h1>
+            <p className="mt-1.5 mb-6 text-[14.5px] text-slate-500">
+              Your account for <span className="font-medium text-slate-700">{email}</span> is ready.
+            </p>
+            <Link
+              href="/login"
+              className="flex h-[47px] w-full items-center justify-center rounded-xl bg-blue-700 text-[15px] font-semibold text-white transition-colors hover:bg-blue-800"
+            >
+              Go to log in
+            </Link>
+          </div>
+        ) : (
+          <>
+            <h1 className="text-center text-[25px] font-semibold tracking-tight text-slate-900">
+              Create your account
+            </h1>
+            <p className="mt-1.5 mb-6 text-center text-[14.5px] text-slate-500">
+              Start building a resume that gets read.
+            </p>
 
-        <button type="button" className={socialBtn}>
-          <GoogleIcon /> Sign up with Google
-        </button>
+            <button type="button" className={socialBtn}>
+              <GoogleIcon /> Sign up with Google
+            </button>
 
-        <div className="my-[22px] flex items-center gap-3.5">
-          <div className="h-px flex-1 bg-[#e6e6e3]" />
-          <span className="text-[13px] text-slate-400">or</span>
-          <div className="h-px flex-1 bg-[#e6e6e3]" />
-        </div>
+            <div className="my-[22px] flex items-center gap-3.5">
+              <div className="h-px flex-1 bg-[#e6e6e3]" />
+              <span className="text-[13px] text-slate-400">or</span>
+              <div className="h-px flex-1 bg-[#e6e6e3]" />
+            </div>
 
-        <div className="mb-[15px]">
-          <label className={labelCls}>Email</label>
-          <input type="email" placeholder="you@email.com" className={inputCls} />
-        </div>
-        <div className="mb-[15px]">
-          <label className={labelCls}>Password</label>
-          <input type="password" placeholder="Create a password" className={inputCls} />
-        </div>
+            <form onSubmit={handleSubmit} noValidate>
+              <div className="mb-[15px]">
+                <label htmlFor="email" className={labelCls}>
+                  Email
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@email.com"
+                  className={inputCls}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
 
-        <button
-          type="button"
-          className="mt-1 h-[47px] w-full rounded-xl bg-blue-700 text-[15px] font-semibold text-white transition-colors hover:bg-blue-800"
-        >
-          Create account
-        </button>
+              <div className="mb-[15px]">
+                <label htmlFor="password" className={labelCls}>
+                  Password
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="At least 8 characters"
+                  className={inputCls}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
 
-        <p className="mx-auto mt-4 max-w-[300px] text-center text-[12px] leading-relaxed text-slate-400">
-          By signing up, you agree to our{" "}
-          <a
-            href="https://tally.so/help/terms-and-privacy"
-            target="_blank"
-            rel="noreferrer"
-            className="text-slate-500 underline underline-offset-2"
-          >
-            Terms &amp; Privacy
-          </a>
-          .
-        </p>
+              {error && (
+                <p className="mb-[15px] rounded-xl bg-red-50 px-3.5 py-2.5 text-[13.5px] text-red-700">
+                  {error}
+                </p>
+              )}
 
-        <p className="mt-4 text-center text-[14px] text-slate-500">
-          Already have an account?{" "}
-          <Link href="/login" className="font-medium text-blue-700 hover:text-blue-800">
-            Log in
-          </Link>
-        </p>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="mt-1 h-[47px] w-full rounded-xl bg-blue-700 text-[15px] font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {submitting ? "Creating account…" : "Create account"}
+              </button>
+            </form>
+
+            <p className="mx-auto mt-4 max-w-[300px] text-center text-[12px] leading-relaxed text-slate-400">
+              By signing up, you agree to our{" "}
+              <a
+                href="https://tally.so/help/terms-and-privacy"
+                target="_blank"
+                rel="noreferrer"
+                className="text-slate-500 underline underline-offset-2"
+              >
+                Terms &amp; Privacy
+              </a>
+              .
+            </p>
+
+            <p className="mt-4 text-center text-[14px] text-slate-500">
+              Already have an account?{" "}
+              <Link href="/login" className="font-medium text-blue-700 hover:text-blue-800">
+                Log in
+              </Link>
+            </p>
+          </>
+        )}
       </div>
     </main>
   );

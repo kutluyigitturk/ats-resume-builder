@@ -1,0 +1,87 @@
+// Prisma schema — ATS Resume Builder
+// Docs: https://www.prisma.io/docs
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled — used by the app
+  directUrl = env("DIRECT_URL") // unpooled — used by migrations
+}
+
+// Subscription tiers shown on the pricing page.
+// Everyone starts on FREE; billing is wired up later.
+enum Plan {
+  FREE
+  STANDARD
+  PRO
+  AI
+}
+
+enum TokenType {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+}
+
+model User {
+  id String @id @default(cuid())
+
+  email String @unique
+  // Never the password itself — only its argon2id hash.
+  passwordHash String
+  name         String?
+
+  // Null until the user clicks the link in the verification email.
+  emailVerified DateTime?
+
+  plan Plan @default(FREE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resumes Resume[]
+  tokens  Token[]
+}
+
+model Resume {
+  id     String @id @default(cuid())
+  userId String
+
+  name       String @default("Untitled Resume")
+  templateId String
+
+  // The whole CV document and its style settings, stored as JSON.
+  // Keeps the existing builder data shape without a migration per field.
+  cvData        Json
+  styleSettings Json
+  pdfName       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// One-time tokens for email verification and password reset.
+model Token {
+  id     String @id @default(cuid())
+  userId String
+
+  type TokenType
+
+  // Hashed for the same reason passwords are: if the database leaks,
+  // the raw tokens in it must not be usable to take over accounts.
+  tokenHash String @unique
+
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+}
