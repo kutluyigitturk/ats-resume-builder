@@ -1,29 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import AuthField from "@/components/AuthField";
 import { GoogleIcon } from "@/components/SocialIcons";
+import { shake } from "@/lib/shake";
 
 const cardShadow = "0 1px 2px rgba(23,23,27,0.03), 0 12px 32px -14px rgba(23,23,27,0.12)";
 const socialBtn =
   "flex h-[46px] w-full items-center justify-center gap-2.5 rounded-xl border border-[#d6d6d2] bg-white text-[14.5px] font-medium text-slate-900 transition-colors hover:bg-slate-50";
-const inputCls =
-  "h-[46px] w-full rounded-xl border border-[#d6d6d2] bg-[#fbfbfa] px-3.5 text-[14.5px] text-slate-900 placeholder:text-slate-400 transition-all focus:border-blue-700 focus:bg-white focus:outline-none focus:ring-[3px] focus:ring-blue-700/15";
-const labelCls = "mb-1.5 block text-[13px] font-medium text-slate-500";
 
 export default function LoginPage() {
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
   const [resent, setResent] = useState(false);
 
-  // Only offered after a correct password, so this cannot be used to send
-  // mail to addresses the visitor does not own.
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+  const formErrorRef = useRef(null);
+  const refs = { email: emailRef, password: passwordRef };
+
+  function reportFirst(fieldErrors) {
+    const first = ["email", "password"].find((name) => fieldErrors[name]);
+    if (!first) return;
+
+    const element = refs[first].current;
+    element?.focus();
+    shake(element);
+  }
+
+  // Only the empty cases are checked here. Whether the credentials are right
+  // is the server's answer, and it deliberately never says which half failed.
+  function validate() {
+    const next = {};
+    if (!email.trim()) next.email = "Enter your email address.";
+    if (!password) next.password = "Enter your password.";
+    return next;
+  }
+
   async function handleResend() {
     setResent(true);
 
@@ -36,9 +58,18 @@ export default function LoginPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setError(null);
+    setFormError(null);
     setNeedsVerification(false);
     setResent(false);
+
+    const fieldErrors = validate();
+    setErrors(fieldErrors);
+
+    if (Object.keys(fieldErrors).length > 0) {
+      reportFirst(fieldErrors);
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -51,16 +82,19 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error ?? "Something went wrong.");
+        // Kept at form level on purpose. Pinning "incorrect" to the email or
+        // the password field would tell an attacker which one was right.
+        setFormError(data.error ?? "Unable to log you in. Try again in a moment.");
         setNeedsVerification(Boolean(data.needsVerification));
+        shake(formErrorRef.current);
         return;
       }
 
-      // refresh() re-runs the server components so the new session is picked up.
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setError("Could not reach the server. Check your connection.");
+      setFormError("Could not reach the server. Check your connection and try again.");
+      shake(formErrorRef.current);
     } finally {
       setSubmitting(false);
     }
@@ -97,37 +131,35 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
-          <div className="mb-[15px]">
-            <label htmlFor="email" className={labelCls}>
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder="you@email.com"
-              className={inputCls}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+          <AuthField
+            ref={emailRef}
+            id="email"
+            label="Email"
+            type="email"
+            autoComplete="email"
+            placeholder="name@example.com"
+            value={email}
+            error={errors.email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+            }}
+          />
 
-          <div className="mb-[15px]">
-            <label htmlFor="password" className={labelCls}>
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="current-password"
-              placeholder="••••••••"
-              className={inputCls}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
+          <AuthField
+            ref={passwordRef}
+            id="password"
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            value={password}
+            error={errors.password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
+            }}
+          />
 
           <div className="-mt-1.5 mb-4 flex justify-end">
             <Link
@@ -138,9 +170,15 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          {error && (
-            <div className="mb-[15px] rounded-xl bg-red-50 px-3.5 py-2.5 text-[13.5px] text-red-700">
-              <p>{error}</p>
+          {formError && (
+            <div
+              ref={formErrorRef}
+              // Announced as soon as it appears, without moving focus away
+              // from the field the user is still in.
+              role="alert"
+              className="mb-[15px] rounded-xl bg-red-50 px-3.5 py-2.5 text-[13.5px] text-red-700"
+            >
+              <p>{formError}</p>
               {needsVerification &&
                 (resent ? (
                   <p className="mt-1.5 text-red-600">Sent. Check your inbox for the new link.</p>
@@ -159,7 +197,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="h-[47px] w-full rounded-xl bg-blue-700 text-[15px] font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-[47px] w-full rounded-xl bg-blue-700 text-[15px] font-semibold text-white transition-colors hover:bg-blue-800 active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? "Logging in…" : "Log in"}
           </button>
