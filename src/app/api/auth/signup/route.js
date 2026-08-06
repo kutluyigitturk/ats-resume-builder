@@ -1,5 +1,7 @@
 import { hash } from "@node-rs/argon2";
 import { prisma } from "@/lib/prisma";
+import { issueToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "@/lib/email";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
@@ -42,6 +44,9 @@ export async function POST(request) {
       data: { email, passwordHash },
       select: { id: true, email: true },
     });
+
+    const token = await issueToken(user.id, "EMAIL_VERIFY");
+    await sendVerificationEmail(user.email, token);
 
     return Response.json(user, { status: 201 });
   } catch (error) {

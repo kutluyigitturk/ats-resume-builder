@@ -33,13 +33,25 @@ export async function POST(request) {
   try {
     const user = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, passwordHash: true },
+      select: { id: true, passwordHash: true, emailVerified: true },
     });
 
     const passwordMatches = await verify(user?.passwordHash ?? DUMMY_HASH, password);
 
     if (!user || !passwordMatches) {
       return Response.json({ error: INVALID_CREDENTIALS }, { status: 401 });
+    }
+
+    // Checked only after the password is confirmed. Doing it earlier would
+    // tell anyone who guesses an address whether it is registered here.
+    if (!user.emailVerified) {
+      return Response.json(
+        {
+          error: "Confirm your email address before logging in.",
+          needsVerification: true,
+        },
+        { status: 403 }
+      );
     }
 
     await createSession(user.id, request.headers.get("user-agent"));

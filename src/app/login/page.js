@@ -19,10 +19,26 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resent, setResent] = useState(false);
+
+  // Only offered after a correct password, so this cannot be used to send
+  // mail to addresses the visitor does not own.
+  async function handleResend() {
+    setResent(true);
+
+    await fetch("/api/auth/resend-verification", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    }).catch(() => {});
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError(null);
+    setNeedsVerification(false);
+    setResent(false);
     setSubmitting(true);
 
     try {
@@ -36,6 +52,7 @@ export default function LoginPage() {
 
       if (!response.ok) {
         setError(data.error ?? "Something went wrong.");
+        setNeedsVerification(Boolean(data.needsVerification));
         return;
       }
 
@@ -113,15 +130,30 @@ export default function LoginPage() {
           </div>
 
           <div className="-mt-1.5 mb-4 flex justify-end">
-            <Link href="#" className="text-[13px] font-medium text-blue-700 hover:text-blue-800">
+            <Link
+              href="/forgot-password"
+              className="text-[13px] font-medium text-blue-700 hover:text-blue-800"
+            >
               Forgot password?
             </Link>
           </div>
 
           {error && (
-            <p className="mb-[15px] rounded-xl bg-red-50 px-3.5 py-2.5 text-[13.5px] text-red-700">
-              {error}
-            </p>
+            <div className="mb-[15px] rounded-xl bg-red-50 px-3.5 py-2.5 text-[13.5px] text-red-700">
+              <p>{error}</p>
+              {needsVerification &&
+                (resent ? (
+                  <p className="mt-1.5 text-red-600">Sent. Check your inbox for the new link.</p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    className="mt-1.5 font-semibold underline underline-offset-2 hover:text-red-800"
+                  >
+                    Send the link again
+                  </button>
+                ))}
+            </div>
           )}
 
           <button
