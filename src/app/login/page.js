@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import { GoogleIcon } from "@/components/SocialIcons";
@@ -10,12 +14,47 @@ const inputCls =
 const labelCls = "mb-1.5 block text-[13px] font-medium text-slate-500";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error ?? "Something went wrong.");
+        return;
+      }
+
+      // refresh() re-runs the server components so the new session is picked up.
+      router.push("/dashboard");
+      router.refresh();
+    } catch {
+      setError("Could not reach the server. Check your connection.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <main
       className="relative flex min-h-screen flex-col items-center justify-center bg-[#f6f6f4] px-5 py-20"
       style={{ fontFamily: "var(--font-geist), sans-serif" }}
     >
-      <div className="absolute left-8 top-7">
+      <div className="absolute top-7 left-8">
         <Logo />
       </div>
 
@@ -26,7 +65,7 @@ export default function LoginPage() {
         <h1 className="text-center text-[25px] font-semibold tracking-tight text-slate-900">
           Welcome back
         </h1>
-        <p className="mb-6 mt-1.5 text-center text-[14.5px] text-slate-500">
+        <p className="mt-1.5 mb-6 text-center text-[14.5px] text-slate-500">
           Log in to keep building.
         </p>
 
@@ -40,26 +79,59 @@ export default function LoginPage() {
           <div className="h-px flex-1 bg-[#e6e6e3]" />
         </div>
 
-        <div className="mb-[15px]">
-          <label className={labelCls}>Email</label>
-          <input type="email" placeholder="you@email.com" className={inputCls} />
-        </div>
-        <div className="mb-[15px]">
-          <label className={labelCls}>Password</label>
-          <input type="password" placeholder="••••••••" className={inputCls} />
-        </div>
-        <div className="-mt-1.5 mb-4 flex justify-end">
-          <Link href="#" className="text-[13px] font-medium text-blue-700 hover:text-blue-800">
-            Forgot password?
-          </Link>
-        </div>
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="mb-[15px]">
+            <label htmlFor="email" className={labelCls}>
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@email.com"
+              className={inputCls}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-        <button
-          type="button"
-          className="h-[47px] w-full rounded-xl bg-blue-700 text-[15px] font-semibold text-white transition-colors hover:bg-blue-800"
-        >
-          Log in
-        </button>
+          <div className="mb-[15px]">
+            <label htmlFor="password" className={labelCls}>
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              placeholder="••••••••"
+              className={inputCls}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+
+          <div className="-mt-1.5 mb-4 flex justify-end">
+            <Link href="#" className="text-[13px] font-medium text-blue-700 hover:text-blue-800">
+              Forgot password?
+            </Link>
+          </div>
+
+          {error && (
+            <p className="mb-[15px] rounded-xl bg-red-50 px-3.5 py-2.5 text-[13.5px] text-red-700">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="h-[47px] w-full rounded-xl bg-blue-700 text-[15px] font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitting ? "Logging in…" : "Log in"}
+          </button>
+        </form>
 
         <p className="mt-[22px] text-center text-[14px] text-slate-500">
           Don&apos;t have an account?{" "}

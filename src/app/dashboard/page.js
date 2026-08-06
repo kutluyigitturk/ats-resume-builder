@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Logo from "@/components/Logo";
 import Navbar from "@/components/Navbar";
+import UserMenu from "@/components/UserMenu";
 import TemplateModal from "@/components/builder/TemplateModal";
 import CVPreview from "@/components/cv-preview/CVPreview";
 import initialCV from "@/data/initialCV";
@@ -516,8 +517,9 @@ export default function Dashboard() {
         <div className="absolute top-1/3 -right-40 h-[400px] w-[400px] rounded-full bg-indigo-50/30 blur-[120px]" />
       </div>
 
-      <Navbar maxWidth="1024px" baseRingClass="ring-slate-200/50" justify="justify-center">
+      <Navbar maxWidth="1024px" baseRingClass="ring-slate-200/50" justify="justify-between">
         <Logo />
+        <UserMenu />
       </Navbar>
 
       <main className="relative z-10 mx-auto max-w-5xl px-6 pt-28 pb-16">

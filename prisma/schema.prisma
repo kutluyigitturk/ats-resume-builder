@@ -43,6 +43,7 @@ model User {
 
   resumes Resume[]
   tokens  Token[]
+  sessions Session[]
 }
 
 model Resume {
@@ -84,4 +85,22 @@ model Token {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, type])
+}
+// Server-side sessions. Storing them lets us revoke a login instantly -
+// something a self-contained JWT cannot do once it has been issued.
+model Session {
+  id     String @id @default(cuid())
+  userId String
+
+  // Only the hash of the cookie value. A leaked database must not hand
+  // anyone a working session.
+  tokenHash String @unique
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
