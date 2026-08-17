@@ -5,7 +5,10 @@ Next.js App Router, JavaScript (not TypeScript), Tailwind v4, deployed on Vercel
 
 ## Working agreement
 
-- **Never commit or push.** Propose changes; the owner reviews and pushes.
+- **Commit and push only when the owner asks for it**, never on your own initiative and
+  never for a change they have not seen yet. When they do ask: run `npm run lint` first,
+  write a Conventional Commits message, and push to `main`. If lint fails, fix it and say
+  so before pushing.
 - Explanations to the owner in **Turkish**. Code, comments and commit messages in **English**.
 - Code comments are short and explain **why**, not what. No comment restating the line below it.
 - `npm run lint` and `npx prettier --check .` must pass before anything is handed over.
