@@ -1,5 +1,6 @@
 import { randomBytes, createHash } from "node:crypto";
 import { cookies } from "next/headers";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
 const COOKIE_NAME = "session";
@@ -59,7 +60,7 @@ export async function getCurrentUser() {
     select: {
       expiresAt: true,
       user: {
-        select: { id: true, email: true, plan: true, emailVerified: true },
+        select: { id: true, email: true, name: true, plan: true, emailVerified: true },
       },
     },
   });
@@ -72,6 +73,51 @@ export async function getCurrentUser() {
   }
 
   return session.user;
+}
+
+// The gate every protected layout uses. Kept here rather than repeated per
+// layout so a route can never be added with a subtly weaker check.
+//
+// Deliberately not wrapped in a try/catch: a protected page fails closed. If
+// the session cannot be read, the error reaches the boundary and the visitor
+// gets an error screen with a retry - never the page. Redirecting to /login
+// instead would be a lie, telling someone their session ended when the
+// database merely hiccuped.
+export async function requireUser() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  return user;
+}
+
+// The mirror of requireUser, for the pages that only make sense logged out.
+// Someone already signed in who lands on /login has nothing to do there.
+//
+// This one fails OPEN, which is the opposite of requireUser and the whole
+// point: /login, /signup and /forgot-password are the way back in. If reading
+// the session throws, the visitor is treated as signed out and gets the form.
+// Letting the error through here would close the only door left open.
+export async function redirectIfAuthenticated() {
+  let user = null;
+
+  try {
+    user = await getCurrentUser();
+  } catch (error) {
+    // The framework signals redirects, not-founds and "this route must be
+    // dynamic" by throwing. Swallowing those breaks routing itself, so they go
+    // straight back up; only a real failure is treated as "not signed in".
+    unstable_rethrow(error);
+
+    console.error("Session lookup failed on a public page:", error);
+    return;
+  }
+
+  if (user) {
+    redirect("/dashboard");
+  }
 }
 
 // Deletes the session row as well as the cookie. Clearing only the cookie
