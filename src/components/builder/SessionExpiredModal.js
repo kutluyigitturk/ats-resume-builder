@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import AuthField from "@/components/AuthField";
+import Modal from "@/components/ui/Modal";
 import { shake } from "@/lib/shake";
 
 // A session that runs out mid-edit used to end in a red line under the toolbar
@@ -13,51 +14,8 @@ export default function SessionExpiredModal({ onClose, onSignedIn }) {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const dialogRef = useRef(null);
   const emailRef = useRef(null);
   const errorRef = useRef(null);
-  const openerRef = useRef(null);
-
-  useEffect(() => {
-    openerRef.current = document.activeElement;
-    emailRef.current?.focus();
-
-    function onKeyDown(event) {
-      if (event.key === "Escape") {
-        onClose();
-        return;
-      }
-
-      if (event.key !== "Tab") return;
-
-      // Keep Tab inside the dialog; behind it sits a whole editor that is not
-      // usable until this is dealt with.
-      const focusable = dialogRef.current?.querySelectorAll(
-        "button:not([disabled]), input:not([disabled]), a[href]"
-      );
-      if (!focusable?.length) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener("keydown", onKeyDown);
-
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      // Put focus back where it was, so closing does not drop the user at the
-      // top of the page.
-      openerRef.current?.focus?.();
-    };
-  }, [onClose]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -89,16 +47,13 @@ export default function SessionExpiredModal({ onClose, onSignedIn }) {
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/25 backdrop-blur-sm"
-      onClick={onClose}
+    <Modal
+      open
+      onClose={onClose}
+      labelledBy="session-expired-title"
+      backdropClass="backdrop:bg-black/25 backdrop:backdrop-blur-sm"
     >
       <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="session-expired-title"
-        onClick={(e) => e.stopPropagation()}
         className="mx-4 w-full max-w-[380px] rounded-2xl border border-slate-200 bg-white p-7 shadow-2xl"
         style={{ fontFamily: "var(--font-geist), sans-serif" }}
       >
@@ -115,6 +70,7 @@ export default function SessionExpiredModal({ onClose, onSignedIn }) {
         <form onSubmit={handleSubmit} noValidate>
           <AuthField
             ref={emailRef}
+            autoFocus
             id="session-email"
             label="Email"
             type="email"
@@ -162,6 +118,6 @@ export default function SessionExpiredModal({ onClose, onSignedIn }) {
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 }
