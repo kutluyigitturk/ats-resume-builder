@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Modal from "@/components/ui/Modal";
 import { templates } from "@/data/templates";
 import { defaultStyleSettings } from "@/data/styleDefaults";
 import initialCV from "@/data/initialCV";
@@ -84,9 +85,7 @@ function TemplateCard({
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-[15px] font-bold text-slate-900">
-                {template.name}
-              </span>
+              <span className="text-[15px] font-bold text-slate-900">{template.name}</span>
 
               {isDefault && (
                 <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold text-blue-600 ring-1 ring-blue-100">
@@ -95,9 +94,7 @@ function TemplateCard({
               )}
             </div>
 
-            <p className="text-xs leading-relaxed text-slate-500 mb-2.5">
-              {template.description}
-            </p>
+            <p className="text-xs leading-relaxed text-slate-500 mb-2.5">{template.description}</p>
 
             <div className="flex flex-wrap gap-1.5">
               {template.badges.map((badge) => (
@@ -114,9 +111,7 @@ function TemplateCard({
                 : "border-slate-300 group-hover:border-slate-400"
             }`}
           >
-            {isSelected && (
-              <div className="h-2 w-2 rounded-full bg-white" />
-            )}
+            {isSelected && <div className="h-2 w-2 rounded-full bg-white" />}
           </div>
         </div>
       </div>
@@ -143,11 +138,12 @@ function TemplateCard({
         }`}
       >
         <span
-          className={`text-[11px] font-medium ${
-            isSelected ? "text-blue-600" : "text-slate-400"
-          }`}
+          className={`text-[11px] font-medium ${isSelected ? "text-blue-600" : "text-slate-400"}`}
         >
-          Default font: {template.defaultPrimaryFont}{template.defaultPrimaryFont !== template.defaultSecondaryFont ? ` / ${template.defaultSecondaryFont}` : ""}
+          Default font: {template.defaultPrimaryFont}
+          {template.defaultPrimaryFont !== template.defaultSecondaryFont
+            ? ` / ${template.defaultSecondaryFont}`
+            : ""}
         </span>
       </div>
     </button>
@@ -175,12 +171,14 @@ export default function TemplateModal({
   const isCreateMode = mode === "create";
 
   // Check if CV has any real content
-  const hasContent = cv && (
-    cv.name?.trim() || cv.email?.trim() || cv.summary?.trim() ||
-    cv.experiences?.some(e => e.company?.trim() || e.position?.trim()) ||
-    cv.education?.some(e => e.school?.trim() || e.degree?.trim()) ||
-    cv.skills?.some(s => s.category?.trim() || s.items?.trim())
-  );
+  const hasContent =
+    cv &&
+    (cv.name?.trim() ||
+      cv.email?.trim() ||
+      cv.summary?.trim() ||
+      cv.experiences?.some((e) => e.company?.trim() || e.position?.trim()) ||
+      cv.education?.some((e) => e.school?.trim() || e.degree?.trim()) ||
+      cv.skills?.some((s) => s.category?.trim() || s.items?.trim()));
 
   // Use sample data for empty CVs or create mode without data
   const previewCv = hasContent ? cv : sampleCV;
@@ -211,8 +209,6 @@ export default function TemplateModal({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const handleApply = () => {
     if (isCreateMode && onCreate) {
       const finalName = resumeName.trim() || "Untitled Resume";
@@ -224,19 +220,17 @@ export default function TemplateModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      labelledBy="template-modal-title"
+      backdropClass="backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+    >
       <div className="relative z-10 mx-4 flex max-h-[96vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-100 px-7 py-5">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 id="template-modal-title" className="text-lg font-bold text-slate-900">
               {isCreateMode ? "Create New Resume" : "Choose Resume Template"}
             </h2>
             <p className="mt-0.5 text-xs text-slate-500">
@@ -317,6 +311,6 @@ export default function TemplateModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
