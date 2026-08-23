@@ -1,21 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import AuthField from "@/components/AuthField";
+import { shake } from "@/lib/shake";
 
 const cardShadow = "0 1px 2px rgba(23,23,27,0.03), 0 12px 32px -14px rgba(23,23,27,0.12)";
-const inputCls =
-  "h-[46px] w-full rounded-xl border border-[#d6d6d2] bg-[#fbfbfa] px-3.5 text-[14.5px] text-slate-900 placeholder:text-slate-400 transition-all focus:border-blue-700 focus:bg-white focus:outline-none focus:ring-[3px] focus:ring-blue-700/15";
-const labelCls = "mb-1.5 block text-[13px] font-medium text-slate-500";
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
+  const [error, setError] = useState(null);
   const [sent, setSent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  const emailRef = useRef(null);
+
+  // Checked here only to catch a typo before the user is told to go and wait
+  // for mail that was never going to arrive. The server still answers the
+  // same way for every address.
+  function validate() {
+    if (!email.trim()) return "Enter your email address.";
+    if (!EMAIL_PATTERN.test(email.trim())) {
+      return "Enter a valid email address, like name@example.com.";
+    }
+
+    return null;
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
+
+    const emailError = validate();
+    setError(emailError);
+
+    if (emailError) {
+      emailRef.current?.focus();
+      shake(emailRef.current);
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -72,21 +98,20 @@ export default function ForgotPasswordPage() {
             </p>
 
             <form onSubmit={handleSubmit} noValidate>
-              <div className="mb-[15px]">
-                <label htmlFor="email" className={labelCls}>
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@email.com"
-                  className={inputCls}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+              <AuthField
+                ref={emailRef}
+                id="email"
+                label="Email"
+                type="email"
+                autoComplete="email"
+                placeholder="name@example.com"
+                value={email}
+                error={error}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (error) setError(null);
+                }}
+              />
 
               <button
                 type="submit"

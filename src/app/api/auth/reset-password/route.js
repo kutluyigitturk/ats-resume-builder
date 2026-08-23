@@ -1,8 +1,9 @@
 import { hash } from "@node-rs/argon2";
 import { prisma } from "@/lib/prisma";
-import { consumeToken } from "@/lib/tokens";
+import { consumeToken, checkToken } from "@/lib/tokens";
+import { checkPassword } from "@/lib/password";
 
-const MIN_PASSWORD_LENGTH = 8;
+const INVALID_LINK = "This link is invalid or has expired. Request a new one.";
 
 export async function POST(request) {
   let body;
@@ -15,21 +16,33 @@ export async function POST(request) {
   const token = String(body.token ?? "");
   const password = String(body.password ?? "");
 
-  if (password.length < MIN_PASSWORD_LENGTH) {
-    return Response.json(
-      { error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.` },
-      { status: 400 }
-    );
-  }
-
   try {
+    // Read the token before spending it. A reset token is single-use, so
+    // consuming it first and then rejecting a weak password would leave the
+    // user holding a dead link and no way back in.
+    const owner = await checkToken(token, "PASSWORD_RESET");
+
+    if (!owner) {
+      return Response.json({ error: INVALID_LINK }, { status: 400 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: owner },
+      select: { email: true },
+    });
+
+    const passwordError = checkPassword(password, user?.email ?? "");
+
+    if (passwordError) {
+      return Response.json({ error: passwordError, field: "password" }, { status: 400 });
+    }
+
+    // Only now is the token spent. This is also the check that matters: the
+    // read above cannot tell a used token from a fresh one, this one can.
     const userId = await consumeToken(token, "PASSWORD_RESET");
 
     if (!userId) {
-      return Response.json(
-        { error: "This link is invalid or has expired. Request a new one." },
-        { status: 400 }
-      );
+      return Response.json({ error: INVALID_LINK }, { status: 400 });
     }
 
     const passwordHash = await hash(password);

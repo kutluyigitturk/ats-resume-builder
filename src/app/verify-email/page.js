@@ -1,24 +1,40 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import Logo from "@/components/Logo";
-import { prisma } from "@/lib/prisma";
-import { checkToken } from "@/lib/tokens";
 
 const cardShadow = "0 1px 2px rgba(23,23,27,0.03), 0 12px 32px -14px rgba(23,23,27,0.12)";
 
-export default async function VerifyEmailPage({ searchParams }) {
-  const { token } = await searchParams;
-  const userId = await checkToken(token, "EMAIL_VERIFY");
+const COPY = {
+  verified: {
+    heading: "Email verified",
+    body: "Your address is confirmed. You can log in now.",
+  },
+  expired: {
+    heading: "Link expired",
+    body: "This link is no longer valid. Log in and request a new one.",
+  },
+  // Someone who typed or bookmarked the bare address has not had anything go
+  // wrong, and telling them a link failed would send them looking for a fault
+  // that isn't there.
+  none: {
+    heading: "Nothing to confirm here",
+    body: "Open the link from your confirmation email, or log in to request a new one.",
+  },
+};
 
-  if (userId) {
-    // The `emailVerified: null` condition keeps the original timestamp if the
-    // link is opened again, and makes running this twice harmless.
-    await prisma.user.updateMany({
-      where: { id: userId, emailVerified: null },
-      data: { emailVerified: new Date() },
-    });
+// Purely the result screen. The token is spent by /api/auth/verify-email,
+// which redirects here with the outcome.
+export default async function VerifyEmailPage({ searchParams }) {
+  const { status, token } = await searchParams;
+
+  // Links mailed before the token moved to the API route still point here.
+  // Handing them on keeps every address that was already invited working,
+  // instead of showing "expired" for a token that is perfectly valid.
+  if (!status && token) {
+    redirect(`/api/auth/verify-email?token=${encodeURIComponent(token)}`);
   }
 
-  const verified = Boolean(userId);
+  const copy = COPY[status] ?? COPY.none;
 
   return (
     <main
@@ -33,14 +49,8 @@ export default async function VerifyEmailPage({ searchParams }) {
         className="w-full max-w-[400px] rounded-2xl border border-[#e6e6e3] bg-white p-9 text-center"
         style={{ boxShadow: cardShadow }}
       >
-        <h1 className="text-[25px] font-semibold tracking-tight text-slate-900">
-          {verified ? "Email verified" : "Link expired"}
-        </h1>
-        <p className="mt-1.5 mb-6 text-[14.5px] text-slate-500">
-          {verified
-            ? "Your address is confirmed. You can log in now."
-            : "This link is no longer valid. Log in and request a new one."}
-        </p>
+        <h1 className="text-[25px] font-semibold tracking-tight text-slate-900">{copy.heading}</h1>
+        <p className="mt-1.5 mb-6 text-[14.5px] text-slate-500">{copy.body}</p>
 
         <Link
           href="/login"

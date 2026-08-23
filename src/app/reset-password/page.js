@@ -1,14 +1,16 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/Logo";
+import AuthField from "@/components/AuthField";
+import { checkPassword } from "@/lib/password";
+import { shake } from "@/lib/shake";
 
 const cardShadow = "0 1px 2px rgba(23,23,27,0.03), 0 12px 32px -14px rgba(23,23,27,0.12)";
-const inputCls =
-  "h-[46px] w-full rounded-xl border border-[#d6d6d2] bg-[#fbfbfa] px-3.5 text-[14.5px] text-slate-900 placeholder:text-slate-400 transition-all focus:border-blue-700 focus:bg-white focus:outline-none focus:ring-[3px] focus:ring-blue-700/15";
-const labelCls = "mb-1.5 block text-[13px] font-medium text-slate-500";
+
+const FIELDS = ["password", "confirm"];
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -16,16 +18,53 @@ function ResetPasswordForm() {
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
+  const passwordRef = useRef(null);
+  const confirmRef = useRef(null);
+  const formErrorRef = useRef(null);
+  const refs = { password: passwordRef, confirm: confirmRef };
+
+  function reportFirst(fieldErrors) {
+    const first = FIELDS.find((field) => fieldErrors[field]);
+    if (!first) return;
+
+    const element = refs[first].current;
+    element?.focus();
+    shake(element);
+  }
+
+  function validate() {
+    const next = {};
+
+    // The same rules the server applies. The address is not known here, so the
+    // server keeps the last word on the check that needs it.
+    const passwordError = checkPassword(password);
+    if (passwordError) next.password = passwordError;
+
+    if (!next.password && password !== confirm) {
+      next.confirm = "The two passwords do not match.";
+    }
+
+    return next;
+  }
+
+  function clearError(field) {
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
-    setError(null);
+    setFormError(null);
 
-    if (password !== confirm) {
-      setError("The two passwords do not match.");
+    const fieldErrors = validate();
+    setErrors(fieldErrors);
+
+    if (Object.keys(fieldErrors).length > 0) {
+      reportFirst(fieldErrors);
       return;
     }
 
@@ -41,16 +80,45 @@ function ResetPasswordForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error ?? "Something went wrong.");
+        // A rejected password belongs on the password field; a dead link is
+        // about the whole page, so the server sends it without one.
+        if (data.field) {
+          const serverErrors = { [data.field]: data.error };
+          setErrors(serverErrors);
+          reportFirst(serverErrors);
+        } else {
+          setFormError(data.error ?? "Something went wrong. Try again in a moment.");
+          shake(formErrorRef.current);
+        }
         return;
       }
 
       setDone(true);
     } catch {
-      setError("Could not reach the server. Check your connection.");
+      setFormError("Could not reach the server. Check your connection and try again.");
+      shake(formErrorRef.current);
     } finally {
       setSubmitting(false);
     }
+  }
+
+  // Nothing on this page works without a token, and an empty form that fails
+  // on submit is a worse way to say so.
+  if (!token) {
+    return (
+      <div className="text-center">
+        <h1 className="text-[25px] font-semibold tracking-tight text-slate-900">Link incomplete</h1>
+        <p className="mt-1.5 mb-6 text-[14.5px] leading-relaxed text-slate-500">
+          Open the link from the email exactly as it was sent, or request a new one.
+        </p>
+        <Link
+          href="/forgot-password"
+          className="flex h-[47px] w-full items-center justify-center rounded-xl bg-blue-700 text-[15px] font-semibold text-white transition-colors hover:bg-blue-800"
+        >
+          Request a new link
+        </Link>
+      </div>
+    );
   }
 
   if (done) {
@@ -82,41 +150,43 @@ function ResetPasswordForm() {
       </p>
 
       <form onSubmit={handleSubmit} noValidate>
-        <div className="mb-[15px]">
-          <label htmlFor="password" className={labelCls}>
-            New password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            placeholder="At least 8 characters"
-            className={inputCls}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+        <AuthField
+          ref={passwordRef}
+          id="password"
+          label="New password"
+          type="password"
+          autoComplete="new-password"
+          placeholder="At least 8 characters"
+          value={password}
+          error={errors.password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            clearError("password");
+          }}
+        />
 
-        <div className="mb-[15px]">
-          <label htmlFor="confirm" className={labelCls}>
-            Confirm password
-          </label>
-          <input
-            id="confirm"
-            name="confirm"
-            type="password"
-            autoComplete="new-password"
-            placeholder="Type it again"
-            className={inputCls}
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-          />
-        </div>
+        <AuthField
+          ref={confirmRef}
+          id="confirm"
+          label="Confirm password"
+          type="password"
+          autoComplete="new-password"
+          placeholder="Type it again"
+          value={confirm}
+          error={errors.confirm}
+          onChange={(e) => {
+            setConfirm(e.target.value);
+            clearError("confirm");
+          }}
+        />
 
-        {error && (
-          <p className="mb-[15px] rounded-xl bg-red-50 px-3.5 py-2.5 text-[13.5px] text-red-700">
-            {error}
+        {formError && (
+          <p
+            ref={formErrorRef}
+            role="alert"
+            className="mb-[15px] rounded-xl bg-red-50 px-3.5 py-2.5 text-[13.5px] text-red-700"
+          >
+            {formError}
           </p>
         )}
 

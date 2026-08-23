@@ -1,42 +1,42 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import AuthField from "@/components/AuthField";
-import { GoogleIcon } from "@/components/SocialIcons";
+import SocialSoon from "@/components/SocialSoon";
+import { checkPassword } from "@/lib/password";
 import { shake } from "@/lib/shake";
 
 const cardShadow = "0 1px 2px rgba(23,23,27,0.03), 0 12px 32px -14px rgba(23,23,27,0.12)";
-const socialBtn =
-  "flex h-[46px] w-full items-center justify-center gap-2.5 rounded-xl border border-[#d6d6d2] bg-white text-[14.5px] font-medium text-slate-900 transition-colors hover:bg-slate-50";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_NAME_LENGTH = 80;
 
-// Maps a server message onto the field it belongs to. Anything not listed
-// stays at form level.
-const FIELD_FOR_ERROR = {
-  "Enter a valid email address.": "email",
-  "An account with this email already exists.": "email",
-  "Password must be at least 8 characters.": "password",
-};
+// The order the fields appear in, which is also the order they are reported.
+const FIELDS = ["name", "email", "password"];
 
 export default function SignupPage() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
   const [formError, setFormError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState(false);
+  const [resendState, setResendState] = useState("idle");
+  const [resendError, setResendError] = useState(null);
+  const [cooldown, setCooldown] = useState(0);
 
+  const nameRef = useRef(null);
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
-  const refs = { email: emailRef, password: passwordRef };
+  const refs = { name: nameRef, email: emailRef, password: passwordRef };
 
   // Moving focus to the first bad field is what actually announces the
   // problem to a screen reader; the shake is only for people watching.
   function reportFirst(fieldErrors) {
-    const first = ["email", "password"].find((name) => fieldErrors[name]);
+    const first = FIELDS.find((field) => fieldErrors[field]);
     if (!first) return;
 
     const element = refs[first].current;
@@ -47,19 +47,69 @@ export default function SignupPage() {
   function validate() {
     const next = {};
 
+    if (!name.trim()) {
+      next.name = "Enter your name.";
+    } else if (name.trim().length > MAX_NAME_LENGTH) {
+      next.name = `Use ${MAX_NAME_LENGTH} characters or fewer.`;
+    }
+
     if (!email.trim()) {
       next.email = "Enter your email address.";
     } else if (!EMAIL_PATTERN.test(email.trim())) {
       next.email = "Enter a valid email address, like name@example.com.";
     }
 
-    if (!password) {
-      next.password = "Choose a password.";
-    } else if (password.length < 8) {
-      next.password = "Choose a password with at least 8 characters.";
-    }
+    // The same function the server uses, so the form can never promise a
+    // password the server will turn down.
+    const passwordError = checkPassword(password, email);
+    if (passwordError) next.password = passwordError;
 
     return next;
+  }
+
+  function clearError(field) {
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+  }
+
+  // Counts the cooldown down one second at a time. The state change happens in
+  // the timer callback rather than in the effect body, so this does not cascade
+  // a render on every pass.
+  useEffect(() => {
+    if (cooldown <= 0) return;
+
+    const timer = setTimeout(() => setCooldown((seconds) => seconds - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
+
+  // The endpoint wants the password as well as the address, so it cannot be
+  // used to mail a stranger. Both are still in state from the form above.
+  async function handleResend() {
+    setResendState("sending");
+    setResendError(null);
+
+    try {
+      const response = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        setResendState("idle");
+        setResendError(data?.error ?? "Could not send it. Try again in a moment.");
+        return;
+      }
+
+      setResendState("sent");
+      // The server silently ignores a second request inside its own one-minute
+      // window, so the button stays down for the same minute. Otherwise it
+      // would keep reporting mail that was never sent.
+      setCooldown(60);
+    } catch {
+      setResendState("idle");
+      setResendError("Could not reach the server. Check your connection and try again.");
+    }
   }
 
   async function handleSubmit(event) {
@@ -80,16 +130,16 @@ export default function SignupPage() {
       const response = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        const field = FIELD_FOR_ERROR[data.error];
-
-        if (field) {
-          const serverErrors = { [field]: data.error };
+        // The server names the field its message belongs to. Anything without
+        // one - a rate limit, an outage - has no field to sit next to.
+        if (data.field) {
+          const serverErrors = { [data.field]: data.error };
           setErrors(serverErrors);
           reportFirst(serverErrors);
         } else {
@@ -135,6 +185,40 @@ export default function SignupPage() {
             >
               Go to log in
             </Link>
+
+            {/* Without this the screen is a dead end: mail that never arrives
+                leaves the account unusable and the page offers no way out. */}
+            <div className="mt-5 border-t border-[#eeeeeb] pt-4 text-[13.5px]">
+              {resendState === "sent" ? (
+                <p className="text-slate-500" role="status">
+                  Sent again. It can take a minute to arrive - check your spam folder too.
+                </p>
+              ) : (
+                <p className="text-slate-500">
+                  Didn&apos;t get it?{" "}
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendState === "sending" || cooldown > 0}
+                    className="font-medium text-blue-700 underline underline-offset-2 hover:text-blue-800 disabled:cursor-not-allowed disabled:text-slate-400 disabled:no-underline"
+                  >
+                    {resendState === "sending" ? "Sending…" : "Send it again"}
+                  </button>
+                </p>
+              )}
+
+              {cooldown > 0 && (
+                <p className="mt-1.5 text-[13px] text-slate-400">
+                  You can ask for another link in {cooldown}s.
+                </p>
+              )}
+
+              {resendError && (
+                <p role="alert" className="mt-2 text-[13px] text-red-700">
+                  {resendError}
+                </p>
+              )}
+            </div>
           </div>
         ) : (
           <>
@@ -145,9 +229,7 @@ export default function SignupPage() {
               Start building a resume that gets read.
             </p>
 
-            <button type="button" className={socialBtn}>
-              <GoogleIcon /> Sign up with Google
-            </button>
+            <SocialSoon label="Sign up with Google" />
 
             <div className="my-[22px] flex items-center gap-3.5">
               <div className="h-px flex-1 bg-[#e6e6e3]" />
@@ -156,6 +238,22 @@ export default function SignupPage() {
             </div>
 
             <form onSubmit={handleSubmit} noValidate>
+              <AuthField
+                ref={nameRef}
+                id="name"
+                label="Your name"
+                type="text"
+                autoComplete="name"
+                placeholder="Kutlu Türkyiğit"
+                maxLength={MAX_NAME_LENGTH}
+                value={name}
+                error={errors.name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  clearError("name");
+                }}
+              />
+
               <AuthField
                 ref={emailRef}
                 id="email"
@@ -167,7 +265,7 @@ export default function SignupPage() {
                 error={errors.email}
                 onChange={(e) => {
                   setEmail(e.target.value);
-                  if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }));
+                  clearError("email");
                 }}
               />
 
@@ -182,12 +280,15 @@ export default function SignupPage() {
                 error={errors.password}
                 onChange={(e) => {
                   setPassword(e.target.value);
-                  if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }));
+                  clearError("password");
                 }}
               />
 
               {formError && (
-                <p className="mb-[15px] rounded-xl bg-red-50 px-3.5 py-2.5 text-[13.5px] text-red-700">
+                <p
+                  role="alert"
+                  className="mb-[15px] rounded-xl bg-red-50 px-3.5 py-2.5 text-[13.5px] text-red-700"
+                >
                   {formError}
                 </p>
               )}

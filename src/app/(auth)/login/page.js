@@ -5,12 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import AuthField from "@/components/AuthField";
-import { GoogleIcon } from "@/components/SocialIcons";
+import SocialSoon from "@/components/SocialSoon";
 import { shake } from "@/lib/shake";
 
 const cardShadow = "0 1px 2px rgba(23,23,27,0.03), 0 12px 32px -14px rgba(23,23,27,0.12)";
-const socialBtn =
-  "flex h-[46px] w-full items-center justify-center gap-2.5 rounded-xl border border-[#d6d6d2] bg-white text-[14.5px] font-medium text-slate-900 transition-colors hover:bg-slate-50";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -120,9 +118,7 @@ export default function LoginPage() {
           Log in to keep building.
         </p>
 
-        <button type="button" className={socialBtn}>
-          <GoogleIcon /> Continue with Google
-        </button>
+        <SocialSoon label="Continue with Google" />
 
         <div className="my-[22px] flex items-center gap-3.5">
           <div className="h-px flex-1 bg-[#e6e6e3]" />

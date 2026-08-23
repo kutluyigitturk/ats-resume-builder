@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 export default function UserMenu() {
   const router = useRouter();
-  const [email, setEmail] = useState(null);
+  const [label, setLabel] = useState(null);
   const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -14,7 +14,9 @@ export default function UserMenu() {
     fetch("/api/auth/me")
       .then((response) => (response.ok ? response.json() : null))
       .then((user) => {
-        if (!cancelled && user?.email) setEmail(user.email);
+        // Accounts created before the name field existed still only have an
+        // address, so the email stays as the fallback.
+        if (!cancelled && user) setLabel(user.name || user.email);
       })
       .catch(() => {});
 
@@ -36,7 +38,11 @@ export default function UserMenu() {
 
   return (
     <div className="flex items-center gap-3">
-      {email && <span className="hidden text-[13px] text-slate-500 sm:block">{email}</span>}
+      {label && (
+        <span className="hidden max-w-[200px] truncate text-[13px] text-slate-500 sm:block">
+          {label}
+        </span>
+      )}
       <button
         type="button"
         onClick={handleLogout}

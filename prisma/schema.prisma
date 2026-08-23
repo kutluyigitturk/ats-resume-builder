@@ -86,6 +86,24 @@ model Token {
 
   @@index([userId, type])
 }
+// Attempt counters for login, signup and the two endpoints that send mail.
+// In the database rather than in memory because every serverless instance has
+// its own memory and is recycled constantly - an in-process counter would let
+// an attacker reset the limit just by being spread across instances.
+model RateLimit {
+  id String @id @default(cuid())
+
+  // What is being limited ("login:email") and who is being limited.
+  bucket String
+  key    String
+
+  count      Int
+  windowEnds DateTime
+
+  @@unique([bucket, key])
+  @@index([windowEnds])
+}
+
 // Server-side sessions. Storing them lets us revoke a login instantly -
 // something a self-contained JWT cannot do once it has been issued.
 model Session {
