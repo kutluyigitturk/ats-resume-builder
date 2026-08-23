@@ -16,7 +16,7 @@ export default function LanguagesForm({
   moveItemDown,
   isOpen,
   onToggle,
-  sectionTitle, 
+  sectionTitle,
   onSectionTitleChange,
 }) {
   return (

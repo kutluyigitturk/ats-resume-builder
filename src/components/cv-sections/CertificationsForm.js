@@ -19,7 +19,7 @@ export default function CertificationsForm({
   isOpen,
   onToggle,
   templateId,
-  sectionTitle, 
+  sectionTitle,
   onSectionTitleChange,
 }) {
   return (
@@ -61,15 +61,15 @@ export default function CertificationsForm({
 
             <div className="grid grid-cols-2 gap-3 mb-3">
               <DateInput
-                  label="Date Acquired"
-                  value={cert.dateAcquired}
-                  onChange={(v) => updateItem("certifications", cert.id, "dateAcquired", v)}
-                />
-                <DateInput
-                  label="Expiration Date"
-                  value={cert.expirationDate}
-                  onChange={(v) => updateItem("certifications", cert.id, "expirationDate", v)}
-                />
+                label="Date Acquired"
+                value={cert.dateAcquired}
+                onChange={(v) => updateItem("certifications", cert.id, "dateAcquired", v)}
+              />
+              <DateInput
+                label="Expiration Date"
+                value={cert.expirationDate}
+                onChange={(v) => updateItem("certifications", cert.id, "expirationDate", v)}
+              />
             </div>
             {templateId === "advanced" && (
               <>

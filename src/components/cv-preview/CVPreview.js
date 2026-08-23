@@ -2,7 +2,12 @@
 
 import { useRef, useState, useLayoutEffect, useMemo } from "react";
 import { cvStyles } from "@/lib/constants";
-import { hasValue, formatDateRange, getVisibleReferences, resolveFontFamily } from "@/lib/cvHelpers";
+import {
+  hasValue,
+  formatDateRange,
+  getVisibleReferences,
+  resolveFontFamily,
+} from "@/lib/cvHelpers";
 import { defaultStyleSettings } from "@/data/styleDefaults";
 import { MailIcon, PhoneIcon, MapPinIcon, LinkedInIcon, LinkIcon } from "@/icons";
 
@@ -32,7 +37,7 @@ function buildResolvedStyles(settings, templateId) {
   const blockGap = `${settings.betweenContentBlocks}pt`;
 
   const isProfessional = templateId === "professional";
-  const sectionTitleExtra = isProfessional ? { letterSpacing: "2px" } : {};
+  const sectionTitleExtra = isProfessional ? { letterSpacing: "1px" } : {};
 
   return {
     page: {
@@ -65,7 +70,12 @@ function buildResolvedStyles(settings, templateId) {
     itemHeader: { ...cvStyles.itemHeader, fontFamily: headingFont },
     itemDate: { ...cvStyles.itemDate, fontFamily: bodyFont },
     itemSubtitle: { ...cvStyles.itemSubtitle, fontFamily: bodyFont },
-    bulletList: { ...cvStyles.bulletList, fontFamily: bodyFont, fontSize: bodySize, ...(isProfessional ? { paddingLeft: "30px" } : {}) },
+    bulletList: {
+      ...cvStyles.bulletList,
+      fontFamily: bodyFont,
+      fontSize: bodySize,
+      ...(isProfessional ? { paddingLeft: "30px" } : {}),
+    },
     bulletItem: cvStyles.bulletItem,
     referenceTitle: { ...cvStyles.referenceTitle, fontFamily: headingFont },
     referenceContact: { ...cvStyles.referenceContact, fontFamily: bodyFont },
@@ -99,9 +109,7 @@ function buildSummaryBlocks(cv, styles, isFirst) {
 }
 
 function buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether) {
-  const visible = (cv.experiences || []).filter(
-    (e) => hasValue(e.company) || hasValue(e.position)
-  );
+  const visible = (cv.experiences || []).filter((e) => hasValue(e.company) || hasValue(e.position));
   if (visible.length === 0) return [];
 
   const isProfessional = templateId === "professional";
@@ -119,7 +127,9 @@ function buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether) {
   const renderExpHeader = (exp) => {
     if (isProfessional) {
       const leftParts = [exp.position, exp.company].filter(hasValue);
-      const rightParts = [formatDateRange(exp.startDate, exp.endDate), exp.location].filter(hasValue);
+      const rightParts = [formatDateRange(exp.startDate, exp.endDate), exp.location].filter(
+        hasValue
+      );
       return (
         <div style={styles.itemHeader}>
           <span>{leftParts.join(", ")}</span>
@@ -131,9 +141,7 @@ function buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether) {
       <>
         <div style={styles.itemHeader}>
           <span>{exp.company}</span>
-          <span style={styles.itemDate}>
-            {formatDateRange(exp.startDate, exp.endDate)}
-          </span>
+          <span style={styles.itemDate}>{formatDateRange(exp.startDate, exp.endDate)}</span>
         </div>
         {(hasValue(exp.position) || hasValue(exp.location)) && (
           <p style={styles.itemSubtitle}>
@@ -203,9 +211,7 @@ function buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether) {
 }
 
 function buildEducationBlocks(cv, styles, isFirst) {
-  const visible = (cv.education || []).filter(
-    (e) => hasValue(e.school) || hasValue(e.degree)
-  );
+  const visible = (cv.education || []).filter((e) => hasValue(e.school) || hasValue(e.degree));
   if (visible.length === 0) return [];
 
   const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
@@ -225,9 +231,7 @@ function buildEducationBlocks(cv, styles, isFirst) {
         <div style={{ marginBottom: styles.blockGap }}>
           <div style={styles.itemHeader}>
             <span>{edu.degree}</span>
-            <span style={styles.itemDate}>
-              {formatDateRange(edu.startDate, edu.endDate)}
-            </span>
+            <span style={styles.itemDate}>{formatDateRange(edu.startDate, edu.endDate)}</span>
           </div>
 
           {(hasValue(edu.school) || hasValue(edu.location)) && (
@@ -265,9 +269,7 @@ function buildEducationBlocks(cv, styles, isFirst) {
 }
 
 function buildSkillsBlocks(cv, styles, isFirst, hideReferences, templateId) {
-  const visible = (cv.skills || []).filter(
-    (s) => hasValue(s.category) || hasValue(s.items)
-  );
+  const visible = (cv.skills || []).filter((s) => hasValue(s.category) || hasValue(s.items));
   if (visible.length === 0) return [];
 
   const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
@@ -338,7 +340,11 @@ function buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether) {
     {
       key: "projects-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>{cv.sectionTitles?.projects || "Technical Projects and Research"}</h2>,
+      element: (
+        <h2 style={titleStyle}>
+          {cv.sectionTitles?.projects || "Technical Projects and Research"}
+        </h2>
+      ),
     },
   ];
 
@@ -447,7 +453,9 @@ function buildVolunteeringBlocks(cv, styles, isFirst, keepTogether) {
     {
       key: "volunteering-header",
       type: "section-header",
-      element: <h2 style={titleStyle}>{cv.sectionTitles?.volunteering || "Volunteering & Leadership"}</h2>,
+      element: (
+        <h2 style={titleStyle}>{cv.sectionTitles?.volunteering || "Volunteering & Leadership"}</h2>
+      ),
     },
   ];
 
@@ -462,9 +470,7 @@ function buildVolunteeringBlocks(cv, styles, isFirst, keepTogether) {
           <div style={{ marginBottom: styles.blockGap }}>
             <div style={styles.itemHeader}>
               <span>{item.organization}</span>
-              <span style={styles.itemDate}>
-                {formatDateRange(item.startDate, item.endDate)}
-              </span>
+              <span style={styles.itemDate}>{formatDateRange(item.startDate, item.endDate)}</span>
             </div>
 
             {(hasValue(item.role) || hasValue(item.location)) && (
@@ -495,9 +501,7 @@ function buildVolunteeringBlocks(cv, styles, isFirst, keepTogether) {
           <div>
             <div style={styles.itemHeader}>
               <span>{item.organization}</span>
-              <span style={styles.itemDate}>
-                {formatDateRange(item.startDate, item.endDate)}
-              </span>
+              <span style={styles.itemDate}>{formatDateRange(item.startDate, item.endDate)}</span>
             </div>
 
             {(hasValue(item.role) || hasValue(item.location)) && (
@@ -566,8 +570,25 @@ function buildCertificationsBlocks(cv, styles, isFirst, templateId) {
           {(hasValue(item.institution) || (templateId === "advanced" && hasValue(item.url))) && (
             <p style={styles.itemSubtitle}>
               {item.institution}
-              {hasValue(item.institution) && templateId === "advanced" && hasValue(item.url) && " – "}
-              {templateId === "advanced" && hasValue(item.url) && (<a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "9pt", color: "#2563eb", textDecoration: "none", fontStyle: "normal" }}>View Credentials</a>)}
+              {hasValue(item.institution) &&
+                templateId === "advanced" &&
+                hasValue(item.url) &&
+                " – "}
+              {templateId === "advanced" && hasValue(item.url) && (
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: "9pt",
+                    color: "#2563eb",
+                    textDecoration: "none",
+                    fontStyle: "normal",
+                  }}
+                >
+                  View Credentials
+                </a>
+              )}
             </p>
           )}
 
@@ -690,12 +711,17 @@ function buildReferencesBlocks(cv, styles, isFirst, hideReferences) {
 
 const sectionBuilders = {
   summary: (cv, styles, isFirst) => buildSummaryBlocks(cv, styles, isFirst),
-  experience: (cv, styles, isFirst, hideReferences, templateId, keepTogether) => buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether),
+  experience: (cv, styles, isFirst, hideReferences, templateId, keepTogether) =>
+    buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether),
   education: (cv, styles, isFirst) => buildEducationBlocks(cv, styles, isFirst),
-  skills: (cv, styles, isFirst, hideReferences, templateId) => buildSkillsBlocks(cv, styles, isFirst, hideReferences, templateId),
-  projects: (cv, styles, isFirst, hideReferences, templateId, keepTogether) => buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether),
-  volunteering: (cv, styles, isFirst, hideReferences, templateId, keepTogether) => buildVolunteeringBlocks(cv, styles, isFirst, keepTogether),
-  certifications: (cv, styles, isFirst, hideReferences, templateId) => buildCertificationsBlocks(cv, styles, isFirst, templateId),
+  skills: (cv, styles, isFirst, hideReferences, templateId) =>
+    buildSkillsBlocks(cv, styles, isFirst, hideReferences, templateId),
+  projects: (cv, styles, isFirst, hideReferences, templateId, keepTogether) =>
+    buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether),
+  volunteering: (cv, styles, isFirst, hideReferences, templateId, keepTogether) =>
+    buildVolunteeringBlocks(cv, styles, isFirst, keepTogether),
+  certifications: (cv, styles, isFirst, hideReferences, templateId) =>
+    buildCertificationsBlocks(cv, styles, isFirst, templateId),
   languages: (cv, styles, isFirst) => buildLanguagesBlocks(cv, styles, isFirst),
   references: (cv, styles, isFirst, hideReferences) =>
     buildReferencesBlocks(cv, styles, isFirst, hideReferences),
@@ -703,7 +729,14 @@ const sectionBuilders = {
 
 /* ─── Block builder (order-aware) ────────────────── */
 
-function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "classic", keepTogether = false) {
+function buildBlocks(
+  cv,
+  hideReferences,
+  styles,
+  sectionOrder,
+  templateId = "classic",
+  keepTogether = false
+) {
   const blocks = [];
 
   if (hasValue(cv.name) || hasValue(cv.title) || hasContactInfo(cv)) {
@@ -715,25 +748,42 @@ function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "cla
       element: (
         <>
           {hasValue(cv.name) && (
-            <h1 style={{
-              ...styles.name,
-              ...(isProfessional ? { textTransform: "uppercase", letterSpacing: "3px", fontSize: "20pt" } : {}),
-            }}>
+            <h1
+              style={{
+                ...styles.name,
+                ...(isProfessional
+                  ? { textTransform: "uppercase", letterSpacing: "1px", fontSize: "20pt" }
+                  : {}),
+              }}
+            >
               {cv.name}
             </h1>
           )}
           {hasValue(cv.title) && (
-            <p style={{
-              ...styles.title,
-              ...(isProfessional ? { textTransform: "uppercase", letterSpacing: "1.5px", fontSize: "10pt" } : {}),
-            }}>
+            <p
+              style={{
+                ...styles.title,
+                ...(isProfessional
+                  ? { textTransform: "uppercase", letterSpacing: "1px", fontSize: "10pt" }
+                  : {}),
+              }}
+            >
               {cv.title}
             </p>
           )}
           {hasContactInfo(cv) && (
             <>
               {templateId === "advanced" ? (
-                <div style={{ ...styles.contact, display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "12px", alignItems: "center" }}>
+                <div
+                  style={{
+                    ...styles.contact,
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    gap: "12px",
+                    alignItems: "center",
+                  }}
+                >
                   {hasValue(cv.email) && (
                     <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
                       <MailIcon size={13} /> {cv.email}
@@ -750,12 +800,34 @@ function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "cla
                     </span>
                   )}
                   {hasValue(cv.linkedin) && (
-                    <a href={cv.linkedin.startsWith("http") ? cv.linkedin : `https://${cv.linkedin}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#555", textDecoration: "none" }}>
+                    <a
+                      href={cv.linkedin.startsWith("http") ? cv.linkedin : `https://${cv.linkedin}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        color: "#555",
+                        textDecoration: "none",
+                      }}
+                    >
                       <LinkedInIcon size={13} /> {cv.sectionTitles?.linkedinLabel || "LinkedIn"}
                     </a>
                   )}
                   {hasValue(cv.website) && (
-                    <a href={cv.website.startsWith("http") ? cv.website : `https://${cv.website}`} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "4px", color: "#555", textDecoration: "none" }}>
+                    <a
+                      href={cv.website.startsWith("http") ? cv.website : `https://${cv.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        color: "#555",
+                        textDecoration: "none",
+                      }}
+                    >
                       <LinkIcon size={13} /> {cv.sectionTitles?.portfolioLabel || "Portfolio"}
                     </a>
                   )}
@@ -780,7 +852,14 @@ function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "cla
     const builder = sectionBuilders[sectionId];
     if (!builder) continue;
 
-    const sectionBlocks = builder(cv, styles, isFirstSection, hideReferences, templateId, keepTogether);
+    const sectionBlocks = builder(
+      cv,
+      styles,
+      isFirstSection,
+      hideReferences,
+      templateId,
+      keepTogether
+    );
     if (sectionBlocks.length > 0) {
       blocks.push(...sectionBlocks);
       isFirstSection = false;
@@ -792,40 +871,142 @@ function buildBlocks(cv, hideReferences, styles, sectionOrder, templateId = "cla
 
 /* ─── Pagination algorithm ───────────────────────── */
 
-function paginateBlocks(heights, types, maxPageHeight) {
+// Where a page may be broken inside a block, measured from the block's top.
+//
+// Line boxes only come out of a range over a TEXT node - selecting an
+// element's contents returns one merged rectangle for the whole thing, which
+// is no use as a break list. Element bottoms are collected too, so a break can
+// also land cleanly between two bullets rather than inside one.
+function collectBreakOffsets(el) {
+  const top = el.getBoundingClientRect().top;
+  const offsets = [];
+  const range = document.createRange();
+
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (!node.nodeValue.trim()) continue;
+
+    range.selectNodeContents(node);
+
+    for (const rect of range.getClientRects()) {
+      if (rect.height > 0) offsets.push(rect.bottom - top);
+    }
+  }
+
+  for (const child of el.querySelectorAll("*")) {
+    const rect = child.getBoundingClientRect();
+    if (rect.height > 0) offsets.push(rect.bottom - top);
+  }
+
+  return [...new Set(offsets.map((o) => Math.round(o)))].sort((a, b) => a - b);
+}
+
+// A slice shorter than this is not worth starting at the bottom of a page -
+// a line or two stranded under a heading reads as a mistake.
+const MIN_SLICE_PX = 48;
+
+// Picks the last line boundary that still fits in the budget, so a page never
+// breaks through the middle of a line of text. Falls back to the raw budget
+// for a block with no measurable lines (a rule, an image).
+function sliceAt(breaks, from, budget) {
+  const limit = from + budget;
+  let best = 0;
+
+  for (const b of breaks) {
+    if (b > from && b <= limit) best = b;
+  }
+
+  return best > from ? best - from : budget;
+}
+
+function paginateBlocks(heights, types, maxPageHeight, breakpoints = {}) {
+  // A page with no usable height cannot be filled, and slicing against it would
+  // never advance. One page holding everything is wrong, but it is visible and
+  // it recovers as soon as a real measurement arrives.
+  if (!(maxPageHeight > 0)) {
+    return heights.length > 0
+      ? [heights.map((_, i) => ({ index: i, offset: 0, height: null }))]
+      : [];
+  }
+
   const pages = [];
   let currentPage = [];
   let currentHeight = 0;
+
+  const flush = () => {
+    if (currentPage.length > 0) {
+      pages.push(currentPage);
+      currentPage = [];
+      currentHeight = 0;
+    }
+  };
+
+  // A block that is taller than a whole page fits nowhere, so it used to be
+  // dropped on a page of its own where everything past 297mm was cut off and
+  // silently lost. Instead it is shown a page at a time: each page renders the
+  // next slice of the same block, which is what the reader expects a long
+  // paragraph to do.
+  const spill = (i, height) => {
+    const breaks = breakpoints[i] || [];
+    let offset = 0;
+
+    const room = maxPageHeight - currentHeight;
+    if (room >= MIN_SLICE_PX) {
+      const slice = sliceAt(breaks, 0, room);
+      currentPage.push({ index: i, offset: 0, height: slice });
+      offset = slice;
+    }
+
+    while (offset < height) {
+      flush();
+
+      const remaining = height - offset;
+      const slice = remaining <= maxPageHeight ? remaining : sliceAt(breaks, offset, maxPageHeight);
+
+      currentPage.push({ index: i, offset, height: slice });
+      currentHeight = slice;
+      offset += slice;
+    }
+  };
 
   for (let i = 0; i < heights.length; i++) {
     const h = heights[i];
 
     if (currentHeight + h <= maxPageHeight) {
-      currentPage.push(i);
+      currentPage.push({ index: i, offset: 0, height: null });
       currentHeight += h;
       continue;
     }
 
+    if (h > maxPageHeight) {
+      spill(i, h);
+      continue;
+    }
+
     if (currentPage.length > 0) {
-      const lastIdx = currentPage[currentPage.length - 1];
-      const lastType = types[lastIdx];
+      const last = currentPage[currentPage.length - 1];
+      const lastType = types[last.index];
 
       // Only protect section-header from being alone at page bottom
       // item-start already has content (header + first bullet) so it's fine to stay
-      if (lastType === "section-header") {
+      if (lastType === "section-header" && last.height === null) {
         currentPage.pop();
 
         if (currentPage.length > 0) pages.push([...currentPage]);
 
-        currentPage = [lastIdx, i];
-        currentHeight = heights[lastIdx] + h;
+        currentPage = [
+          { index: last.index, offset: 0, height: null },
+          { index: i, offset: 0, height: null },
+        ];
+        currentHeight = heights[last.index] + h;
       } else {
         pages.push([...currentPage]);
-        currentPage = [i];
+        currentPage = [{ index: i, offset: 0, height: null }];
         currentHeight = h;
       }
     } else {
-      currentPage = [i];
+      currentPage = [{ index: i, offset: 0, height: null }];
       currentHeight = h;
     }
   }
@@ -841,8 +1022,17 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
   const rulerRef = useRef(null);
   const [pageGroups, setPageGroups] = useState(null);
 
-  const settings = styleSettings || defaultStyleSettings;
-  const resolvedStyles = useMemo(() => buildResolvedStyles(settings, templateId), [settings, templateId]);
+  // Not every caller merges before passing: the dashboard hands over whatever
+  // is in storage, and a resume saved before an option existed is missing it.
+  // A missing marginTopBottom made the page ruler "NaNmm", which measures zero.
+  const settings = useMemo(
+    () => ({ ...defaultStyleSettings, ...(styleSettings || {}) }),
+    [styleSettings]
+  );
+  const resolvedStyles = useMemo(
+    () => buildResolvedStyles(settings, templateId),
+    [settings, templateId]
+  );
 
   const pageBaseStyle = useMemo(
     () => ({
@@ -862,8 +1052,25 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
   const rulerHeight = `${297 - 2 * settings.marginTopBottom}mm`;
 
   const blocks = useMemo(
-    () => buildBlocks(cv, hideReferences, resolvedStyles, settings.sectionOrder, templateId, settings.keepItemsTogether),
-    [cv, hideReferences, resolvedStyles, settings.sectionOrder, templateId, settings.keepItemsTogether]
+    () =>
+      buildBlocks(
+        cv,
+        hideReferences,
+        resolvedStyles,
+        // Same fallback pdfHtmlBuilder already has: a resume stored without an
+        // order must not iterate undefined and blank the whole preview.
+        settings.sectionOrder || defaultStyleSettings.sectionOrder,
+        templateId,
+        settings.keepItemsTogether
+      ),
+    [
+      cv,
+      hideReferences,
+      resolvedStyles,
+      settings.sectionOrder,
+      templateId,
+      settings.keepItemsTogether,
+    ]
   );
 
   useLayoutEffect(() => {
@@ -887,9 +1094,19 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
       types.push(blockEls[i].dataset.blockType || "content");
     }
 
-    setPageGroups(
-      paginateBlocks(heights, types, pageContentHeight - PAGE_HEIGHT_BUFFER)
-    );
+    const budget = pageContentHeight - PAGE_HEIGHT_BUFFER;
+
+    // Only a block that cannot fit on a page will ever be sliced, so the line
+    // boxes are only worth collecting for those.
+    const breakpoints = {};
+
+    for (let i = 0; i < blockEls.length; i++) {
+      if (heights[i] <= budget) continue;
+
+      breakpoints[i] = collectBreakOffsets(blockEls[i]);
+    }
+
+    setPageGroups(paginateBlocks(heights, types, budget, breakpoints));
   }, [blocks, pageBaseStyle, rulerHeight]);
 
   return (
@@ -945,11 +1162,26 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
                 boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08)",
               }}
             >
-              {group.map((idx) => {
-                const block = blocks[idx];
+              {group.map((piece) => {
+                const block = blocks[piece.index];
                 if (!block) return null;
 
-                return <div key={block.key}>{block.element}</div>;
+                // An unsliced block renders as it always did.
+                if (piece.offset === 0 && piece.height === null) {
+                  return <div key={block.key}>{block.element}</div>;
+                }
+
+                // A slice is a window onto the same block, scrolled to the part
+                // this page is responsible for. Rendering it again rather than
+                // splitting the content keeps every element intact.
+                return (
+                  <div
+                    key={`${block.key}-${piece.offset}`}
+                    style={{ height: `${piece.height}px`, overflow: "hidden" }}
+                  >
+                    <div style={{ marginTop: `${-piece.offset}px` }}>{block.element}</div>
+                  </div>
+                );
               })}
             </div>
           ))}

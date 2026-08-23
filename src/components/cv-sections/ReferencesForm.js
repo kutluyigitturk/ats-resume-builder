@@ -58,7 +58,9 @@ export default function ReferencesForm({
                 label="Phone"
                 placeholder="+90 5XX XXX XXXX"
                 value={ref.phone}
-                onChange={(v) => updateItem("references", ref.id, "phone", v.replace(/[^0-9+\-\s()]/g, ""))}
+                onChange={(v) =>
+                  updateItem("references", ref.id, "phone", v.replace(/[^0-9+\-\s()]/g, ""))
+                }
               />
               <FormInput
                 label="Email"

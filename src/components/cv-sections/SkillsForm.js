@@ -16,7 +16,7 @@ export default function SkillsForm({
   moveItemDown,
   isOpen,
   onToggle,
-  sectionTitle, 
+  sectionTitle,
   onSectionTitleChange,
 }) {
   return (

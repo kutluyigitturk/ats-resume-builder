@@ -5,7 +5,14 @@ import { FormTextarea } from "@/components/ui/FormInput";
 import sectionTips from "@/data/sectionTips";
 import { DocumentIcon } from "@/icons";
 
-export default function SummaryForm({ cv, updateField, isOpen, onToggle, sectionTitle, onSectionTitleChange }) {
+export default function SummaryForm({
+  cv,
+  updateField,
+  isOpen,
+  onToggle,
+  sectionTitle,
+  onSectionTitleChange,
+}) {
   return (
     <Section
       title={sectionTitle}
