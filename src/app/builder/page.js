@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Suspense } from "react";
 
@@ -39,6 +39,7 @@ import CVPreview from "@/components/cv-preview/CVPreview";
 
 // Templates
 import TemplateModal from "@/components/builder/TemplateModal";
+import SessionExpiredModal from "@/components/builder/SessionExpiredModal";
 import { defaultTemplateId, getTemplate } from "@/data/templates";
 
 // Resume manager
@@ -65,21 +66,40 @@ function BuilderInner() {
 
   const cvData = useCVData(resumeId);
   const { cv } = cvData;
-  const undoRedo = useUndoRedo(cv, cvData.setCv);
+  const undoRedo = useUndoRedo(cv, cvData.setCv, cvData.hydrated);
 
   // Update "last edited" timestamp when CV data changes
+  const editedBaseline = useRef(null);
+
   useEffect(() => {
-    if (!resumeId || !cv) return;
+    if (!resumeId || !cv || !cvData.hydrated) return;
+
+    // The first settled value is what was loaded from storage, not an edit.
+    // Stamping it made every card read "Last edited just now" after a look,
+    // and kept cleanupEmptyResumes from ever recognising an untouched resume.
+    const current = JSON.stringify(cv);
+    if (editedBaseline.current === null) {
+      editedBaseline.current = current;
+      return;
+    }
+    if (current === editedBaseline.current) return;
+
     // Debounce the touch to avoid excessive writes
     const timeout = setTimeout(() => {
       touchResume(resumeId);
+      editedBaseline.current = current;
     }, 2000);
     return () => clearTimeout(timeout);
-  }, [cv, resumeId]);
+  }, [cv, resumeId, cvData.hydrated]);
 
   const { panelWidth, handleMouseDown } = useResizablePanel();
 
-  const [hideReferences, setHideReferences] = useState(false);
+  // Every other preference survives a reload; this one used to reset, so a
+  // resume printed without references had them back the next morning.
+  const hideReferencesStorageKey = resumeId
+    ? `cv-${resumeId}-hideReferences`
+    : "cv-builder-hideReferences";
+  const [hideReferences, setHideReferences] = useLocalStorage(hideReferencesStorageKey, false);
   const [zoom, setZoom] = useState(100);
   const [builderMode, setBuilderMode] = useState("editor");
   const [completenessOpen, setCompletenessOpen] = useState(false);
@@ -109,14 +129,13 @@ function BuilderInner() {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const getSectionTitle = (key, fallback) =>
-    cv.sectionTitles?.[key] || fallback;
+  const getSectionTitle = (key, fallback) => cv.sectionTitles?.[key] || fallback;
 
   const updateSectionTitle = (key, value) => {
-      cvData.updateField("sectionTitles", {
-        ...cv.sectionTitles,
-        [key]: value,
-      });
+    cvData.updateField("sectionTitles", {
+      ...cv.sectionTitles,
+      [key]: value,
+    });
   };
 
   return (
@@ -138,97 +157,97 @@ function BuilderInner() {
                 <CompletenessPanel cv={cv} isOpen={completenessOpen} />
 
                 <PersonalInfoForm
-                    cv={cv}
-                    updateField={cvData.updateField}
-                    isOpen={openSections.personal}
-                    onToggle={() => toggleSection("personal")}
-                    sectionTitle={getSectionTitle("personal", "Personal Information")}
-                    onSectionTitleChange={(v) => updateSectionTitle("personal", v)}
+                  cv={cv}
+                  updateField={cvData.updateField}
+                  isOpen={openSections.personal}
+                  onToggle={() => toggleSection("personal")}
+                  sectionTitle={getSectionTitle("personal", "Personal Information")}
+                  onSectionTitleChange={(v) => updateSectionTitle("personal", v)}
                 />
 
                 <SummaryForm
-                    cv={cv}
-                    updateField={cvData.updateField}
-                    isOpen={openSections.summary}
-                    onToggle={() => toggleSection("summary")}
-                    sectionTitle={getSectionTitle("summary", "Professional Summary")}
-                    onSectionTitleChange={(v) => updateSectionTitle("summary", v)}
+                  cv={cv}
+                  updateField={cvData.updateField}
+                  isOpen={openSections.summary}
+                  onToggle={() => toggleSection("summary")}
+                  sectionTitle={getSectionTitle("summary", "Professional Summary")}
+                  onSectionTitleChange={(v) => updateSectionTitle("summary", v)}
                 />
 
                 <ExperienceForm
-                    experiences={cv.experiences}
-                    {...cvData}
-                    isOpen={openSections.experience}
-                    onToggle={() => toggleSection("experience")}
-                    sectionTitle={getSectionTitle("experience", "Work Experience")}
-                    onSectionTitleChange={(v) => updateSectionTitle("experience", v)}
+                  experiences={cv.experiences}
+                  {...cvData}
+                  isOpen={openSections.experience}
+                  onToggle={() => toggleSection("experience")}
+                  sectionTitle={getSectionTitle("experience", "Work Experience")}
+                  onSectionTitleChange={(v) => updateSectionTitle("experience", v)}
                 />
 
                 <EducationForm
-                    education={cv.education}
-                    {...cvData}
-                    isOpen={openSections.education}
-                    onToggle={() => toggleSection("education")}
-                    sectionTitle={getSectionTitle("education", "Education")}
-                    onSectionTitleChange={(v) => updateSectionTitle("education", v)}
+                  education={cv.education}
+                  {...cvData}
+                  isOpen={openSections.education}
+                  onToggle={() => toggleSection("education")}
+                  sectionTitle={getSectionTitle("education", "Education")}
+                  onSectionTitleChange={(v) => updateSectionTitle("education", v)}
                 />
 
                 <SkillsForm
-                    skills={cv.skills}
-                    {...cvData}
-                    isOpen={openSections.skills}
-                    onToggle={() => toggleSection("skills")}
-                    sectionTitle={getSectionTitle("skills", "Technical Skills")}
-                    onSectionTitleChange={(v) => updateSectionTitle("skills", v)}
+                  skills={cv.skills}
+                  {...cvData}
+                  isOpen={openSections.skills}
+                  onToggle={() => toggleSection("skills")}
+                  sectionTitle={getSectionTitle("skills", "Technical Skills")}
+                  onSectionTitleChange={(v) => updateSectionTitle("skills", v)}
                 />
 
                 <ProjectsForm
-                    projects={cv.projects}
-                    {...cvData}
-                    isOpen={openSections.projects}
-                    onToggle={() => toggleSection("projects")}
-                    templateId={templateId}
-                    sectionTitle={getSectionTitle("projects", "Technical Projects and Research")}
-                    onSectionTitleChange={(v) => updateSectionTitle("projects", v)}
+                  projects={cv.projects}
+                  {...cvData}
+                  isOpen={openSections.projects}
+                  onToggle={() => toggleSection("projects")}
+                  templateId={templateId}
+                  sectionTitle={getSectionTitle("projects", "Technical Projects and Research")}
+                  onSectionTitleChange={(v) => updateSectionTitle("projects", v)}
                 />
 
                 <VolunteeringForm
-                    volunteering={cv.volunteering}
-                    {...cvData}
-                    isOpen={openSections.volunteering}
-                    onToggle={() => toggleSection("volunteering")}
-                    sectionTitle={getSectionTitle("volunteering", "Volunteering & Leadership")}
-                    onSectionTitleChange={(v) => updateSectionTitle("volunteering", v)}
+                  volunteering={cv.volunteering}
+                  {...cvData}
+                  isOpen={openSections.volunteering}
+                  onToggle={() => toggleSection("volunteering")}
+                  sectionTitle={getSectionTitle("volunteering", "Volunteering & Leadership")}
+                  onSectionTitleChange={(v) => updateSectionTitle("volunteering", v)}
                 />
 
                 <CertificationsForm
-                    certifications={cv.certifications}
-                    {...cvData}
-                    isOpen={openSections.certifications}
-                    onToggle={() => toggleSection("certifications")}
-                    templateId={templateId}
-                    sectionTitle={getSectionTitle("certifications", "Certifications")}
-                    onSectionTitleChange={(v) => updateSectionTitle("certifications", v)}
+                  certifications={cv.certifications}
+                  {...cvData}
+                  isOpen={openSections.certifications}
+                  onToggle={() => toggleSection("certifications")}
+                  templateId={templateId}
+                  sectionTitle={getSectionTitle("certifications", "Certifications")}
+                  onSectionTitleChange={(v) => updateSectionTitle("certifications", v)}
                 />
 
                 <LanguagesForm
-                    languages={cv.languages}
-                    {...cvData}
-                    isOpen={openSections.languages}
-                    onToggle={() => toggleSection("languages")}
-                    sectionTitle={getSectionTitle("languages", "Languages")}
-                    onSectionTitleChange={(v) => updateSectionTitle("languages", v)}
+                  languages={cv.languages}
+                  {...cvData}
+                  isOpen={openSections.languages}
+                  onToggle={() => toggleSection("languages")}
+                  sectionTitle={getSectionTitle("languages", "Languages")}
+                  onSectionTitleChange={(v) => updateSectionTitle("languages", v)}
                 />
 
                 <ReferencesForm
-                    references={cv.references}
-                    hideReferences={hideReferences}
-                    setHideReferences={setHideReferences}
-                    {...cvData}
-                    isOpen={openSections.references}
-                    onToggle={() => toggleSection("references")}
-                    sectionTitle={getSectionTitle("references", "References")}
-                    onSectionTitleChange={(v) => updateSectionTitle("references", v)}
+                  references={cv.references}
+                  hideReferences={hideReferences}
+                  setHideReferences={setHideReferences}
+                  {...cvData}
+                  isOpen={openSections.references}
+                  onToggle={() => toggleSection("references")}
+                  sectionTitle={getSectionTitle("references", "References")}
+                  onSectionTitleChange={(v) => updateSectionTitle("references", v)}
                 />
               </div>
             </div>
@@ -262,6 +281,17 @@ function BuilderInner() {
               undoFlash={undoRedo.undoFlash}
               redoFlash={undoRedo.redoFlash}
             />
+
+            {pdfExport.exportError && (
+              // Announced when it appears, without stealing focus from the
+              // field the user was editing.
+              <p
+                role="alert"
+                className="mt-3 rounded-xl bg-red-50 px-3.5 py-2.5 text-[13.5px] text-red-700"
+              >
+                {pdfExport.exportError}
+              </p>
+            )}
           </div>
 
           <div className="mt-[15px] flex justify-center">
@@ -280,15 +310,35 @@ function BuilderInner() {
           </div>
         </div>
       </div>
+      {pdfExport.sessionExpired && (
+        <SessionExpiredModal
+          onClose={pdfExport.dismissSessionExpired}
+          onSignedIn={() => {
+            pdfExport.dismissSessionExpired();
+            pdfExport.handleDownloadPDF();
+          }}
+        />
+      )}
+
       <TemplateModal
         isOpen={templateModalOpen}
         onClose={() => setTemplateModalOpen(false)}
         currentTemplateId={templateId}
         onApply={(newTemplateId) => {
-          setTemplateId(newTemplateId);
+          const previous = getTemplate(templateId);
           const tpl = getTemplate(newTemplateId);
-          updateStyle("primaryFont", tpl.defaultPrimaryFont);
-          updateStyle("secondaryFont", tpl.defaultSecondaryFont);
+          setTemplateId(newTemplateId);
+
+          // Only carry the new template's fonts over if the current ones are
+          // still the outgoing template's defaults. A font the user chose is
+          // not ours to reset, and there is no undo for style settings.
+          if (styleSettings.primaryFont === previous.defaultPrimaryFont) {
+            updateStyle("primaryFont", tpl.defaultPrimaryFont);
+          }
+          if (styleSettings.secondaryFont === previous.defaultSecondaryFont) {
+            updateStyle("secondaryFont", tpl.defaultSecondaryFont);
+          }
+
           if (resumeId) updateResumeTemplateId(resumeId, newTemplateId);
         }}
         cv={cv}

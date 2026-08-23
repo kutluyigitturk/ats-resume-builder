@@ -26,11 +26,24 @@ function writeJSON(key, value) {
 
 // ─── Key builders ─────────────────────────────────
 
-export function cvDataKey(id) { return `cv-${id}-cvData`; }
-export function styleKey(id) { return `cv-${id}-styleSettings`; }
-export function templateKey(id) { return `cv-${id}-templateId`; }
-export function pdfNameKey(id) { return `cv-${id}-pdfName`; }
-export function openSectionsKey(id) { return `cv-${id}-openSections`; }
+export function cvDataKey(id) {
+  return `cv-${id}-cvData`;
+}
+export function styleKey(id) {
+  return `cv-${id}-styleSettings`;
+}
+export function templateKey(id) {
+  return `cv-${id}-templateId`;
+}
+export function pdfNameKey(id) {
+  return `cv-${id}-pdfName`;
+}
+export function openSectionsKey(id) {
+  return `cv-${id}-openSections`;
+}
+export function hideReferencesKey(id) {
+  return `cv-${id}-hideReferences`;
+}
 
 // ─── Registry ─────────────────────────────────────
 
@@ -101,9 +114,13 @@ export function deleteResume(id) {
   saveResumes(list);
 
   // Remove resume data
-  [cvDataKey, styleKey, templateKey, pdfNameKey, openSectionsKey].forEach((keyFn) => {
-    try { localStorage.removeItem(keyFn(id)); } catch {}
-  });
+  [cvDataKey, styleKey, templateKey, pdfNameKey, openSectionsKey, hideReferencesKey].forEach(
+    (keyFn) => {
+      try {
+        localStorage.removeItem(keyFn(id));
+      } catch {}
+    }
+  );
 }
 
 export function renameResume(id, newName) {
@@ -141,14 +158,22 @@ export function duplicateResume(id) {
   // Add to registry
   const list = getResumes();
   const sourceIndex = list.findIndex((r) => r.id === id);
-  list.splice(sourceIndex + 1, 0, { id: newId, name: newName, templateId: source.templateId, createdAt: now, updatedAt: now });
+  list.splice(sourceIndex + 1, 0, {
+    id: newId,
+    name: newName,
+    templateId: source.templateId,
+    createdAt: now,
+    updatedAt: now,
+  });
   saveResumes(list);
 
   // Copy all data
-  [cvDataKey, styleKey, templateKey, pdfNameKey, openSectionsKey].forEach((keyFn) => {
-    const data = readJSON(keyFn(id));
-    if (data !== null) writeJSON(keyFn(newId), data);
-  });
+  [cvDataKey, styleKey, templateKey, pdfNameKey, openSectionsKey, hideReferencesKey].forEach(
+    (keyFn) => {
+      const data = readJSON(keyFn(id));
+      if (data !== null) writeJSON(keyFn(newId), data);
+    }
+  );
 
   // Set the new name for pdfName
   writeJSON(pdfNameKey(newId), newName);
@@ -209,27 +234,55 @@ function isEmptyCV(cvData) {
   if (!cvData) return true;
 
   // Check if any text field has content
-  const textFields = ["name", "title", "phone", "email", "location", "linkedin", "website", "summary"];
+  const textFields = [
+    "name",
+    "title",
+    "phone",
+    "email",
+    "location",
+    "linkedin",
+    "website",
+    "summary",
+  ];
   const hasText = textFields.some((f) => cvData[f] && cvData[f].trim().length > 0);
   if (hasText) return false;
 
   // Check if any array section has items
-  const arraySections = ["experiences", "education", "skills", "projects", "volunteering", "certifications", "languages", "references"];
+  const arraySections = [
+    "experiences",
+    "education",
+    "skills",
+    "projects",
+    "volunteering",
+    "certifications",
+    "languages",
+    "references",
+  ];
   const hasItems = arraySections.some((s) => Array.isArray(cvData[s]) && cvData[s].length > 0);
   if (hasItems) return false;
 
   return true;
 }
 
+// Deleting without asking is only defensible for a resume the user provably
+// never worked on, so the bar is deliberately high: still empty, never edited
+// since it was created, and left alone for a day. Sixty seconds and an empty
+// check alone used to be enough, which threw away the work of anyone who
+// picked a template and then stopped to think.
+const ABANDONED_AFTER_MS = 24 * 60 * 60 * 1000;
+
 export function cleanupEmptyResumes() {
   const list = getResumes();
   const toDelete = [];
-  const GRACE_PERIOD_MS = 60_000; // Don't delete resumes created less than 60s ago
   const now = Date.now();
 
   for (const resume of list) {
     const createdAt = new Date(resume.createdAt).getTime();
-    if (now - createdAt < GRACE_PERIOD_MS) continue;
+    if (now - createdAt < ABANDONED_AFTER_MS) continue;
+
+    // touchResume moves updatedAt on every edit, so an untouched resume is
+    // the only one where the two timestamps still match.
+    if (resume.updatedAt !== resume.createdAt) continue;
 
     const cvData = readJSON(cvDataKey(resume.id));
     if (isEmptyCV(cvData)) {
@@ -240,9 +293,13 @@ export function cleanupEmptyResumes() {
   if (toDelete.length === 0) return false;
 
   toDelete.forEach((id) => {
-    [cvDataKey, styleKey, templateKey, pdfNameKey, openSectionsKey].forEach((keyFn) => {
-      try { localStorage.removeItem(keyFn(id)); } catch {}
-    });
+    [cvDataKey, styleKey, templateKey, pdfNameKey, openSectionsKey, hideReferencesKey].forEach(
+      (keyFn) => {
+        try {
+          localStorage.removeItem(keyFn(id));
+        } catch {}
+      }
+    );
   });
 
   const cleaned = list.filter((r) => !toDelete.includes(r.id));

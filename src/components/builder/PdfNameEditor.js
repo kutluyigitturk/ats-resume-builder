@@ -10,6 +10,7 @@ export default function PdfNameEditor({
   setPdfName,
   editingName,
   setEditingName,
+  commitPdfName,
   cv,
   onCompletenessToggle,
 }) {
@@ -47,8 +48,8 @@ export default function PdfNameEditor({
                 autoFocus
                 value={pdfName}
                 onChange={(e) => setPdfName(e.target.value)}
-                onBlur={() => setEditingName(false)}
-                onKeyDown={(e) => e.key === "Enter" && setEditingName(false)}
+                onBlur={commitPdfName}
+                onKeyDown={(e) => e.key === "Enter" && commitPdfName()}
                 style={{ width: inputWidth }}
                 className="min-w-[2ch] border-none bg-transparent p-0 text-center text-sm font-semibold tracking-[-0.01em] text-slate-900 outline-none"
               />

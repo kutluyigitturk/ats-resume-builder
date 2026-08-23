@@ -3,16 +3,29 @@
 import { useState } from "react";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { buildPdfHtml } from "@/lib/pdfHtmlBuilder";
+import { renameResume } from "@/lib/resumeManager";
 
 // Handles PDF name editing, generation and download
 export default function usePdfExport(cv, hideReferences, styleSettings, templateId, resumeId) {
   const [downloading, setDownloading] = useState(false);
+  const [exportError, setExportError] = useState(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
   const pdfStorageKey = resumeId ? `cv-${resumeId}-pdfName` : "cv-builder-pdfName";
   const [pdfName, setPdfName] = useLocalStorage(pdfStorageKey, "Untitled_CV");
   const [editingName, setEditingName] = useState(false);
 
+  // The header edits the PDF name, but the dashboard card reads the registry.
+  // Without this the same resume ends up with two different names.
+  const commitPdfName = () => {
+    setEditingName(false);
+    const trimmed = pdfName.trim();
+    if (resumeId && trimmed) renameResume(resumeId, trimmed);
+  };
+
   const handleDownloadPDF = async () => {
     setDownloading(true);
+    setExportError(null);
+    setSessionExpired(false);
 
     try {
       const html = buildPdfHtml(cv, hideReferences, styleSettings, templateId, pdfName);
@@ -20,10 +33,27 @@ export default function usePdfExport(cv, hideReferences, styleSettings, template
       const response = await fetch("/api/generate-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ html }),
+        // Only the names travel; the server holds the font files.
+        body: JSON.stringify({
+          html,
+          fonts: [styleSettings?.primaryFont, styleSettings?.secondaryFont],
+        }),
       });
 
-      if (!response.ok) throw new Error("PDF generation failed");
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+
+        // A tab left open for a month outlives its session. That is the one
+        // failure the user can actually fix, so it gets a way to fix it
+        // instead of a line of text telling them to go somewhere else.
+        if (response.status === 401) {
+          setSessionExpired(true);
+          return;
+        }
+
+        setExportError(data?.error ?? "Could not build the PDF. Try again in a moment.");
+        return;
+      }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -34,7 +64,7 @@ export default function usePdfExport(cv, hideReferences, styleSettings, template
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("PDF download error:", error);
-      alert("PDF oluşturulurken bir hata oluştu. Lütfen tekrar deneyin.");
+      setExportError("Could not reach the server. Check your connection and try again.");
     } finally {
       setDownloading(false);
     }
@@ -45,7 +75,11 @@ export default function usePdfExport(cv, hideReferences, styleSettings, template
     setPdfName,
     editingName,
     setEditingName,
+    commitPdfName,
     downloading,
+    exportError,
+    sessionExpired,
+    dismissSessionExpired: () => setSessionExpired(false),
     handleDownloadPDF,
   };
 }

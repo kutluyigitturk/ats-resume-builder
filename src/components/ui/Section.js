@@ -38,30 +38,33 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
     setEditingTitle(false);
   };
 
-  const handleMouseMove = useCallback((e) => {
-    if (!pencilRef.current || !onTitleChange || editingTitle) return;
+  const handleMouseMove = useCallback(
+    (e) => {
+      if (!pencilRef.current || !onTitleChange || editingTitle) return;
 
-    const pencilRect = pencilRef.current.getBoundingClientRect();
-    const pencilCenterX = pencilRect.left + pencilRect.width / 2;
-    const pencilCenterY = pencilRect.top + pencilRect.height / 2;
+      const pencilRect = pencilRef.current.getBoundingClientRect();
+      const pencilCenterX = pencilRect.left + pencilRect.width / 2;
+      const pencilCenterY = pencilRect.top + pencilRect.height / 2;
 
-    const dx = e.clientX - pencilCenterX;
-    const dy = e.clientY - pencilCenterY;
-    const distance = Math.sqrt(dx * dx + dy * dy);
+      const dx = e.clientX - pencilCenterX;
+      const dy = e.clientY - pencilCenterY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-    const maxDistance = 250;
-    const minOpacity = 0.08;
-    const maxOpacity = 1;
+      const maxDistance = 250;
+      const minOpacity = 0.08;
+      const maxOpacity = 1;
 
-    if (distance >= maxDistance) {
-      setPencilOpacity(minOpacity);
-    } else {
-      const ratio = 1 - distance / maxDistance;
-      const raw = minOpacity + ratio * (maxOpacity - minOpacity);
-      const stepped = Math.round(raw * 10) / 10;
-      setPencilOpacity(stepped);
-    }
-  }, [onTitleChange, editingTitle]);
+      if (distance >= maxDistance) {
+        setPencilOpacity(minOpacity);
+      } else {
+        const ratio = 1 - distance / maxDistance;
+        const raw = minOpacity + ratio * (maxOpacity - minOpacity);
+        const stepped = Math.round(raw * 10) / 10;
+        setPencilOpacity(stepped);
+      }
+    },
+    [onTitleChange, editingTitle]
+  );
 
   const handleMouseLeave = useCallback(() => {
     setPencilOpacity(0);
@@ -79,8 +82,15 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
         ref={headerRef}
         role="button"
         tabIndex={0}
-        onClick={() => { if (!editingTitle) onToggle(); }}
-        onKeyDown={(e) => { if (!editingTitle && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onToggle(); } }}
+        onClick={() => {
+          if (!editingTitle) onToggle();
+        }}
+        onKeyDown={(e) => {
+          if (!editingTitle && (e.key === "Enter" || e.key === " ")) {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         className={`flex w-full cursor-pointer items-center justify-between px-4 py-3.5 text-left transition-colors ${
@@ -88,29 +98,33 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
         }`}
       >
         <div className="flex min-w-0 items-center gap-2.5">
-          {icon && <span className="flex shrink-0 items-center justify-center text-blue-600">{icon}</span>}
+          {icon && (
+            <span className="flex shrink-0 items-center justify-center text-blue-600">{icon}</span>
+          )}
 
           {editingTitle ? (
-              <span className="flex items-center gap-1.5">
-                <input
-                  ref={inputRef}
-                  value={editValue}
-                  onChange={(e) => {
-                    const filtered = e.target.value.replace(/[0-9]/g, "");
-                    setEditValue(filtered);
-                    if (filtered.trim() && onTitleChange) onTitleChange(filtered);
-                  }}
-                  onBlur={saveTitle}
-                  onKeyDown={(e) => {
-                    e.stopPropagation();
-                    if (e.key === "Enter") saveTitle();
-                    if (e.key === "Escape") setEditingTitle(false);
-                  }}
-                  onClick={(e) => e.stopPropagation()}
-                  className="min-w-0 bg-transparent text-[15px] font-semibold tracking-[-0.01em] text-slate-900 outline-none"
-                />
-                <span className="h-6 w-6 shrink-0" />
-              </span>
+            <span className="flex items-center gap-1.5">
+              <input
+                ref={inputRef}
+                value={editValue}
+                onChange={(e) => {
+                  // Digits used to be stripped here with no explanation, so
+                  // "Awards 2024" could not be typed at all.
+                  const next = e.target.value;
+                  setEditValue(next);
+                  if (next.trim() && onTitleChange) onTitleChange(next);
+                }}
+                onBlur={saveTitle}
+                onKeyDown={(e) => {
+                  e.stopPropagation();
+                  if (e.key === "Enter") saveTitle();
+                  if (e.key === "Escape") setEditingTitle(false);
+                }}
+                onClick={(e) => e.stopPropagation()}
+                className="min-w-0 bg-transparent text-[15px] font-semibold tracking-[-0.01em] text-slate-900 outline-none"
+              />
+              <span className="h-6 w-6 shrink-0" />
+            </span>
           ) : (
             <span className="flex items-center gap-1.5">
               <span className="truncate text-[15px] font-semibold tracking-[-0.01em] text-slate-900">
@@ -118,13 +132,13 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
               </span>
               {onTitleChange && (
                 <span
-                    ref={pencilRef}
-                    onClick={startEditing}
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md cursor-pointer transition-colors text-slate-400 hover:text-slate-700 active:text-slate-900"
-                    style={{
-                      opacity: pencilOpacity,
-                      transition: "opacity 0.15s ease",
-                    }}
+                  ref={pencilRef}
+                  onClick={startEditing}
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md cursor-pointer transition-colors text-slate-400 hover:text-slate-700 active:text-slate-900"
+                  style={{
+                    opacity: pencilOpacity,
+                    transition: "opacity 0.15s ease",
+                  }}
                 >
                   <PencilIcon size={11} />
                 </span>
@@ -151,9 +165,7 @@ export default function Section({ title, icon, isOpen, onToggle, onTitleChange, 
                 onClick={() => setTipsOpen((prev) => !prev)}
                 className="flex w-full cursor-pointer items-center justify-between px-4 py-3 text-left"
               >
-                <span className="text-xs font-medium text-slate-700">
-                  Tips and Recommendations
-                </span>
+                <span className="text-xs font-medium text-slate-700">Tips and Recommendations</span>
 
                 <span
                   className={`text-slate-400 transition-transform duration-200 ${
