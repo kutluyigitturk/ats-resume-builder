@@ -132,10 +132,18 @@ export default function UserMenu() {
             openMenu();
           }
         }}
-        className="flex items-center gap-1 rounded-full py-0.5 pr-1 pl-0.5 transition-colors hover:bg-black/5 focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2 focus-visible:outline-none"
+        // cursor-pointer is load-bearing: Tailwind v4's preflight dropped the
+        // button cursor rule, so without it the pointer never even changes.
+        // The hover signal is on the pill's outline because the avatar is
+        // opaque and covers most of a background tint. border-transparent at
+        // rest is also load-bearing - v4 defaults border-color to currentColor.
+        className="group flex cursor-pointer items-center gap-1 rounded-full border border-transparent py-0.5 pr-1 pl-0.5 transition-colors hover:border-[#d6d6d2] hover:bg-white aria-expanded:border-[#d6d6d2] aria-expanded:bg-white focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2 focus-visible:outline-none"
       >
         <Avatar name={user.name} email={user.email} size={32} />
-        <span className="text-slate-400" aria-hidden="true">
+        <span
+          className="text-slate-500 transition-colors group-hover:text-slate-700 group-aria-expanded:text-slate-700"
+          aria-hidden="true"
+        >
           {open ? <ChevronUpIcon size={14} /> : <ChevronDownIcon size={14} />}
         </span>
       </button>
@@ -155,10 +163,14 @@ export default function UserMenu() {
           {/* Identity */}
           <div className="flex items-start gap-3 px-4 pt-3 pb-3">
             <div className="min-w-0 flex-1">
+              {/* Accounts made before the name field existed have none, and
+                  printing the address on both lines said nothing twice. */}
               <p className="truncate text-[14px] font-semibold text-slate-900">
                 {user.name || user.email}
               </p>
-              <p className="mt-0.5 truncate text-[12.5px] text-slate-500">{user.email}</p>
+              <p className="mt-0.5 truncate text-[12.5px] text-slate-500">
+                {user.name ? user.email : "No name set"}
+              </p>
             </div>
 
             {/* Held open for the light/dark switch. Reserving it now means
