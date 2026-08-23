@@ -1,4 +1,4 @@
-import { Inter, Roboto, Open_Sans, Lato, Carlito, Sora, Geist } from "next/font/google";
+import { Inter, Roboto, Open_Sans, Montserrat, Carlito, Sora, Geist } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -21,11 +21,11 @@ const openSans = Open_Sans({
   variable: "--font-open-sans",
 });
 
-const lato = Lato({
-  subsets: ["latin"],
+const montserrat = Montserrat({
+  subsets: ["latin", "latin-ext"],
   weight: ["400", "700"],
   display: "swap",
-  variable: "--font-lato",
+  variable: "--font-montserrat",
 });
 
 const carlito = Carlito({
@@ -39,7 +39,7 @@ const sora = Sora({
   subsets: ["latin"],
   weight: ["400", "700", "800"],
   display: "swap",
-  variable: "--font-montserrat",
+  variable: "--font-sora",
 });
 
 const geist = Geist({
@@ -59,7 +59,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${roboto.variable} ${openSans.variable} ${lato.variable} ${carlito.variable} ${inter.className} ${sora.variable} ${geist.variable} antialiased`}
+        className={`${inter.variable} ${roboto.variable} ${openSans.variable} ${montserrat.variable} ${carlito.variable} ${inter.className} ${sora.variable} ${geist.variable} antialiased`}
       >
         {children}
       </body>

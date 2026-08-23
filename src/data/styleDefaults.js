@@ -4,7 +4,7 @@ export const fontOptions = [
   { name: "Inter", family: "Inter, sans-serif", source: "google" },
   { name: "Roboto", family: "Roboto, sans-serif", source: "google" },
   { name: "Open Sans", family: "'Open Sans', sans-serif", source: "google" },
-  { name: "Lato", family: "Lato, sans-serif", source: "google" },
+  { name: "Montserrat", family: "Montserrat, sans-serif", source: "google" },
   { name: "Carlito", family: "Carlito, Calibri, sans-serif", source: "google" },
   { name: "Arial", family: "Arial, sans-serif", source: "system" },
   { name: "Georgia", family: "Georgia, serif", source: "system" },

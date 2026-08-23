@@ -14,7 +14,7 @@ export default function Logo({ size = "text-xl" }) {
       href="/"
       aria-label={brand.name}
       className={`group relative inline-flex select-none items-baseline ${size} font-extrabold tracking-tight`}
-      style={{ fontFamily: "var(--font-montserrat), sans-serif", color: accent.ink }}
+      style={{ fontFamily: "var(--font-sora), sans-serif", color: accent.ink }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
