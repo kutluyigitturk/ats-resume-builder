@@ -68,7 +68,7 @@ function Sidebar() {
 
   return (
     <aside
-      className="flex flex-wrap items-center gap-2 border-b px-4 py-4 md:w-[240px] md:shrink-0 md:flex-col md:flex-nowrap md:items-stretch md:border-r md:border-b-0 md:px-3 md:py-2"
+      className="flex flex-wrap items-center gap-2 border-b px-4 py-4 md:w-[288px] md:shrink-0 md:flex-col md:flex-nowrap md:items-stretch md:border-r md:border-b-0 md:px-3 md:py-2"
       style={{ borderColor: BORDER }}
     >
       <nav className="flex gap-1 md:flex-col">
@@ -83,9 +83,9 @@ function Sidebar() {
           type="button"
           onClick={handleLogout}
           disabled={loggingOut}
-          className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-[14px] font-medium text-slate-500 transition-colors hover:bg-white hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2.5 text-[14px] font-medium text-slate-700 transition-colors hover:bg-white hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <span className="text-slate-400">
+          <span className="text-slate-500">
             <LogOutIcon size={17} />
           </span>
           {loggingOut ? "Logging out…" : "Log out"}
@@ -112,10 +112,10 @@ function Sidebar() {
 function InfoCard({ icon, label, children, action }) {
   return (
     <div
-      className="flex flex-col overflow-hidden rounded-2xl border bg-white"
+      className="flex flex-col overflow-hidden rounded-[10px] border bg-white"
       style={{ borderColor: BORDER }}
     >
-      <div className="flex flex-1 items-start gap-3.5 px-5 pt-5 pb-6">
+      <div className="flex flex-1 items-start gap-3.5 px-5 pt-5 pb-6 md:min-h-[168px]">
         <span className="mt-0.5 shrink-0 text-blue-700">{icon}</span>
         <div className="min-w-0 flex-1">
           <p className="text-[12.5px] text-slate-500">{label}</p>
@@ -129,20 +129,27 @@ function InfoCard({ icon, label, children, action }) {
   );
 }
 
+// A tinted band rather than more white: the strip is a separate surface from
+// the card body, and a hairline alone was not saying so.
+//
+// The text colour is set per branch, never in the shared string. Two colour
+// classes on one element are decided by stylesheet order, not by the order
+// they appear in the attribute - so the disabled grey would have been a coin
+// toss against the base blue.
 function CardAction({ href, label }) {
-  const className =
-    "flex w-full items-center justify-center gap-2 px-5 py-3 text-[13.5px] font-semibold text-blue-700 transition-colors hover:bg-blue-50/60";
+  const base =
+    "flex w-full items-center justify-center gap-2 bg-[#f7f8f9] px-5 py-3 text-[13.5px] font-semibold transition-colors";
 
   if (href) {
     return (
-      <Link href={href} className={className}>
+      <Link href={href} className={`${base} text-blue-700 hover:bg-[#eef0f2]`}>
         {label}
       </Link>
     );
   }
 
   return (
-    <button type="button" disabled className={`${className} cursor-not-allowed text-slate-400`}>
+    <button type="button" disabled className={`${base} cursor-not-allowed text-slate-400`}>
       {label}
       <Soon />
     </button>
@@ -174,7 +181,7 @@ export default function AccountPage() {
         <main className="min-w-0 flex-1 md:pl-10">
           {/* Identity */}
           <div className="flex flex-col items-center pt-8 pb-7">
-            <Avatar name={user.name} email={user.email} size={84} />
+            <Avatar name={user.name} email={user.email} size={120} />
 
             <h1
               className="mt-4 max-w-full truncate text-[26px] font-bold tracking-tight text-slate-900"
@@ -192,7 +199,7 @@ export default function AccountPage() {
           <div className="h-px" style={{ background: BORDER }} />
 
           {/* Cards */}
-          <div className="mt-7 grid grid-cols-1 items-stretch gap-4 lg:grid-cols-2">
+          <div className="mt-7 grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
             <InfoCard
               icon={<MailIcon size={20} />}
               label="Email"
