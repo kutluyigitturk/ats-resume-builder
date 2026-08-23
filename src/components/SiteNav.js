@@ -5,6 +5,8 @@ import Link from "next/link";
 import Logo from "@/components/Logo";
 import Navbar from "@/components/Navbar";
 import { accent } from "@/config/brand";
+import UserMenu from "@/components/UserMenu";
+import { useSessionUser } from "@/components/SessionUser";
 
 const body = { fontFamily: "var(--font-geist), sans-serif" };
 
@@ -79,6 +81,8 @@ function ToolsDropdown() {
 }
 
 export default function SiteNav() {
+  const user = useSessionUser();
+
   return (
     <Navbar>
       <Logo />
@@ -91,20 +95,30 @@ export default function SiteNav() {
           Pricing
         </Link>
       </div>
+      {/* Offering "Log in" to someone who is already logged in is the nav
+          telling them it does not know who they are. The ternary is not
+          optional: UserMenu renders nothing without a session, so leaning on
+          it alone would leave this corner empty for a signed-out visitor. */}
       <div className="flex items-center gap-2.5" style={body}>
-        <Link
-          href="/login"
-          className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-[15px] font-medium text-slate-900 transition-colors duration-200 hover:bg-slate-50"
-        >
-          Log in
-        </Link>
-        <Link
-          href="/signup"
-          className="rounded-xl px-4 py-2 text-[15px] font-semibold text-white transition-transform duration-200 hover:scale-[1.02]"
-          style={{ backgroundColor: accent.ink }}
-        >
-          Sign up
-        </Link>
+        {user ? (
+          <UserMenu />
+        ) : (
+          <>
+            <Link
+              href="/login"
+              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-[15px] font-medium text-slate-900 transition-colors duration-200 hover:bg-slate-50"
+            >
+              Log in
+            </Link>
+            <Link
+              href="/signup"
+              className="rounded-xl px-4 py-2 text-[15px] font-semibold text-white transition-transform duration-200 hover:scale-[1.02]"
+              style={{ backgroundColor: accent.ink }}
+            >
+              Sign up
+            </Link>
+          </>
+        )}
       </div>
     </Navbar>
   );
