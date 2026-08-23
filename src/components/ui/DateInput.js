@@ -1,13 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { labelStyle, inputStyle, ONGOING } from "@/lib/constants";
 import { CalendarCheckIcon, CalendarXIcon } from "@/icons";
 
 // An entry that has not ended is written as a word, and which word is the
 // user's business: the interface is in English but the resume very often is
-// not. So the state is read off the content rather than compared against one
-// blessed string - anything with a letter in it is a running entry, and the
-// field stays as free as every other field in the form.
+// not. So there is no blessed string to compare against - the field takes
+// whatever they type.
 const hasLetter = (value) => /\p{L}/u.test(value ?? "");
 
 // Auto-formatting date input for MM/YYYY format
@@ -20,19 +20,33 @@ export default function DateInput({
   ongoing = false,
   ongoingLabel = ONGOING,
 }) {
-  const isOngoing = hasLetter(value);
+  // Which of the two the field is taking is the badge's business, not the
+  // content's. Deriving it from the text looked simpler until you tried to
+  // replace "Present" with "Halen": the moment the last letter was deleted the
+  // field turned back into a date and refused the first letter of the new word.
+  //
+  // The stored text still decides on arrival, so a resume saved with "Halen"
+  // opens in word mode; after that only the badge changes it.
+  const [wordMode, setWordMode] = useState(() => hasLetter(value));
+  const isOngoing = wordMode || hasLetter(value);
+
+  function toggle() {
+    setWordMode(!isOngoing);
+    onChange(isOngoing ? "" : ongoingLabel);
+  }
 
   const handleChange = (e) => {
     const raw = e.target.value;
 
-    // A word is passed through untouched. Only something the user is clearly
-    // typing as a date gets the MM/YYYY treatment.
-    if (hasLetter(raw)) {
+    // In word mode the field is free text - "Expected 2026" needs its digits
+    // as much as "Halen" needs its letters.
+    if (isOngoing) {
       onChange(raw.slice(0, 24));
       return;
     }
 
-    // Remove everything except digits and slash
+    // Otherwise only a date can be typed. Letters are dropped rather than
+    // silently switching the mode behind the user's back.
     const cleaned = raw.replace(/[^0-9/]/g, "");
 
     // Remove any user-typed slashes to re-format cleanly
@@ -59,7 +73,7 @@ export default function DateInput({
       <div className="relative">
         <input
           type="text"
-          placeholder={placeholder}
+          placeholder={isOngoing ? ongoingLabel : placeholder}
           value={value}
           onChange={handleChange}
           maxLength={isOngoing ? 24 : 7}
@@ -78,7 +92,7 @@ export default function DateInput({
             aria-checked={isOngoing}
             aria-label="Still ongoing"
             title={isOngoing ? "Still ongoing — click to set an end date" : "Mark as still ongoing"}
-            onClick={() => onChange(isOngoing ? "" : ongoingLabel)}
+            onClick={toggle}
             className={`absolute top-1/2 right-1.5 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded transition-colors ${
               isOngoing
                 ? "bg-gray-900 text-white hover:bg-gray-800"
