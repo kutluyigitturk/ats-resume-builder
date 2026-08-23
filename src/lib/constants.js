@@ -6,6 +6,14 @@ export const inputStyle =
 
 export const labelStyle = "block text-sm font-medium text-gray-500 mb-1.5";
 
+// The word a new entry starts with when the resume does not already use one
+// of its own. Only a default: the field is free text and useCVData stamps
+// whatever this resume already says, so a Turkish CV keeps saying "Halen".
+export const ONGOING = "Present";
+
+// Sections whose entries can still be running.
+export const DATED_SECTIONS = ["experiences", "education", "projects", "volunteering"];
+
 // CV preview inline style values (shared between preview and PDF template)
 // These will be the foundation for the template system later
 export const cvStyles = {

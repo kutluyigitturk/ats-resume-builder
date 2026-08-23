@@ -14,11 +14,12 @@ export default function EducationForm({
   addItem,
   removeItem,
   updateItem,
+  ongoingLabel,
   moveItemUp,
   moveItemDown,
   isOpen,
   onToggle,
-  sectionTitle, 
+  sectionTitle,
   onSectionTitleChange,
 }) {
   return (
@@ -73,6 +74,8 @@ export default function EducationForm({
                   label="End Date"
                   value={edu.endDate}
                   onChange={(v) => updateItem("education", edu.id, "endDate", v)}
+                  ongoing
+                  ongoingLabel={ongoingLabel}
                 />
               </div>
             </div>
@@ -83,9 +86,7 @@ export default function EducationForm({
                 rows={5}
                 placeholder="Additional Information"
                 value={edu.additionalInfo}
-                onChange={(e) =>
-                  updateItem("education", edu.id, "additionalInfo", e.target.value)
-                }
+                onChange={(e) => updateItem("education", edu.id, "additionalInfo", e.target.value)}
                 className={`${inputStyle} min-h-[140px] resize-y leading-6`}
               />
             </div>

@@ -14,6 +14,7 @@ export default function VolunteeringForm({
   addItem,
   removeItem,
   updateItem,
+  ongoingLabel,
   moveItemUp,
   moveItemDown,
   addBullet,
@@ -21,7 +22,7 @@ export default function VolunteeringForm({
   updateBullet,
   isOpen,
   onToggle,
-  sectionTitle, 
+  sectionTitle,
   onSectionTitleChange,
 }) {
   return (
@@ -69,15 +70,17 @@ export default function VolunteeringForm({
 
             <div className="grid grid-cols-2 gap-3 mb-3">
               <DateInput
-                  label="Start Date"
-                  value={vol.startDate}
-                  onChange={(v) => updateItem("volunteering", vol.id, "startDate", v)}
-                />
-                <DateInput
-                  label="End Date"
-                  value={vol.endDate}
-                  onChange={(v) => updateItem("volunteering", vol.id, "endDate", v)}
-                />
+                label="Start Date"
+                value={vol.startDate}
+                onChange={(v) => updateItem("volunteering", vol.id, "startDate", v)}
+              />
+              <DateInput
+                label="End Date"
+                value={vol.endDate}
+                onChange={(v) => updateItem("volunteering", vol.id, "endDate", v)}
+                ongoing
+                ongoingLabel={ongoingLabel}
+              />
             </div>
 
             <BulletListEditor

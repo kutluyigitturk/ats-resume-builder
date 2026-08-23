@@ -14,6 +14,7 @@ export default function ExperienceForm({
   addItem,
   removeItem,
   updateItem,
+  ongoingLabel,
   moveItemUp,
   moveItemDown,
   addBullet,
@@ -77,6 +78,8 @@ export default function ExperienceForm({
                 label="End Date"
                 value={exp.endDate}
                 onChange={(v) => updateItem("experiences", exp.id, "endDate", v)}
+                ongoing
+                ongoingLabel={ongoingLabel}
               />
             </div>
 

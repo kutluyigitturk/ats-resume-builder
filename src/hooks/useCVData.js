@@ -1,7 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import initialCV from "@/data/initialCV";
+import { DATED_SECTIONS, ONGOING } from "@/lib/constants";
 import {
   createNewExperience,
   createNewEducation,
@@ -25,6 +27,21 @@ const templateMap = {
   references: createNewReference,
 };
 
+// Which word this resume uses for an entry that has not ended. Taking it from
+// the document rather than from a setting means someone writing in Turkish
+// types "Halen" once and every entry they add afterwards follows, with no
+// preference to find and nothing to keep in sync.
+function ongoingLabelFor(cv) {
+  for (const section of DATED_SECTIONS) {
+    for (const item of cv?.[section] ?? []) {
+      const end = item?.endDate;
+      if (typeof end === "string" && /\p{L}/u.test(end)) return end.trim();
+    }
+  }
+
+  return ONGOING;
+}
+
 function resolveItemIndex(items, itemIdentifier) {
   if (typeof itemIdentifier === "number") {
     return itemIdentifier;
@@ -37,20 +54,34 @@ function resolveItemIndex(items, itemIdentifier) {
 // Accepts optional resumeId for multi-CV support
 export default function useCVData(resumeId) {
   const storageKey = resumeId ? `cv-${resumeId}-cvData` : "cv-builder-cvData";
-  const [cv, setCv] = useLocalStorage(storageKey, initialCV);
+  const [stored, setCv, hydrated] = useLocalStorage(storageKey, initialCV);
+
+  // A resume saved before a field existed simply has no key for it. Merging
+  // over the defaults means every field the app knows about is always present,
+  // so a new section cannot render as undefined in one place and crash another.
+  const cv = useMemo(() => ({ ...initialCV, ...stored }), [stored]);
 
   const updateField = (field, value) => {
     setCv((prev) => ({ ...prev, [field]: value }));
   };
 
+  const ongoingLabel = useMemo(() => ongoingLabelFor(cv), [cv]);
+
   const addItem = (section) => {
     const createItem = templateMap[section];
     if (!createItem) return;
 
-    setCv((prev) => ({
-      ...prev,
-      [section]: [...prev[section], createItem()],
-    }));
+    setCv((prev) => {
+      const item = createItem();
+
+      // Still running is the common case for the entry someone is adding right
+      // now, so it starts that way - in this resume's own word.
+      if (DATED_SECTIONS.includes(section)) {
+        item.endDate = ongoingLabelFor(prev);
+      }
+
+      return { ...prev, [section]: [...prev[section], item] };
+    });
   };
 
   const removeItem = (section, itemIdentifier) => {
@@ -158,6 +189,8 @@ export default function useCVData(resumeId) {
   return {
     cv,
     setCv,
+    hydrated,
+    ongoingLabel,
     updateField,
     addItem,
     removeItem,

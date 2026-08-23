@@ -3,6 +3,13 @@
 import { labelStyle, inputStyle, ONGOING } from "@/lib/constants";
 import { CalendarCheckIcon, CalendarXIcon } from "@/icons";
 
+// An entry that has not ended is written as a word, and which word is the
+// user's business: the interface is in English but the resume very often is
+// not. So the state is read off the content rather than compared against one
+// blessed string - anything with a letter in it is a running entry, and the
+// field stays as free as every other field in the form.
+const hasLetter = (value) => /\p{L}/u.test(value ?? "");
+
 // Auto-formatting date input for MM/YYYY format
 // Automatically inserts "/" after the month digits
 export default function DateInput({
@@ -11,15 +18,21 @@ export default function DateInput({
   value,
   onChange,
   ongoing = false,
+  ongoingLabel = ONGOING,
 }) {
-  const isOngoing = value === ONGOING;
+  const isOngoing = hasLetter(value);
 
   const handleChange = (e) => {
     const raw = e.target.value;
 
-    // Digits only. Letters are turned away rather than accepted and reformatted,
-    // so the field never looks like it takes free text - the toggle beside it is
-    // the way to say an entry has not ended.
+    // A word is passed through untouched. Only something the user is clearly
+    // typing as a date gets the MM/YYYY treatment.
+    if (hasLetter(raw)) {
+      onChange(raw.slice(0, 24));
+      return;
+    }
+
+    // Remove everything except digits and slash
     const cleaned = raw.replace(/[^0-9/]/g, "");
 
     // Remove any user-typed slashes to re-format cleanly
@@ -46,14 +59,10 @@ export default function DateInput({
       <div className="relative">
         <input
           type="text"
-          inputMode="numeric"
           placeholder={placeholder}
-          value={isOngoing ? ONGOING : value}
+          value={value}
           onChange={handleChange}
-          // Read-only rather than disabled: the word stays legible and
-          // selectable, and typing simply does nothing.
-          readOnly={isOngoing}
-          maxLength={7}
+          maxLength={isOngoing ? 24 : 7}
           // Only as much room as the icon needs. A labelled badge here ate
           // three quarters of the field - measured at 124px wide on a 13"
           // screen, it left 20px for the date itself.
@@ -69,7 +78,7 @@ export default function DateInput({
             aria-checked={isOngoing}
             aria-label="Still ongoing"
             title={isOngoing ? "Still ongoing — click to set an end date" : "Mark as still ongoing"}
-            onClick={() => onChange(isOngoing ? "" : ONGOING)}
+            onClick={() => onChange(isOngoing ? "" : ongoingLabel)}
             className={`absolute top-1/2 right-1.5 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded transition-colors ${
               isOngoing
                 ? "bg-gray-900 text-white hover:bg-gray-800"
