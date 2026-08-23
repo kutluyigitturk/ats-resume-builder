@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Logo from "@/components/Logo";
 import Navbar from "@/components/Navbar";
 import UserMenu from "@/components/UserMenu";
 import Modal from "@/components/ui/Modal";
+import UndoToast from "@/components/ui/UndoToast";
 import TemplateModal from "@/components/builder/TemplateModal";
 import CVPreview from "@/components/cv-preview/CVPreview";
 import initialCV from "@/data/initialCV";
@@ -13,6 +14,10 @@ import sampleCV from "@/data/sampleCV";
 import { defaultStyleSettings } from "@/data/styleDefaults";
 import {
   getResumes,
+  getTrashedResumes,
+  restoreResume,
+  purgeResume,
+  purgeExpiredTrash,
   createResume,
   createResumeWithData,
   deleteResume,
@@ -40,6 +45,11 @@ import {
 const BG_COLOR = "#fafafa";
 
 /* ─── Helpers ────────────────────────────────────── */
+
+function daysLeft(deletedAt) {
+  const elapsed = Date.now() - new Date(deletedAt).getTime();
+  return Math.max(0, 30 - Math.floor(elapsed / 86400000));
+}
 
 function formatTimeAgo(isoString) {
   const now = new Date();
@@ -167,6 +177,7 @@ function ResumeCard({ resume, onEdit, onRename, onDuplicate, onDelete }) {
               Duplicate
             </button>
             <button
+              data-delete-for={resume.id}
               onClick={() => onDelete(resume.id, resume.name)}
               className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-red-50/40 px-4 py-2 text-sm font-medium text-red-500 transition-colors hover:bg-red-100"
             >
@@ -501,59 +512,55 @@ function AIRequiredModal({ onClose }) {
   );
 }
 
-/* ─── Delete Modal ───────────────────────────────── */
+/* ─── Permanent delete confirmation ──────────────── */
 
-function DeleteModal({ name, onConfirm, onCancel }) {
+// The only dialog left in the delete flow. Deleting a resume from the list no
+// longer asks anything - it is undoable, so a question there was a toll paid on
+// every correct delete to catch a rare wrong one. This one is asked because
+// nothing survives it.
+function PurgeModal({ name, onConfirm, onCancel }) {
+  const cancelRef = useRef(null);
+
   return (
     <Modal
       open
       onClose={onCancel}
-      labelledBy="delete-modal-title"
+      labelledBy="purge-modal-title"
+      initialFocusRef={cancelRef}
       backdropClass="backdrop:bg-black/20 backdrop:backdrop-blur-sm"
     >
       <div
-        className="mx-4 w-full max-w-sm rounded-3xl border border-slate-200/60 p-8 shadow-2xl text-center"
+        className="mx-4 w-full max-w-[400px] rounded-2xl border border-slate-200/70 p-6 shadow-2xl"
         style={{ background: "#fff" }}
       >
-        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 border border-red-200/50">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#ef4444"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-            <path d="M12 9v4" />
-            <path d="M12 17h.01" />
-          </svg>
-        </div>
-        <h3 id="delete-modal-title" className="mb-2 text-lg font-bold text-slate-900">
-          Delete Resume
+        <h3 id="purge-modal-title" className="text-base font-bold text-slate-900">
+          Delete &ldquo;{name}&rdquo; permanently?
         </h3>
-        <p className="mb-8 text-sm text-slate-500 leading-relaxed">
-          You are about to delete &ldquo;{name}&rdquo;.
-          <br />
-          Are you sure you want to proceed?
+        <p className="mt-2 text-sm leading-relaxed text-slate-500">
+          This resume and everything in it will be removed from this browser. It cannot be
+          recovered.
         </p>
-        <div className="flex gap-3">
-          {/* Focus opens here, not on the destructive button: someone who
-              presses Enter out of habit must not lose a resume by it. */}
-          <button
-            autoFocus
-            onClick={onCancel}
-            className="flex-1 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-          >
-            Keep it
-          </button>
+
+        {/* Buttons sit at the trailing edge and size to their labels: the
+            destructive one should not be the biggest thing in the dialog. */}
+        <div className="mt-6 flex justify-end gap-2">
           <button
             onClick={onConfirm}
-            className="flex-1 rounded-xl bg-red-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600"
+            className="rounded-xl border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50"
           >
-            Delete resume
+            Delete permanently
+          </button>
+          {/* Focus opens on the way out, not on the destructive button:
+              someone who presses Enter out of habit must not lose a resume.
+              Handed to the dialog rather than set with autoFocus - React does
+              not render that as an attribute, so showModal() would fall back
+              to the first focusable child, which is the destructive one. */}
+          <button
+            ref={cancelRef}
+            onClick={onCancel}
+            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+          >
+            Cancel
           </button>
         </div>
       </div>
@@ -634,6 +641,75 @@ function RenameModal({ currentName, onConfirm, onCancel }) {
   );
 }
 
+/* ─── Recently deleted ───────────────────────────── */
+
+// Without somewhere to go, the toast is the only door and the trash is
+// invisible - which is worse than having no trash at all.
+function RecentlyDeleted({ items, onRestore, onPurge }) {
+  const [open, setOpen] = useState(false);
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="mt-3">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-slate-700"
+      >
+        Recently deleted ({items.length})
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="mt-3 rounded-2xl border border-slate-200/70 bg-white p-2">
+          {items.map((r) => (
+            <div key={r.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-slate-700">{r.name}</p>
+                <p className="text-xs text-slate-400">
+                  Deleted {formatTimeAgo(r.deletedAt)} · removed in {daysLeft(r.deletedAt)} days
+                </p>
+              </div>
+
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => onRestore(r.id)}
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
+                >
+                  Restore
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onPurge(r)}
+                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-red-600"
+                >
+                  Delete permanently
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Dashboard Page ─────────────────────────────── */
 
 export default function Dashboard() {
@@ -641,8 +717,12 @@ export default function Dashboard() {
   const [resumes, setResumes] = useState([]);
   const [hydrated, setHydrated] = useState(false);
 
+  const [trashed, setTrashed] = useState([]);
+  const [toast, setToast] = useState(null);
+  const refocusRef = useRef(null);
+
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [purgeTarget, setPurgeTarget] = useState(null);
   const [renameTarget, setRenameTarget] = useState(null);
   const [showAIModal, setShowAIModal] = useState(false);
   const [pendingImportData, setPendingImportData] = useState(null);
@@ -650,9 +730,24 @@ export default function Dashboard() {
   useEffect(() => {
     migrateIfNeeded();
     cleanupEmptyResumes();
+    purgeExpiredTrash();
     setResumes(getResumes());
+    setTrashed(getTrashedResumes());
     setHydrated(true);
   }, []);
+
+  // An undo that leaves focus on the body is only half an undo: the card comes
+  // back but the keyboard is nowhere. Put it back where the delete started.
+  // A ref rather than state - the card has to be on screen before it can take
+  // focus, so this runs after the commit that brings it back, and storing the
+  // pending id in state would only add a render to do the same thing.
+  useEffect(() => {
+    const id = refocusRef.current;
+    if (!id) return;
+
+    refocusRef.current = null;
+    document.querySelector(`[data-delete-for="${id}"]`)?.focus();
+  });
 
   const handleCreate = (name, templateId) => {
     let id;
@@ -685,12 +780,34 @@ export default function Dashboard() {
     setResumes(getResumes());
   };
 
-  const handleDelete = () => {
-    if (!deleteTarget) return;
-    deleteResume(deleteTarget.id);
+  // No confirmation: the resume goes to the trash, the card leaves, and the
+  // way back is offered rather than demanded.
+  const handleDelete = (id, name) => {
+    deleteResume(id);
     setResumes(getResumes());
-    setDeleteTarget(null);
+    setTrashed(getTrashedResumes());
+    setToast({ id, name });
   };
+
+  const handleRestore = (id) => {
+    restoreResume(id);
+    setResumes(getResumes());
+    setTrashed(getTrashedResumes());
+    setToast(null);
+    refocusRef.current = id;
+  };
+
+  const handlePurge = () => {
+    if (!purgeTarget) return;
+    purgeResume(purgeTarget.id);
+    setTrashed(getTrashedResumes());
+    setPurgeTarget(null);
+  };
+
+  // Stable, because the toast counts down inside an effect that lists it as a
+  // dependency - a new function on every render would restart the clock and
+  // the toast would never leave.
+  const dismissToast = useCallback(() => setToast(null), []);
 
   const handleRename = (newName) => {
     if (!renameTarget) return;
@@ -736,6 +853,7 @@ export default function Dashboard() {
             <p className="mt-1 text-sm text-slate-500">
               {`${resumes.length} resume${resumes.length !== 1 ? "s" : ""} — pick one to continue or create a new one.`}
             </p>
+            <RecentlyDeleted items={trashed} onRestore={handleRestore} onPurge={setPurgeTarget} />
           </div>
         )}
 
@@ -754,10 +872,18 @@ export default function Dashboard() {
                 onEdit={handleEdit}
                 onRename={(id, name) => setRenameTarget({ id, name })}
                 onDuplicate={handleDuplicate}
-                onDelete={(id, name) => setDeleteTarget({ id, name })}
+                onDelete={handleDelete}
               />
             ))}
             <CreateCard onClick={() => setShowCreateModal(true)} />
+          </div>
+        )}
+
+        {/* Deleting the last resume empties the list, and the trash would go
+            with it - taking the only way back to what was just deleted. */}
+        {isEmpty && trashed.length > 0 && (
+          <div className="mx-auto mt-10 max-w-3xl border-t border-slate-200/60 pt-8">
+            <RecentlyDeleted items={trashed} onRestore={handleRestore} onPurge={setPurgeTarget} />
           </div>
         )}
       </main>
@@ -769,11 +895,11 @@ export default function Dashboard() {
         onCreate={handleCreate}
       />
       {showAIModal && <AIRequiredModal onClose={() => setShowAIModal(false)} />}
-      {deleteTarget && (
-        <DeleteModal
-          name={deleteTarget.name}
-          onConfirm={handleDelete}
-          onCancel={() => setDeleteTarget(null)}
+      {purgeTarget && (
+        <PurgeModal
+          name={purgeTarget.name}
+          onConfirm={handlePurge}
+          onCancel={() => setPurgeTarget(null)}
         />
       )}
       {renameTarget && (
@@ -781,6 +907,16 @@ export default function Dashboard() {
           currentName={renameTarget.name}
           onConfirm={handleRename}
           onCancel={() => setRenameTarget(null)}
+        />
+      )}
+      {toast && (
+        // Keyed so a second delete rebuilds the toast rather than reusing the
+        // first one's expired clock.
+        <UndoToast
+          key={toast.id}
+          message={`"${toast.name}" moved to Trash`}
+          onAction={() => handleRestore(toast.id)}
+          onDismiss={dismissToast}
         />
       )}
     </div>

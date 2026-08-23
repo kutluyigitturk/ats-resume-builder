@@ -47,8 +47,63 @@ export function hideReferencesKey(id) {
 
 // ─── Registry ─────────────────────────────────────
 
-export function getResumes() {
+// The raw list, trash included. Anything that positions or rewrites rows has
+// to work from this: the visible list is a filtered view, and an index taken
+// from it would point at the wrong row once something is in the trash.
+function allResumes() {
   return readJSON(REGISTRY_KEY) || [];
+}
+
+export function getResumes() {
+  return allResumes().filter((r) => !r.deletedAt);
+}
+
+// ─── Trash ────────────────────────────────────────
+//
+// Deleting used to be immediate and permanent, and a resume exists nowhere
+// else - so the only protection was a dialog asking the same question every
+// time, which people answer by reflex. A resume now leaves the list but stays
+// on disk, which is what makes an undo honest: the row carries deletedAt, so a
+// reload during the undo window cannot turn it into either a phantom delete or
+// a dead button.
+
+const TRASH_DAYS = 30;
+
+// A browser's storage is not a disk. Past this the oldest go for good, so a
+// habit of deleting cannot quietly eat the quota a resume needs.
+const TRASH_LIMIT = 10;
+
+export function getTrashedResumes() {
+  return allResumes()
+    .filter((r) => r.deletedAt)
+    .sort((a, b) => new Date(b.deletedAt) - new Date(a.deletedAt));
+}
+
+export function restoreResume(id) {
+  // updatedAt is left alone: restoring is not editing, and the card should go
+  // back saying when it was last worked on.
+  saveResumes(
+    allResumes().map((r) => {
+      if (r.id !== id) return r;
+      const { deletedAt, ...rest } = r;
+      return rest;
+    })
+  );
+}
+
+// Empties the trash of anything past its window, and of anything beyond the
+// cap. Runs where cleanupEmptyResumes runs.
+export function purgeExpiredTrash() {
+  const cutoff = Date.now() - TRASH_DAYS * 24 * 60 * 60 * 1000;
+  const trashed = getTrashedResumes();
+
+  const doomed = trashed.filter(
+    (r, i) => new Date(r.deletedAt).getTime() < cutoff || i >= TRASH_LIMIT
+  );
+
+  doomed.forEach((r) => purgeResume(r.id));
+
+  return doomed.length;
 }
 
 function saveResumes(list) {
@@ -63,7 +118,7 @@ export function createResume(name = "Untitled Resume", chosenTemplateId) {
   const template = chosenTemplateId || defaultTemplateId;
 
   // Add to registry (store templateId for display on cards)
-  const list = getResumes();
+  const list = allResumes();
   list.unshift({ id, name, templateId: template, createdAt: now, updatedAt: now });
   saveResumes(list);
 
@@ -88,7 +143,7 @@ export function createResumeWithData(name = "Untitled Resume", chosenTemplateId,
   const now = new Date().toISOString();
   const template = chosenTemplateId || defaultTemplateId;
 
-  const list = getResumes();
+  const list = allResumes();
   list.unshift({ id, name, templateId: template, createdAt: now, updatedAt: now });
   saveResumes(list);
 
@@ -108,12 +163,19 @@ export function createResumeWithData(name = "Untitled Resume", chosenTemplateId,
   return id;
 }
 
+// Takes a resume out of the list without touching its data, so it can come
+// back. This is what the Delete button on a card does.
 export function deleteResume(id) {
-  // Remove from registry
-  const list = getResumes().filter((r) => r.id !== id);
-  saveResumes(list);
+  saveResumes(
+    allResumes().map((r) => (r.id === id ? { ...r, deletedAt: new Date().toISOString() } : r))
+  );
+}
 
-  // Remove resume data
+// The one that cannot be undone: the registry row and every key belonging to
+// the resume.
+export function purgeResume(id) {
+  saveResumes(allResumes().filter((r) => r.id !== id));
+
   [cvDataKey, styleKey, templateKey, pdfNameKey, openSectionsKey, hideReferencesKey].forEach(
     (keyFn) => {
       try {
@@ -124,7 +186,7 @@ export function deleteResume(id) {
 }
 
 export function renameResume(id, newName) {
-  const list = getResumes().map((r) =>
+  const list = allResumes().map((r) =>
     r.id === id ? { ...r, name: newName, updatedAt: new Date().toISOString() } : r
   );
   saveResumes(list);
@@ -134,29 +196,30 @@ export function renameResume(id, newName) {
 }
 
 export function touchResume(id) {
-  const list = getResumes().map((r) =>
+  const list = allResumes().map((r) =>
     r.id === id ? { ...r, updatedAt: new Date().toISOString() } : r
   );
   saveResumes(list);
 }
 
 export function updateResumeTemplateId(id, templateId) {
-  const list = getResumes().map((r) =>
+  const list = allResumes().map((r) =>
     r.id === id ? { ...r, templateId, updatedAt: new Date().toISOString() } : r
   );
   saveResumes(list);
 }
 
 export function duplicateResume(id) {
-  const source = getResumes().find((r) => r.id === id);
+  const source = allResumes().find((r) => r.id === id);
   if (!source) return null;
 
   const newId = createId("resume");
   const now = new Date().toISOString();
   const newName = `${source.name} (Copy)`;
 
-  // Add to registry
-  const list = getResumes();
+  // Positioned against the raw list on purpose: an index from the visible one
+  // would land in the wrong place as soon as anything sits in the trash.
+  const list = allResumes();
   const sourceIndex = list.findIndex((r) => r.id === id);
   list.splice(sourceIndex + 1, 0, {
     id: newId,
@@ -272,6 +335,8 @@ function isEmptyCV(cvData) {
 const ABANDONED_AFTER_MS = 24 * 60 * 60 * 1000;
 
 export function cleanupEmptyResumes() {
+  // The visible list only: a resume already in the trash has its own clock,
+  // and sweeping it here would empty the bin early.
   const list = getResumes();
   const toDelete = [];
   const now = Date.now();
@@ -292,18 +357,9 @@ export function cleanupEmptyResumes() {
 
   if (toDelete.length === 0) return false;
 
-  toDelete.forEach((id) => {
-    [cvDataKey, styleKey, templateKey, pdfNameKey, openSectionsKey, hideReferencesKey].forEach(
-      (keyFn) => {
-        try {
-          localStorage.removeItem(keyFn(id));
-        } catch {}
-      }
-    );
-  });
-
-  const cleaned = list.filter((r) => !toDelete.includes(r.id));
-  saveResumes(cleaned);
+  // These never existed as far as the user is concerned, so they go straight
+  // out rather than into the trash.
+  toDelete.forEach((id) => purgeResume(id));
 
   return true;
 }
