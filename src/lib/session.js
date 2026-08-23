@@ -93,6 +93,23 @@ export async function requireUser() {
   return user;
 }
 
+// Reads the session without letting a failure take the page down. For any
+// surface that must render whether or not the lookup works - the public auth
+// pages, the 404 - a database hiccup should mean "treated as signed out",
+// never a white screen on the one page someone lands on to recover.
+export async function getCurrentUserQuietly() {
+  try {
+    return await getCurrentUser();
+  } catch (error) {
+    // The framework signals redirects, not-founds and "this route must be
+    // dynamic" by throwing. Swallowing those breaks routing itself.
+    unstable_rethrow(error);
+
+    console.error("Session lookup failed on a public surface:", error);
+    return null;
+  }
+}
+
 // The mirror of requireUser, for the pages that only make sense logged out.
 // Someone already signed in who lands on /login has nothing to do there.
 //
@@ -101,19 +118,7 @@ export async function requireUser() {
 // the session throws, the visitor is treated as signed out and gets the form.
 // Letting the error through here would close the only door left open.
 export async function redirectIfAuthenticated() {
-  let user = null;
-
-  try {
-    user = await getCurrentUser();
-  } catch (error) {
-    // The framework signals redirects, not-founds and "this route must be
-    // dynamic" by throwing. Swallowing those breaks routing itself, so they go
-    // straight back up; only a real failure is treated as "not signed in".
-    unstable_rethrow(error);
-
-    console.error("Session lookup failed on a public page:", error);
-    return;
-  }
+  const user = await getCurrentUserQuietly();
 
   if (user) {
     redirect("/dashboard");

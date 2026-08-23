@@ -10,7 +10,14 @@ import { useEffect, useRef } from "react";
 //
 // The dialog element itself is stripped of its own chrome so the card inside
 // keeps rendering exactly as it did before.
-export default function Modal({ open, onClose, labelledBy, children, backdropClass }) {
+export default function Modal({
+  open,
+  onClose,
+  labelledBy,
+  children,
+  backdropClass,
+  initialFocusRef,
+}) {
   const ref = useRef(null);
 
   useEffect(() => {
@@ -19,10 +26,17 @@ export default function Modal({ open, onClose, labelledBy, children, backdropCla
 
     if (open && !dialog.open) {
       dialog.showModal();
+
+      // showModal lands on the first sequentially focusable element, which is
+      // not always the one the dialog is about - a read-only identity row
+      // sitting above a password field, for instance. React does not render
+      // autoFocus as an attribute, so there is nothing in the DOM to look for;
+      // the caller names the element instead.
+      initialFocusRef?.current?.focus();
     } else if (!open && dialog.open) {
       dialog.close();
     }
-  }, [open]);
+  }, [open, initialFocusRef]);
 
   useEffect(() => {
     const dialog = ref.current;

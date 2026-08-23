@@ -313,10 +313,7 @@ function BuilderInner() {
       {pdfExport.sessionExpired && (
         <SessionExpiredModal
           onClose={pdfExport.dismissSessionExpired}
-          onSignedIn={() => {
-            pdfExport.dismissSessionExpired();
-            pdfExport.handleDownloadPDF();
-          }}
+          onSignedIn={pdfExport.retryAfterSignIn}
         />
       )}
 
