@@ -17,7 +17,15 @@ export default function FormInput({ label, placeholder, value, onChange, classNa
 }
 
 // Standard labeled textarea field with auto-save indicator
-export function FormTextarea({ label, placeholder, value, onChange, rows = "h-28", resizable = false, className = "" }) {
+export function FormTextarea({
+  label,
+  placeholder,
+  value,
+  onChange,
+  rows = "h-28",
+  resizable = false,
+  className = "",
+}) {
   const [saveStatus, setSaveStatus] = useState("idle"); // idle | saving | saved | fading
   const saveTimer = useRef(null);
   const fadeTimer = useRef(null);
@@ -63,7 +71,11 @@ export function FormTextarea({ label, placeholder, value, onChange, rows = "h-28
           }
         `}</style>
         <textarea
-          className={`${inputStyle} ${rows} ${resizable ? "resize-y overflow-hidden" : "resize-none"}`}
+          // overflow-hidden here left a resizable field with no scrollbar: past
+          // the visible box the text could only be reached by dragging the
+          // handle, which made getting back to the top of a long summary a
+          // chore. The handle stays; the field scrolls like any other.
+          className={`${inputStyle} ${rows} overflow-y-auto ${resizable ? "resize-y" : "resize-none"}`}
           placeholder={placeholder}
           value={value || ""}
           onChange={handleChange}

@@ -942,6 +942,10 @@ function collectBreakOffsets(el) {
 // a line or two stranded under a heading reads as a mistake.
 const MIN_SLICE_PX = 48;
 
+// How many lines a broken paragraph must leave behind and carry over. Two is
+// the usual floor for widows and orphans.
+const MIN_LINES = 2;
+
 // Picks the last line boundary that still fits in the budget, so a page never
 // breaks through the middle of a line of text. Falls back to the raw budget
 // for a block with no measurable lines (a rule, an image).
@@ -1018,6 +1022,29 @@ function paginateBlocks(heights, types, maxPageHeight, breakpoints = {}) {
     if (h > maxPageHeight) {
       spill(i, h);
       continue;
+    }
+
+    // A paragraph that does not fit the room left on this page used to move to
+    // the next one whole, which pushed a long summary onto a page of its own
+    // and left the first page nearly empty. Flowing text breaks at a line
+    // instead.
+    //
+    // The guard is counted in lines, not pixels. A pixel threshold rejected a
+    // break that would have left two lines over - and then fell back to moving
+    // the whole paragraph, which stranded far more of the page than the widow
+    // it was avoiding. Two lines on each side is the usual typographic floor.
+    const breaks = breakpoints[i] ?? [];
+    if (types[i] === "content" && breaks.length > 0) {
+      const room = maxPageHeight - currentHeight;
+      const first = sliceAt(breaks, 0, room);
+
+      const linesBefore = breaks.filter((b) => b > 0 && b <= first).length;
+      const linesAfter = breaks.filter((b) => b > first).length;
+
+      if (linesBefore >= MIN_LINES && linesAfter >= MIN_LINES) {
+        spill(i, h);
+        continue;
+      }
     }
 
     if (currentPage.length > 0) {
@@ -1137,7 +1164,11 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
     const breakpoints = {};
 
     for (let i = 0; i < blockEls.length; i++) {
-      if (heights[i] <= budget) continue;
+      // Anything taller than a page has to be sliced, and a run of flowing text
+      // may need slicing wherever it lands - so both get their line boundaries
+      // measured. Headings and deliberately atomic entries do not.
+      const flowing = (blockEls[i].dataset.blockType || "content") === "content";
+      if (heights[i] <= budget && !flowing) continue;
 
       breakpoints[i] = collectBreakOffsets(blockEls[i]);
     }
