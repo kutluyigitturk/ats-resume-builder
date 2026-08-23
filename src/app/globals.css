@@ -876,3 +876,42 @@ body {
     transition: none;
   }
 }
+
+/* ─── Avatar zoom slider ──────────────────────────── */
+
+/* A native range renders differently in every browser and picks up a heavy
+   accent-coloured frame in some of them; this draws it explicitly instead. */
+.avatar-zoom {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: #e6e6e3;
+  outline: none;
+}
+
+.avatar-zoom::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #1d4ed8;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.28);
+  cursor: pointer;
+}
+
+.avatar-zoom::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #1d4ed8;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.28);
+  cursor: pointer;
+}
+
+.avatar-zoom:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 4px;
+}

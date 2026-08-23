@@ -26,6 +26,7 @@ Next.js App Router, JavaScript (not TypeScript), Tailwind v4, deployed on Vercel
 | Sessions         | Hand-rolled, database-backed                           |
 | Email            | Resend, with a console fallback                        |
 | PDF              | `puppeteer-core` + `@sparticuz/chromium` in production |
+| Images           | `sharp` server-side, `react-easy-crop` in the browser  |
 
 ## Architecture decisions
 
@@ -124,6 +125,26 @@ a gate is both free CPU and a way to reach addresses only the server can see.
 The resume HTML is self-contained - inline SVG, system fonts - so every network
 request it makes is one we did not put there, and all of them are aborted.
 
+**The profile photo is bytes in Postgres, not a blob store or a URL.**
+`/api/generate-pdf` aborts every outgoing request, so a remote avatar URL would
+look right on `/account` and come out as an empty box in the exported PDF - the
+worst kind of failure, and that abort is deliberate. `UserAvatar` is its own
+table rather than a column on `User`: `getCurrentUser` selects User columns on
+every authenticated request and `/api/auth/me` returns that object to the
+browser, so image bytes there are one careless `findUnique` away from shipping
+on every page load. Only `User.avatarUpdatedAt` is in that select - it tells the
+UI a photo exists and doubles as the cache key.
+
+**The browser sends the original file and a crop rectangle; the server does the
+crop.** `sharp` runs `rotate` (apply the EXIF orientation, then drop it),
+`extract`, `resize(480, 640)`, `webp`. The rectangle is clamped against the real
+decoded dimensions, because it arrives from the client and is a request, not a
+fact. The re-encode is not optional: a phone photo carries the GPS coordinates
+of wherever it was taken, and the person uploading it does not know that. One
+3:4 derivative is stored and nothing else - the circle in the menu shows its top
+square, and re-cropping means uploading again rather than keeping a second copy
+of every photo. Access lives only in `src/lib/avatar.js`.
+
 **Resumes still live in `localStorage`** (`src/lib/resumeManager.js`), not in the database.
 The `Resume` model exists and is unused. Migrating it is a known, deliberately deferred task.
 
@@ -144,6 +165,8 @@ src/lib/session.js         createSession · getCurrentUser · destroySession
 src/lib/tokens.js          issueToken · consumeToken · checkToken
 src/lib/rateLimit.js       hitRateLimit · clearRateLimit · clientIp
 src/lib/pdfFonts.js        embeds the chosen font into the exported HTML
+src/lib/avatar.js          the only module that touches UserAvatar
+src/components/Avatar.js   the photo, or initials on a colour keyed to the address
 assets/pdf-fonts/          merged woff2 faces, built by scripts/build-pdf-fonts.py
 src/lib/password.js        checkPassword, shared by the server and the forms
 src/lib/email.js           Resend wrapper; logs the link when RESEND_API_KEY is unset

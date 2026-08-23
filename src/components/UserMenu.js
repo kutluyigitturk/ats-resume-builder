@@ -139,7 +139,12 @@ export default function UserMenu() {
         // rest is also load-bearing - v4 defaults border-color to currentColor.
         className="group flex cursor-pointer items-center gap-1 rounded-full border border-transparent py-0.5 pr-1 pl-0.5 transition-colors hover:border-[#d6d6d2] hover:bg-white aria-expanded:border-[#d6d6d2] aria-expanded:bg-white focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2 focus-visible:outline-none"
       >
-        <Avatar name={user.name} email={user.email} size={32} />
+        <Avatar
+          name={user.name}
+          email={user.email}
+          size={32}
+          src={avatarSrc(user.avatarUpdatedAt)}
+        />
         <span
           className="text-slate-500 transition-colors group-hover:text-slate-700 group-aria-expanded:text-slate-700"
           aria-hidden="true"
@@ -258,6 +263,13 @@ export default function UserMenu() {
       )}
     </div>
   );
+}
+
+// The timestamp doubles as the cache key: the route answers with
+// must-revalidate, and this makes a new photo a new URL either way.
+function avatarSrc(avatarUpdatedAt) {
+  if (!avatarUpdatedAt) return null;
+  return `/api/account/avatar?v=${new Date(avatarUpdatedAt).getTime()}`;
 }
 
 function planLabel(plan) {

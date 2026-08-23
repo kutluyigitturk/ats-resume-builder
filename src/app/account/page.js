@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Logo from "@/components/Logo";
 import Navbar from "@/components/Navbar";
 import UserMenu from "@/components/UserMenu";
-import Avatar from "@/components/Avatar";
+import AvatarEditor from "@/components/account/AvatarEditor";
 import { useSessionUser } from "@/components/SessionUser";
 import {
   CheckIcon,
@@ -161,6 +161,13 @@ function CardAction({ href, label }) {
 export default function AccountPage() {
   const user = useSessionUser();
 
+  // Seeded from the server and then owned locally, so uploading or removing a
+  // photo repaints this page immediately; router.refresh() catches the copy in
+  // the navbar, which is rendered from the layout's session.
+  const [avatarVersion, setAvatarVersion] = useState(() =>
+    user?.avatarUpdatedAt ? new Date(user.avatarUpdatedAt).getTime() : null
+  );
+
   if (!user) return null;
 
   const plan = user.plan ? user.plan.charAt(0) + user.plan.slice(1).toLowerCase() : "Free";
@@ -181,7 +188,12 @@ export default function AccountPage() {
         <main className="min-w-0 flex-1 md:pl-10">
           {/* Identity */}
           <div className="flex flex-col items-center pt-8 pb-7">
-            <Avatar name={user.name} email={user.email} size={120} />
+            <AvatarEditor
+              name={user.name}
+              email={user.email}
+              version={avatarVersion}
+              onVersionChange={setAvatarVersion}
+            />
 
             <h1
               className="mt-4 max-w-full truncate text-[26px] font-bold tracking-tight text-slate-900"

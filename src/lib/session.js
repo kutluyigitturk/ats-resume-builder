@@ -60,7 +60,17 @@ export async function getCurrentUser() {
     select: {
       expiresAt: true,
       user: {
-        select: { id: true, email: true, name: true, plan: true, emailVerified: true },
+        // avatarUpdatedAt, never the image itself: this select runs on every
+        // authenticated request and /api/auth/me returns it verbatim. Eight
+        // bytes tell the UI a photo exists and give it a cache key.
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          plan: true,
+          emailVerified: true,
+          avatarUpdatedAt: true,
+        },
       },
     },
   });

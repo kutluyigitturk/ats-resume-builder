@@ -28,7 +28,7 @@ enum TokenType {
 model User {
   id String @id @default(cuid())
 
-  email String @unique
+  email        String  @unique
   // Never the password itself — only its argon2id hash.
   passwordHash String
   name         String?
@@ -38,12 +38,38 @@ model User {
 
   plan Plan @default(FREE)
 
+  // The bytes live in their own table, deliberately - see UserAvatar. This
+  // timestamp is the only avatar column on User: it tells the UI whether a
+  // photo exists and doubles as the cache key, for eight bytes instead of
+  // fifty kilobytes on a select that runs on every request.
+  avatarUpdatedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  resumes Resume[]
-  tokens  Token[]
+  resumes  Resume[]
+  tokens   Token[]
   sessions Session[]
+  avatar   UserAvatar?
+}
+
+// Kept off User on purpose. getCurrentUser selects User columns on every
+// authenticated request and /api/auth/me hands that object to the browser, so
+// image bytes on User are one findUnique-without-a-select away from shipping
+// on every page load.
+//
+// Raw bytes rather than a base64 data URI: base64 is a third larger on disk
+// and on every read, and only the PDF path needs the data: form.
+model UserAvatar {
+  userId   String @id
+  data     Bytes
+  mimeType String
+  width    Int
+  height   Int
+
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Resume {
@@ -86,6 +112,7 @@ model Token {
 
   @@index([userId, type])
 }
+
 // Attempt counters for login, signup and the two endpoints that send mail.
 // In the database rather than in memory because every serverless instance has
 // its own memory and is recycled constantly - an in-process counter would let
