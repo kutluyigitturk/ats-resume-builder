@@ -674,38 +674,42 @@ function RecentlyDeleted({ items, onRestore, onPurge }) {
           <path d="m6 9 6 6 6-6" />
         </svg>
       </button>
+      {/* Grid rows rather than height: 0fr to 1fr animates, height auto does
+          not. The panel stays mounted so it can be animated, so it is made
+          inert while closed - Tab must not reach buttons nobody can see. */}
+      <div className={`trash-panel ${open ? "trash-panel-open" : "trash-panel-closed"}`}>
+        <div inert={!open || undefined}>
+          <div className="mt-3 rounded-2xl border border-slate-200/70 bg-white p-2">
+            {items.map((r) => (
+              <div key={r.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-slate-700">{r.name}</p>
+                  <p className="text-xs text-slate-400">
+                    Deleted {formatTimeAgo(r.deletedAt)} · removed in {daysLeft(r.deletedAt)} days
+                  </p>
+                </div>
 
-      {open && (
-        <div className="mt-3 rounded-2xl border border-slate-200/70 bg-white p-2">
-          {items.map((r) => (
-            <div key={r.id} className="flex items-center justify-between gap-3 px-3 py-2.5">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-slate-700">{r.name}</p>
-                <p className="text-xs text-slate-400">
-                  Deleted {formatTimeAgo(r.deletedAt)} · removed in {daysLeft(r.deletedAt)} days
-                </p>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => onRestore(r.id)}
+                    className="rounded-lg px-3 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
+                  >
+                    Restore
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onPurge(r)}
+                    className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-red-600"
+                  >
+                    Delete permanently
+                  </button>
+                </div>
               </div>
-
-              <div className="flex shrink-0 items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => onRestore(r.id)}
-                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50"
-                >
-                  Restore
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onPurge(r)}
-                  className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-red-600"
-                >
-                  Delete permanently
-                </button>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -914,7 +918,8 @@ export default function Dashboard() {
         // first one's expired clock.
         <UndoToast
           key={toast.id}
-          message={`"${toast.name}" moved to Trash`}
+          name={toast.name}
+          message="moved to Trash"
           onAction={() => handleRestore(toast.id)}
           onDismiss={dismissToast}
         />
