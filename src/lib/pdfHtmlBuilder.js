@@ -133,7 +133,10 @@ function buildDynamicCss(settings, templateId) {
       ${isProfessional ? "letter-spacing: 1px;" : ""}
     }
 
-    .cv-section-title:first-of-type {
+    /* Not :first-of-type - .cv-name is the first div inside .cv-page, so that
+       selector never matched and the first heading kept a full section gap
+       above it while the preview gave it none. */
+    .cv-section-title-first {
       margin-top: 0;
     }
 
@@ -296,7 +299,9 @@ export function buildPdfHtml(
     hasValue(cv.location) ||
     hasValue(cv.linkedin) ||
     hasValue(cv.website);
-  const summary = escapeHtml(cv.summary || "");
+  // hasValue trims: a summary of nothing but spaces is empty, and used to
+  // leave its heading printed with nothing under it.
+  const summary = hasValue(cv.summary) ? escapeHtml(cv.summary) : "";
   const visibleReferences = getVisibleReferences(cv.references || []);
   const sectionOrder = settings.sectionOrder || defaultStyleSettings.sectionOrder;
 
@@ -322,7 +327,12 @@ export function buildPdfHtml(
 
   const orderedSections = sectionOrder
     .map((sectionId) => sectionBuilders[sectionId]?.() || "")
-    .join("");
+    .join("")
+    // Whichever section ends up first loses the gap above its heading, the
+    // same way the preview drops it for the first section it renders. Which
+    // one that is depends on the user's ordering and on which sections have
+    // content, so it is marked here rather than guessed in CSS.
+    .replace('class="cv-section-title"', 'class="cv-section-title cv-section-title-first"');
 
   return `<!DOCTYPE html>
 <html>

@@ -17,11 +17,47 @@ function hasContactInfo(cv) {
   return [cv.phone, cv.email, cv.location, cv.linkedin, cv.website].some(hasValue);
 }
 
-function formatContact(cv) {
-  const parts = [cv.phone, cv.email, cv.location].filter(hasValue);
-  if (hasValue(cv.linkedin)) parts.push(cv.sectionTitles?.linkedinLabel || "LinkedIn");
-  if (hasValue(cv.website)) parts.push(cv.sectionTitles?.portfolioLabel || "Portfolio");
-  return parts.join(" | ");
+// The same contact line the PDF builds, as elements rather than a string: the
+// PDF makes LinkedIn and the portfolio real links, and a preview that shows
+// them as dead text is not showing what the reader will get.
+function contactParts(cv) {
+  const href = (value) => (value.startsWith("http") ? value : `https://${value}`);
+  const parts = [cv.phone, cv.email, cv.location].filter(hasValue).map((text) => ({ text }));
+
+  if (hasValue(cv.linkedin)) {
+    parts.push({ text: cv.sectionTitles?.linkedinLabel || "LinkedIn", href: href(cv.linkedin) });
+  }
+  if (hasValue(cv.website)) {
+    parts.push({ text: cv.sectionTitles?.portfolioLabel || "Portfolio", href: href(cv.website) });
+  }
+
+  return parts;
+}
+
+function ContactLine({ cv, style }) {
+  const parts = contactParts(cv);
+
+  return (
+    <p style={style}>
+      {parts.map((part, i) => (
+        <span key={i}>
+          {i > 0 ? " | " : ""}
+          {part.href ? (
+            <a
+              href={part.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "inherit", textDecoration: "none" }}
+            >
+              {part.text}
+            </a>
+          ) : (
+            part.text
+          )}
+        </span>
+      ))}
+    </p>
+  );
 }
 
 /* ─── Build resolved styles from base + settings ─── */
@@ -691,7 +727,7 @@ function buildReferencesBlocks(cv, styles, isFirst, hideReferences) {
           <div style={{ marginBottom: "8px" }}>
             <div style={styles.referenceTitle}>
               {ref.name}
-              {hasValue(ref.company) ? ` | ${ref.company}` : ""}
+              {hasValue(ref.company) ? ` — ${ref.company}` : ""}
             </div>
             <div style={styles.referenceContact}>
               {ref.phone}
@@ -786,17 +822,17 @@ function buildBlocks(
                 >
                   {hasValue(cv.email) && (
                     <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                      <MailIcon size={13} /> {cv.email}
+                      <MailIcon size={11} /> {cv.email}
                     </span>
                   )}
                   {hasValue(cv.phone) && (
                     <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                      <PhoneIcon size={13} /> {cv.phone}
+                      <PhoneIcon size={11} /> {cv.phone}
                     </span>
                   )}
                   {hasValue(cv.location) && (
                     <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                      <MapPinIcon size={13} /> {cv.location}
+                      <MapPinIcon size={11} /> {cv.location}
                     </span>
                   )}
                   {hasValue(cv.linkedin) && (
@@ -812,7 +848,7 @@ function buildBlocks(
                         textDecoration: "none",
                       }}
                     >
-                      <LinkedInIcon size={13} /> {cv.sectionTitles?.linkedinLabel || "LinkedIn"}
+                      <LinkedInIcon size={11} /> {cv.sectionTitles?.linkedinLabel || "LinkedIn"}
                     </a>
                   )}
                   {hasValue(cv.website) && (
@@ -828,14 +864,14 @@ function buildBlocks(
                         textDecoration: "none",
                       }}
                     >
-                      <LinkIcon size={13} /> {cv.sectionTitles?.portfolioLabel || "Portfolio"}
+                      <LinkIcon size={11} /> {cv.sectionTitles?.portfolioLabel || "Portfolio"}
                     </a>
                   )}
                 </div>
               ) : (
                 <>
                   {isProfessional && <hr style={styles.divider} />}
-                  <p style={styles.contact}>{formatContact(cv)}</p>
+                  <ContactLine cv={cv} style={styles.contact} />
                 </>
               )}
               <hr style={styles.divider} />
