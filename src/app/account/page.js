@@ -7,10 +7,12 @@ import Logo from "@/components/Logo";
 import Navbar from "@/components/Navbar";
 import UserMenu from "@/components/UserMenu";
 import AvatarEditor from "@/components/account/AvatarEditor";
+import NameField from "@/components/account/NameField";
 import { useSessionUser } from "@/components/SessionUser";
 import {
   CheckIcon,
-  DollarIcon,
+  CreditCardIcon,
+  DollarSignIcon,
   FileTextIcon,
   HomeIcon,
   LockIcon,
@@ -19,8 +21,8 @@ import {
   UserXIcon,
 } from "@/icons";
 
-const GROUND = "#f6f6f4";
-const BORDER = "#e6e6e3";
+const GROUND = "#f4f5f7";
+const BORDER = "#e5e7eb";
 
 /* ─── Soon badge ─────────────────────────────────── */
 
@@ -115,11 +117,16 @@ function InfoCard({ icon, label, children, action }) {
       className="flex flex-col overflow-hidden rounded-[10px] border bg-white"
       style={{ borderColor: BORDER }}
     >
-      <div className="flex flex-1 items-start gap-3.5 px-5 pt-5 pb-6 md:min-h-[168px]">
-        <span className="mt-0.5 shrink-0 text-blue-700">{icon}</span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[12.5px] text-slate-500">{label}</p>
-          <div className="mt-1">{children}</div>
+      {/* The icon sits in a left gutter centred on the label-and-value pair,
+          not pinned to the label's first line - that is what made the cards
+          read top-heavy against the reference. */}
+      <div className="flex flex-1 flex-col px-5 pt-5 pb-6 md:min-h-[144px]">
+        <div className="flex items-center gap-4">
+          <span className="shrink-0 text-blue-700">{icon}</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[12.5px] text-slate-500">{label}</p>
+            <div className="mt-1">{children}</div>
+          </div>
         </div>
       </div>
 
@@ -167,6 +174,7 @@ export default function AccountPage() {
   const [avatarVersion, setAvatarVersion] = useState(() =>
     user?.avatarUpdatedAt ? new Date(user.avatarUpdatedAt).getTime() : null
   );
+  const [name, setName] = useState(user?.name ?? null);
 
   if (!user) return null;
 
@@ -174,7 +182,7 @@ export default function AccountPage() {
 
   return (
     <div className="min-h-screen" style={{ background: GROUND }}>
-      <Navbar maxWidth="1152px" baseRingClass="ring-slate-200/50" justify="justify-between">
+      <Navbar maxWidth="1280px" baseRingClass="ring-slate-200/50" justify="justify-between">
         <Logo />
         <UserMenu />
       </Navbar>
@@ -182,7 +190,7 @@ export default function AccountPage() {
       {/* The row sets the height so the sidebar stretches to fill it - the
           divider between the columns has to reach the bottom of the page,
           not stop wherever the shorter column happens to end. */}
-      <div className="mx-auto flex max-w-[1152px] flex-col px-4 pt-24 pb-16 md:min-h-[calc(100vh-2rem)] md:flex-row md:px-6">
+      <div className="mx-auto flex max-w-[1280px] flex-col px-4 pt-24 pb-16 md:min-h-[calc(100vh-2rem)] md:flex-row md:px-6">
         <Sidebar />
 
         <main className="min-w-0 flex-1 md:pl-10">
@@ -195,25 +203,20 @@ export default function AccountPage() {
               onVersionChange={setAvatarVersion}
             />
 
-            <h1
-              className="mt-4 max-w-full truncate text-[26px] font-bold tracking-tight text-slate-900"
-              style={{ fontFamily: "var(--font-sora), sans-serif" }}
-            >
-              {user.name || user.email}
-            </h1>
+            {/* The name is the primary line whether or not it exists yet:
+                "Add your name" is the same field wearing its empty state, so
+                there is no second line explaining an absence. */}
+            <NameField name={name} onSaved={setName} />
 
-            {/* Signup requires a name, so this only speaks up for the accounts
-                that predate that field - and it names what is missing rather
-                than leaving a blank where a name should be. */}
-            {!user.name && <p className="mt-1.5 text-[14px] text-slate-400">No name set</p>}
+            <p className="mt-1.5 max-w-full truncate text-[14px] text-slate-400">{user.email}</p>
           </div>
 
           <div className="h-px" style={{ background: BORDER }} />
 
           {/* Cards */}
-          <div className="mt-7 grid grid-cols-1 items-stretch gap-4 md:grid-cols-2">
+          <div className="mt-7 grid grid-cols-1 items-stretch gap-5 md:grid-cols-2">
             <InfoCard
-              icon={<MailIcon size={20} />}
+              icon={<MailIcon size={22} />}
               label="Email"
               action={<CardAction label="Change Email" />}
             >
@@ -234,7 +237,7 @@ export default function AccountPage() {
             </InfoCard>
 
             <InfoCard
-              icon={<LockIcon size={20} />}
+              icon={<LockIcon size={22} />}
               label="Password"
               action={<CardAction label="Change Password" />}
             >
@@ -246,7 +249,7 @@ export default function AccountPage() {
             </InfoCard>
 
             <InfoCard
-              icon={<DollarIcon size={20} />}
+              icon={<DollarSignIcon size={22} />}
               label="Plan"
               action={<CardAction href="/pricing" label="Change Plan" />}
             >
@@ -259,6 +262,16 @@ export default function AccountPage() {
                   Upgrade
                 </Link>
               </div>
+            </InfoCard>
+
+            {/* Honest for now, and the slot is already the right shape for the
+                day billing exists. */}
+            <InfoCard
+              icon={<CreditCardIcon size={22} />}
+              label="Payment Method"
+              action={<CardAction label="Add Payment Method" />}
+            >
+              <p className="text-[15px] font-semibold text-slate-900">None</p>
             </InfoCard>
           </div>
         </main>

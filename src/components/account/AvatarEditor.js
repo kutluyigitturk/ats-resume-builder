@@ -19,15 +19,28 @@ const FRAME_W = 240;
 const FRAME_H = 320;
 const STAGE_H = 400;
 
+// Large enough to judge a face, small enough that the fallback tone does not
+// become the loudest thing on the page. toneFor() exists to tell people apart
+// in a list, and there is exactly one person here.
+const AVATAR_SIZE = 104;
+
+const BORDER = "#e5e7eb";
+const GROUND = "#f4f5f7";
+
+const BADGE =
+  "flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-white ring-2 transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+
 export default function AvatarEditor({ name, email, version, onVersionChange }) {
   const router = useRouter();
   const fileRef = useRef(null);
+  const keepRef = useRef(null);
 
   const [file, setFile] = useState(null);
   const [objectUrl, setObjectUrl] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [pixels, setPixels] = useState(null);
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
@@ -111,6 +124,7 @@ export default function AvatarEditor({ name, email, version, onVersionChange }) 
       }
 
       onVersionChange(null);
+      setConfirmingRemove(false);
       router.refresh();
     } catch {
       setError("Could not reach the server. Check your connection and try again.");
@@ -121,38 +135,38 @@ export default function AvatarEditor({ name, email, version, onVersionChange }) 
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative">
-        <Avatar name={name} email={email} size={120} src={src} />
+      <div className="relative" style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}>
+        <Avatar name={name} email={email} size={AVATAR_SIZE} src={src} />
 
-        {/* Straddling the avatar's bottom edge, the way the reference does -
-            near what they act on without covering the face. */}
-        <div className="absolute -bottom-2 flex w-full items-center justify-center gap-2.5">
+        {/* On the circle's lower corners rather than under its chin, so
+            neither badge sits over a face. */}
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={busy}
+          aria-label={src ? "Change photo" : "Add a photo"}
+          title={src ? "Change photo" : "Add a photo"}
+          className={`${BADGE} absolute -bottom-1 left-0 bg-blue-700 hover:bg-blue-800`}
+          style={{ "--tw-ring-color": GROUND }}
+        >
+          <PencilIcon size={15} />
+        </button>
+
+        {/* Only when there is something to remove: a live-looking control
+            that does nothing is worse than no control. */}
+        {src && (
           <button
             type="button"
-            onClick={() => fileRef.current?.click()}
+            onClick={() => setConfirmingRemove(true)}
             disabled={busy}
-            aria-label={src ? "Change photo" : "Add a photo"}
-            title={src ? "Change photo" : "Add a photo"}
-            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-blue-700 text-white ring-2 ring-[#f6f6f4] transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+            aria-label="Remove photo"
+            title="Remove photo"
+            className={`${BADGE} absolute right-0 -bottom-1 bg-red-500 hover:bg-red-600`}
+            style={{ "--tw-ring-color": GROUND }}
           >
-            <PencilIcon size={15} />
+            <XIcon size={16} />
           </button>
-
-          {/* Only when there is something to remove: a live-looking control
-              that does nothing is worse than no control. */}
-          {src && (
-            <button
-              type="button"
-              onClick={remove}
-              disabled={busy}
-              aria-label="Remove photo"
-              title="Remove photo"
-              className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-red-500 text-white ring-2 ring-[#f6f6f4] transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <XIcon size={16} />
-            </button>
-          )}
-        </div>
+        )}
       </div>
 
       <input
@@ -164,7 +178,7 @@ export default function AvatarEditor({ name, email, version, onVersionChange }) 
         tabIndex={-1}
       />
 
-      {error && !objectUrl && (
+      {error && !objectUrl && !confirmingRemove && (
         <p role="alert" className="mt-4 text-[13px] text-red-600">
           {error}
         </p>
@@ -179,7 +193,7 @@ export default function AvatarEditor({ name, email, version, onVersionChange }) 
         >
           <div
             className="mx-4 w-full max-w-[460px] rounded-2xl border p-6 shadow-2xl"
-            style={{ background: "#fff", borderColor: "#e6e6e3" }}
+            style={{ background: "#fff", borderColor: BORDER }}
           >
             <h3 id="crop-title" className="text-base font-bold text-slate-900">
               Position your photo
@@ -246,7 +260,7 @@ export default function AvatarEditor({ name, email, version, onVersionChange }) 
                 onClick={close}
                 disabled={busy}
                 className="cursor-pointer rounded-xl border px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-                style={{ borderColor: "#e6e6e3" }}
+                style={{ borderColor: BORDER }}
               >
                 Cancel
               </button>
@@ -257,6 +271,57 @@ export default function AvatarEditor({ name, email, version, onVersionChange }) 
                 className="cursor-pointer rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {busy ? "Saving…" : "Save photo"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* The stored photo is the only copy and there is no undo, so this one
+          asks. Focus opens on the way out, not on the destructive button. */}
+      {confirmingRemove && (
+        <Modal
+          open
+          onClose={busy ? () => {} : () => setConfirmingRemove(false)}
+          labelledBy="remove-photo-title"
+          initialFocusRef={keepRef}
+          backdropClass="backdrop:bg-black/20 backdrop:backdrop-blur-sm"
+        >
+          <div
+            className="mx-4 w-full max-w-[400px] rounded-2xl border p-6 shadow-2xl"
+            style={{ background: "#fff", borderColor: BORDER }}
+          >
+            <h3 id="remove-photo-title" className="text-base font-bold text-slate-900">
+              Remove your photo?
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-slate-500">
+              This is the only copy. Your initials come back in its place, and putting the photo
+              back means uploading it again.
+            </p>
+
+            {error && (
+              <p role="alert" className="mt-4 text-[13px] text-red-600">
+                {error}
+              </p>
+            )}
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={remove}
+                disabled={busy}
+                className="cursor-pointer rounded-xl border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {busy ? "Removing…" : "Remove photo"}
+              </button>
+              <button
+                ref={keepRef}
+                type="button"
+                onClick={() => setConfirmingRemove(false)}
+                disabled={busy}
+                className="cursor-pointer rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
               </button>
             </div>
           </div>

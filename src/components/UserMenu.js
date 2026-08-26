@@ -16,8 +16,8 @@ import {
   SettingsOutlineIcon,
 } from "@/icons";
 
-const BORDER = "#e6e6e3";
-const HOVER = "#f6f6f4";
+const BORDER = "#e5e7eb";
+const HOVER = "#f4f5f7";
 
 export default function UserMenu() {
   const router = useRouter();
@@ -137,7 +137,7 @@ export default function UserMenu() {
         // The hover signal is on the pill's outline because the avatar is
         // opaque and covers most of a background tint. border-transparent at
         // rest is also load-bearing - v4 defaults border-color to currentColor.
-        className="group flex cursor-pointer items-center gap-1 rounded-full border border-transparent py-0.5 pr-1 pl-0.5 transition-colors hover:border-[#d6d6d2] hover:bg-white aria-expanded:border-[#d6d6d2] aria-expanded:bg-white focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2 focus-visible:outline-none"
+        className="group flex cursor-pointer items-center gap-1 rounded-full border border-transparent py-0.5 pr-1 pl-0.5 transition-colors hover:border-[#d1d5db] hover:bg-white aria-expanded:border-[#d1d5db] aria-expanded:bg-white focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2 focus-visible:outline-none"
       >
         <Avatar
           name={user.name}
