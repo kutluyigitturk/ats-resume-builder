@@ -110,7 +110,7 @@ function Hero() {
             <span className="tl-dot" style={{ background: "#0e9f6e" }} /> ATS parsed
           </div>
           <div className="tl-badge b">
-            <span className="tl-dot" style={{ background: "#1d4ed8" }} /> Live preview
+            <span className="tl-dot" style={{ background: "#0099f2" }} /> Live preview
           </div>
           <div className="tl-paper">
             <div className="tl-pname">Elena Voss</div>

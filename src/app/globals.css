@@ -7,9 +7,28 @@
   /* Brand identity tokens (see src/config/brand.js) */
   --ink: #0b0f14;
   --canvas: #f5f6f4;
-  --signal: #1d4ed8;
-  --signal-dark: #1e3a8a;
-  --signal-soft: #dbeafe;
+  --signal: #0099f2;
+  --signal-dark: #0083cf;
+  --signal-soft: #cfeafd;
+}
+
+/* The brand blue, applied by retuning Tailwind's blue scale rather than
+   rewriting 88 call sites. Every existing blue-600 / blue-700 becomes #0099f2
+   at once, and moving the brand again is one edit here.
+   600 and 700 are deliberately the same value: both are used as "the accent"
+   across the app, and one of them being a shade off is how a palette starts
+   drifting. 800 is where hover states go. */
+@theme {
+  --color-blue-50: #e8f6fe;
+  --color-blue-100: #cfeafd;
+  --color-blue-200: #a3d9fb;
+  --color-blue-300: #66c2f8;
+  --color-blue-400: #1aa3f4;
+  --color-blue-500: #0099f2;
+  --color-blue-600: #0099f2;
+  --color-blue-700: #0099f2;
+  --color-blue-800: #0083cf;
+  --color-blue-900: #0064a0;
 }
 
 /* A vertical scrollbar appearing mid-interaction narrows the viewport, and
@@ -382,9 +401,9 @@ body {
   background: linear-gradient(
     to bottom,
     transparent,
-    rgba(29, 78, 216, 0.16) 45%,
-    rgba(29, 78, 216, 0.28) 50%,
-    rgba(29, 78, 216, 0.16) 55%,
+    rgba(0, 153, 242, 0.16) 45%,
+    rgba(0, 153, 242, 0.28) 50%,
+    rgba(0, 153, 242, 0.16) 55%,
     transparent
   );
   border-radius: 999px;
@@ -430,7 +449,7 @@ body {
 }
 /* ─────────────────────────────────────────────────────────────
    TALLY-SPIRIT LANDING (scoped under .tl)
-   Warm, spacious, highlighted keyword, blue accent (#1d4ed8), Geist.
+   Warm, spacious, highlighted keyword, blue accent (#0099f2), Geist.
    ───────────────────────────────────────────────────────────── */
 
 .tl {
@@ -439,9 +458,9 @@ body {
   --tl-muted: #5b6472;
   --tl-faint: #9aa0aa;
   --tl-line: #ecece6;
-  --tl-blue: #1d4ed8;
-  --tl-blue-dark: #1a44c0;
-  --tl-blue-soft: #dbeafe;
+  --tl-blue: #0099f2;
+  --tl-blue-dark: #0083cf;
+  --tl-blue-soft: #cfeafd;
   background: var(--tl-bg);
   color: var(--tl-ink);
   font-family: var(--font-geist), system-ui, sans-serif;
@@ -496,7 +515,7 @@ body {
   font-weight: 600;
   padding: 15px 30px;
   border-radius: 14px;
-  box-shadow: 0 12px 28px -10px rgba(29, 78, 216, 0.5);
+  box-shadow: 0 12px 28px -10px rgba(0, 153, 242, 0.5);
   transition:
     transform 0.2s,
     background 0.2s;
@@ -521,7 +540,7 @@ body {
   content: "";
   position: absolute;
   inset: -40px -80px;
-  background: radial-gradient(ellipse at center, rgba(29, 78, 216, 0.1), transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(0, 153, 242, 0.1), transparent 70%);
   z-index: 0;
 }
 .tl-paper {
@@ -722,7 +741,7 @@ body {
   left: 0;
   right: 0;
   height: 30px;
-  background: linear-gradient(transparent, rgba(29, 78, 216, 0.18), transparent);
+  background: linear-gradient(transparent, rgba(0, 153, 242, 0.18), transparent);
   animation: tl-scan 3s ease-in-out infinite;
 }
 @keyframes tl-scan {
@@ -788,7 +807,7 @@ body {
   transform: translateY(-2px);
 }
 .tl-mark-strong {
-  background: linear-gradient(transparent 60%, rgba(29, 78, 216, 0.55) 60%);
+  background: linear-gradient(transparent 60%, rgba(0, 153, 242, 0.55) 60%);
   padding: 0 4px;
   border-radius: 3px;
 }
@@ -895,7 +914,7 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  background: #1d4ed8;
+  background: #0099f2;
   border: 2px solid #fff;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.28);
   cursor: pointer;
@@ -905,13 +924,13 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  background: #1d4ed8;
+  background: #0099f2;
   border: 2px solid #fff;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.28);
   cursor: pointer;
 }
 
 .avatar-zoom:focus-visible {
-  outline: 2px solid #1d4ed8;
+  outline: 2px solid #0099f2;
   outline-offset: 4px;
 }

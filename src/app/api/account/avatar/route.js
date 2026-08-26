@@ -89,6 +89,11 @@ export async function POST(request) {
     crop = null;
   }
 
+  // Anything that is not a quarter turn is ignored by saveAvatar rather than
+  // refused: a stray value should cost the user their rotation, not their
+  // upload.
+  const rotation = Number(form.get("rotation") ?? 0);
+
   const bytes = Buffer.from(await file.arrayBuffer());
 
   // The size header can lie; the bytes cannot.
@@ -100,7 +105,7 @@ export async function POST(request) {
   }
 
   try {
-    const updatedAt = await saveAvatar(user.id, bytes, crop);
+    const updatedAt = await saveAvatar(user.id, bytes, crop, rotation);
     return Response.json({ updatedAt: updatedAt.getTime() });
   } catch (error) {
     // saveAvatar throws messages written for the person who uploaded the file.

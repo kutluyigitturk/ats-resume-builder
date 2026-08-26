@@ -40,9 +40,16 @@ export async function readAvatar(userId) {
   });
 }
 
+// Only quarter turns. The editor offers rotate-left and rotate-right, and at
+// 90 degree steps the rotated bounding box is exactly the source dimensions
+// swapped - so the rectangle the browser measured and the one sharp extracts
+// live in the same coordinate space. An arbitrary angle grows the box and the
+// two would quietly disagree.
+const TURNS = new Set([0, 90, 180, 270]);
+
 // Turns an uploaded file plus a crop rectangle into the stored derivative.
 // Throws an Error whose message is safe to show the user.
-export async function saveAvatar(userId, bytes, requestedCrop) {
+export async function saveAvatar(userId, bytes, requestedCrop, requestedRotation = 0) {
   let meta;
 
   try {
@@ -55,25 +62,33 @@ export async function saveAvatar(userId, bytes, requestedCrop) {
     throw new Error("Use a JPEG, PNG or WebP photo.");
   }
 
-  // .rotate() applies the EXIF orientation and drops the tag, so the crop
-  // rectangle has to be measured against the image AFTER that turn - on a
-  // sideways phone photo the width and height swap.
-  const turned = meta.orientation >= 5 && meta.orientation <= 8;
-  const sourceWidth = turned ? meta.height : meta.width;
-  const sourceHeight = turned ? meta.width : meta.height;
+  const rotation = TURNS.has(Number(requestedRotation)) ? Number(requestedRotation) : 0;
 
-  if (!sourceWidth || !sourceHeight) {
+  // autoOrient() applies the EXIF orientation and drops the tag, so the crop
+  // rectangle has to be measured against the image AFTER that turn - on a
+  // sideways phone photo the width and height swap. The user's own rotation
+  // swaps them again at 90 and 270.
+  const exifTurned = meta.orientation >= 5 && meta.orientation <= 8;
+  const uprightWidth = exifTurned ? meta.height : meta.width;
+  const uprightHeight = exifTurned ? meta.width : meta.height;
+
+  if (!uprightWidth || !uprightHeight) {
     throw new Error("That image has no readable size. Try another photo.");
   }
 
+  const quarter = rotation === 90 || rotation === 270;
+  const sourceWidth = quarter ? uprightHeight : uprightWidth;
+  const sourceHeight = quarter ? uprightWidth : uprightHeight;
+
   const crop = clampCrop(requestedCrop, sourceWidth, sourceHeight);
 
-  // The order matters. rotate() first so extract() works in the coordinates
-  // the user actually saw; the re-encode at the end is what strips every
-  // remaining tag - a phone photo carries the GPS coordinates of wherever it
-  // was taken, and the person uploading it does not know that.
+  // The order matters. Orientation and rotation first so extract() works in
+  // the coordinates the user actually saw; the re-encode at the end is what
+  // strips every remaining tag - a phone photo carries the GPS coordinates of
+  // wherever it was taken, and the person uploading it does not know that.
   const data = await sharp(bytes, { limitInputPixels: MAX_INPUT_PIXELS })
-    .rotate()
+    .autoOrient()
+    .rotate(rotation)
     .extract(crop)
     .resize(OUT_WIDTH, OUT_HEIGHT, { fit: "cover" })
     .webp({ quality: WEBP_QUALITY })

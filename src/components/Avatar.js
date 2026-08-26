@@ -1,6 +1,6 @@
 // Deep enough for white text to sit on comfortably, and close enough together
 // that the set reads as one family instead of a random assortment.
-const TONES = ["#1d4ed8", "#4338ca", "#0f766e", "#15803d", "#b45309", "#be123c", "#7e22ce"];
+const TONES = ["#0099f2", "#4338ca", "#0f766e", "#15803d", "#b45309", "#be123c", "#7e22ce"];
 
 export function initialsOf(name, email) {
   const words = (name || "").trim().split(/\s+/).filter(Boolean);
