@@ -72,35 +72,43 @@ export default function NameField({ name, onSaved }) {
 
   return (
     <>
-      <div className="mt-4 flex max-w-full items-center gap-2">
-        <h1
-          className={`min-w-0 truncate text-[26px] font-bold tracking-tight ${
-            name ? "text-slate-900" : "text-slate-400"
-          }`}
-          style={{ fontFamily: "var(--font-sora), sans-serif" }}
-        >
-          {name || "Add your name"}
-        </h1>
-
-        {/* A real button beside the heading rather than a click handler on it:
-            this is an action, and it has to be announced as one. */}
-        <span className="group relative flex shrink-0">
-          <button
-            type="button"
-            onClick={start}
-            aria-label="Edit name"
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white hover:text-slate-700 focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:outline-none"
+      {/* The name is centred on the avatar above it, not the name-and-pencil
+          pair - centring the pair pushes the name off the circle by half the
+          button's width. The button hangs off the heading's right edge
+          instead, and the padding keeps it on screen for a long name. */}
+      <div className="mt-4 flex w-full justify-center px-11">
+        <div className="relative flex max-w-full min-w-0 items-center">
+          <h1
+            className={`min-w-0 truncate text-[26px] font-bold tracking-tight ${
+              name ? "text-slate-900" : "text-slate-400"
+            }`}
+            style={{ fontFamily: "var(--font-sora), sans-serif" }}
           >
-            <PencilIcon size={15} />
-          </button>
+            {name || "Add your name"}
+          </h1>
 
-          <span
-            role="tooltip"
-            className="pointer-events-none absolute top-full left-1/2 z-10 mt-1.5 -translate-x-1/2 rounded-lg bg-slate-800 px-2.5 py-1 text-[12px] font-medium whitespace-nowrap text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
-          >
-            Edit name
+          {/* A real button beside the heading rather than a click handler on
+              it: this is an action, and it has to be announced as one. */}
+          <span className="group absolute left-full ml-1.5 flex">
+            <button
+              type="button"
+              onClick={start}
+              aria-label="Edit name"
+              // Only the glyph changes. A filled panel appearing behind a
+              // 15px icon is more movement than the action deserves.
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:text-slate-600 active:text-slate-900 focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:outline-none"
+            >
+              <PencilIcon size={15} />
+            </button>
+
+            <span
+              role="tooltip"
+              className="pointer-events-none absolute top-full left-1/2 z-10 mt-1.5 -translate-x-1/2 rounded-lg bg-slate-800 px-2.5 py-1 text-[12px] font-medium whitespace-nowrap text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+            >
+              Edit name
+            </span>
           </span>
-        </span>
+        </div>
       </div>
 
       {open && (
