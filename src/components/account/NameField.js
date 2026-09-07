@@ -85,8 +85,11 @@ export default function NameField({ name, onSaved }) {
               around it carries 36px, which is what the reference sets on the
               wrapper - but the name itself overrides that, and copying only
               the wrapper is what made ours half again too big. */}
+          {/* A bottom border rather than an underline: text-decoration skips
+              ink around descenders, so the line broke under the g in Yiğittürk.
+              Transparent at rest so the row does not grow on hover. */}
           <h1
-            className="min-w-0 truncate text-[24px] leading-[30px] font-semibold underline-offset-4 group-hover/name:underline"
+            className="min-w-0 truncate border-b-2 border-transparent pb-0.5 text-[24px] leading-[30px] font-semibold transition-colors group-hover/name:border-blue-700"
             style={{ color: name ? "#0a0a0a" : "#737373" }}
           >
             {name || "Add your name"}
@@ -97,7 +100,7 @@ export default function NameField({ name, onSaved }) {
           {/* Hidden until the name is hovered, the way the reference does it -
               a control that is always visible beside a heading competes with
               it. Focus brings it back, so the keyboard still reaches it. */}
-          <span className="group absolute left-full ml-1.5 flex opacity-0 transition-opacity duration-150 group-hover/name:opacity-100 focus-within:opacity-100">
+          <span className="absolute left-full ml-1.5 flex opacity-0 transition-opacity duration-150 group-hover/name:opacity-100 focus-within:opacity-100">
             <button
               type="button"
               onClick={start}
@@ -108,13 +111,19 @@ export default function NameField({ name, onSaved }) {
             >
               <PencilIcon size={15} />
             </button>
+          </span>
 
+          {/* Centred under the name, not under the pencil, and carrying the
+              caret that points back at what it is labelling. */}
+          <span
+            role="tooltip"
+            className="pointer-events-none absolute top-full left-1/2 z-10 mt-2 -translate-x-1/2 rounded-lg bg-slate-800 px-3 py-1.5 text-[13px] font-medium whitespace-nowrap text-white opacity-0 transition-opacity duration-150 group-hover/name:opacity-100 group-focus-within/name:opacity-100"
+          >
             <span
-              role="tooltip"
-              className="pointer-events-none absolute top-full left-1/2 z-10 mt-1.5 -translate-x-1/2 rounded-lg bg-slate-800 px-2.5 py-1 text-[12px] font-medium whitespace-nowrap text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
-            >
-              Edit name
-            </span>
+              aria-hidden="true"
+              className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 rounded-[1px] bg-slate-800"
+            />
+            Edit Name
           </span>
         </div>
       </div>
