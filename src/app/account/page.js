@@ -22,7 +22,7 @@ import {
 function InfoCard({ icon, label, children, action }) {
   return (
     <div
-      className="flex h-full min-h-[200px] flex-col justify-between overflow-hidden rounded-xl border"
+      className="flex h-full min-h-[120px] flex-col justify-between overflow-hidden rounded-xl border"
       style={{ borderColor: BORDER, background: "#fff", boxShadow: "0 1px 2px rgba(0,0,0,0.1)" }}
     >
       <div className="flex flex-row items-center gap-4 px-5 py-6">
@@ -148,7 +148,7 @@ export default function AccountPage() {
         >
           {/* A fixed run of dots. Matching the real length would hand a
               shoulder-surfer the one thing that narrows a guess. */}
-          <span className="tracking-[0.18em]">••••••••••</span>
+          <span>••••••••••</span>
         </InfoCard>
 
         <InfoCard
@@ -183,7 +183,7 @@ export default function AccountPage() {
                 our colour tokens. */}
             {/* eslint-disable-next-line @next/next/no-img-element -- a static
                 SVG in /public needs no loader. */}
-            <img src="/stripe.svg" alt="Stripe" width={56} height={27} className="shrink-0" />
+            <img src="/stripe.svg" alt="Stripe" width={69} height={28} className="shrink-0" />
           </span>
         </InfoCard>
       </section>

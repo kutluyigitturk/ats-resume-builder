@@ -80,7 +80,7 @@ export default function AccountShell({ children }) {
 
   // The reference fades these rather than tinting them.
   const foot =
-    "flex h-10 cursor-pointer items-center px-6 text-[16px] whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+    "flex h-9 cursor-pointer items-center px-6 text-[16px] whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60";
 
   return (
     <div className="min-h-screen" style={{ background: "#fff", color: INK }}>
