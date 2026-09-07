@@ -9,7 +9,7 @@ import { AlertTriangleIcon, PencilIcon, XIcon } from "@/icons";
 // signup could never be saved again from this page.
 const MAX_LENGTH = 80;
 
-const BORDER = "#e5e7eb";
+const BORDER = "#e5e5e5";
 
 export default function NameField({ name, onSaved }) {
   const router = useRouter();
@@ -76,14 +76,12 @@ export default function NameField({ name, onSaved }) {
           pair - centring the pair pushes the name off the circle by half the
           button's width. The button hangs off the heading's right edge
           instead, and the padding keeps it on screen for a long name. */}
-      <div className="mt-4 flex w-full justify-center px-11">
+      <div className="flex w-full justify-center px-11">
         <div className="relative flex max-w-full min-w-0 items-center">
-          <h1
-            className={`min-w-0 truncate text-[26px] font-bold tracking-tight ${
-              name ? "text-slate-900" : "text-slate-400"
-            }`}
-            style={{ fontFamily: "var(--font-sora), sans-serif" }}
-          >
+          {/* No size, weight or family of its own: the identity block sets
+              36px/600 on the wrapper, the way the reference does, so the
+              heading inherits and the two stay in step. */}
+          <h1 className="min-w-0 truncate" style={{ color: name ? "#0a0a0a" : "#737373" }}>
             {name || "Add your name"}
           </h1>
 
@@ -96,7 +94,7 @@ export default function NameField({ name, onSaved }) {
               aria-label="Edit name"
               // Only the glyph changes. A filled panel appearing behind a
               // 15px icon is more movement than the action deserves.
-              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:text-slate-600 active:text-slate-900 focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:outline-none"
+              className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-[16px] text-neutral-400 transition-colors hover:text-neutral-600 active:text-neutral-900 focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:outline-none"
             >
               <PencilIcon size={15} />
             </button>

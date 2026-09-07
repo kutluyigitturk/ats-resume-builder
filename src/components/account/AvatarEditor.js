@@ -20,10 +20,14 @@ const FRAME_W = 210;
 const FRAME_H = 280;
 const STAGE_H = 344;
 
+// The reference wraps a 104px image in a 4px neutral-100 ring, so the whole
+// disc measures 112. Measured, not chosen.
 const AVATAR_SIZE = 104;
+const RING = 4;
 
-const BORDER = "#e5e7eb";
-const GROUND = "#f4f5f7";
+const BORDER = "#e5e5e5";
+const MUTED = "#f5f5f5";
+const GROUND = "#ffffff";
 
 const BADGE =
   "flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-white ring-2 transition-colors disabled:cursor-not-allowed disabled:opacity-60";
@@ -227,7 +231,15 @@ export default function AvatarEditor({ name, email, version, onVersionChange }) 
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative" style={{ width: AVATAR_SIZE, height: AVATAR_SIZE }}>
+      <div
+        className="relative rounded-full"
+        style={{
+          width: AVATAR_SIZE + RING * 2,
+          height: AVATAR_SIZE + RING * 2,
+          padding: RING,
+          background: MUTED,
+        }}
+      >
         <Avatar name={name} email={email} size={AVATAR_SIZE} src={src} />
 
         <button
