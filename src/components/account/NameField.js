@@ -81,8 +81,12 @@ export default function NameField({ name, onSaved }) {
           {/* No size, weight or family of its own: the identity block sets
               36px/600 on the wrapper, the way the reference does, so the
               heading inherits and the two stay in step. */}
+          {/* 24px/600, read off the reference's own inspector. The block
+              around it carries 36px, which is what the reference sets on the
+              wrapper - but the name itself overrides that, and copying only
+              the wrapper is what made ours half again too big. */}
           <h1
-            className="min-w-0 truncate underline-offset-4 group-hover/name:underline"
+            className="min-w-0 truncate text-[24px] leading-[30px] font-semibold underline-offset-4 group-hover/name:underline"
             style={{ color: name ? "#0a0a0a" : "#737373" }}
           >
             {name || "Add your name"}

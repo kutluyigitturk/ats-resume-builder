@@ -178,11 +178,12 @@ export default function AccountPage() {
               neighbour. */}
           <span className="flex items-center justify-between gap-3">
             <span className="min-w-0 truncate" />
-            {/* Stands in for the Stripe mark until the real asset is in the
-                repo; a hand-drawn wordmark would be a worse likeness. */}
-            <span className="shrink-0 text-[15px] font-bold" style={{ color: "#635bff" }}>
-              stripe
-            </span>
+            {/* The mark ships as its own file and is used unaltered - Stripe's
+                brand terms ask for exactly that, and it keeps the asset out of
+                our colour tokens. */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- a static
+                SVG in /public needs no loader. */}
+            <img src="/stripe.svg" alt="Stripe" width={56} height={27} className="shrink-0" />
           </span>
         </InfoCard>
       </section>
