@@ -119,9 +119,11 @@ export default function AccountPage() {
           </p>
         </div>
       </section>
-
       {/* Cards */}
-      <section className="mb-7 grid grid-cols-1 gap-6 pt-6 md:grid-cols-2">
+      // 500px columns rather than two equal shares of whatever is left: the cards // stop growing
+      with the window. minmax(0,500px) rather than a flat 500 so // they still shrink instead of
+      overflowing on a narrow one.
+      <section className="mb-7 grid grid-cols-1 gap-6 pt-6 md:grid-cols-[repeat(2,minmax(0,500px))]">
         <InfoCard
           icon={<MailSolidIcon size={30} />}
           label="Email"
