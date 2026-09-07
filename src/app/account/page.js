@@ -22,7 +22,7 @@ import {
 function InfoCard({ icon, label, children, action }) {
   return (
     <div
-      className="flex h-full min-h-[120px] flex-col justify-between overflow-hidden rounded-xl border"
+      className="flex h-full min-h-[163px] flex-col justify-between overflow-hidden rounded-xl border"
       style={{ borderColor: BORDER, background: "#fff", boxShadow: "0 1px 2px rgba(0,0,0,0.1)" }}
     >
       <div className="flex flex-row items-center gap-4 px-5 py-6">
@@ -160,7 +160,7 @@ export default function AccountPage() {
             {plan}
             <Link
               href="/pricing"
-              className="rounded-full bg-blue-700 px-4 py-1.5 text-[12.5px] font-semibold text-white transition-colors hover:bg-blue-800"
+              className="rounded-full bg-blue-700 px-4 py-1 text-[12.5px] font-semibold text-white transition-colors hover:bg-blue-800"
             >
               Upgrade
             </Link>
