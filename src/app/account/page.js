@@ -122,7 +122,8 @@ function InfoCard({ icon, label, children, action }) {
           read top-heavy against the reference. */}
       <div className="flex flex-1 flex-col px-5 pt-5 pb-6 md:min-h-[144px]">
         <div className="flex items-center gap-4">
-          <span className="shrink-0 text-blue-700">{icon}</span>
+          {/* Decoration, so it keeps the brand blue - nothing here is text. */}
+          <span className="shrink-0 text-blue-600">{icon}</span>
           <div className="min-w-0 flex-1">
             <p className="text-[12.5px] text-slate-500">{label}</p>
             <div className="mt-1">{children}</div>

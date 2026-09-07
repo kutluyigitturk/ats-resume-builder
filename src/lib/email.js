@@ -62,7 +62,7 @@ function layout(heading, body, buttonLabel, buttonUrl, name) {
   <h1 style="font-size:22px;margin:0 0 12px">${heading}</h1>
   ${greeting}
   <p style="font-size:15px;line-height:1.6;color:#5b6472;margin:0 0 24px">${body}</p>
-  <a href="${buttonUrl}" style="display:inline-block;background:#0099f2;color:#fff;text-decoration:none;font-size:15px;font-weight:600;padding:12px 24px;border-radius:10px">${buttonLabel}</a>
+  <a href="${buttonUrl}" style="display:inline-block;background:#0072ad;color:#fff;text-decoration:none;font-size:15px;font-weight:600;padding:12px 24px;border-radius:10px">${buttonLabel}</a>
   <p style="font-size:13px;line-height:1.6;color:#8a93a0;margin:24px 0 0">Or paste this link into your browser:<br><span style="word-break:break-all">${buttonUrl}</span></p>
 </div>`;
 }

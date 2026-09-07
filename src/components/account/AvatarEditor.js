@@ -236,7 +236,7 @@ export default function AvatarEditor({ name, email, version, onVersionChange }) 
           disabled={busy}
           aria-label={src ? "Change photo" : "Add a photo"}
           title={src ? "Change photo" : "Add a photo"}
-          className={`${BADGE} absolute -bottom-1 left-0 bg-blue-700 hover:bg-blue-800`}
+          className={`${BADGE} absolute -bottom-1 left-0 bg-blue-600 hover:bg-blue-700`}
           style={{ "--tw-ring-color": GROUND }}
         >
           <PencilIcon size={15} />
@@ -294,7 +294,7 @@ export default function AvatarEditor({ name, email, version, onVersionChange }) 
                 id="crop-title"
                 className="flex items-center gap-2.5 text-base font-bold text-slate-900"
               >
-                <span className="text-blue-700">
+                <span className="text-blue-600">
                   <CropIcon size={18} />
                 </span>
                 Crop your avatar

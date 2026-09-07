@@ -128,7 +128,7 @@ export default function NameField({ name, onSaved }) {
                 id="change-name-title"
                 className="flex items-center gap-2.5 text-base font-bold text-slate-900"
               >
-                <span className="text-blue-700">
+                <span className="text-blue-600">
                   <PencilIcon size={16} />
                 </span>
                 Change name

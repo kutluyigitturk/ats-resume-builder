@@ -21,7 +21,7 @@ export default function StatusToast({ message, busy = false, onDismiss, duration
       {busy && (
         <span
           aria-hidden="true"
-          className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-slate-200 border-t-blue-700"
+          className="h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600"
         />
       )}
       {message}

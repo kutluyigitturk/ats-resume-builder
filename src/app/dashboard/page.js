@@ -840,12 +840,15 @@ export default function Dashboard() {
         <div className="absolute top-1/3 -right-40 h-[400px] w-[400px] rounded-full bg-indigo-50/30 blur-[120px]" />
       </div>
 
-      <Navbar maxWidth="1024px" baseRingClass="ring-slate-200/50" justify="justify-between">
+      <Navbar maxWidth="1280px" baseRingClass="ring-slate-200/50" justify="justify-between">
         <Logo />
         <UserMenu />
       </Navbar>
 
-      <main className="relative z-10 mx-auto max-w-5xl px-6 pt-28 pb-16">
+      {/* Same width as /account. A bar that resizes as you move between two
+          pages of the same account area reads as a bug, and the two pages
+          share a navbar and a user menu. */}
+      <main className="relative z-10 mx-auto max-w-[1280px] px-6 pt-28 pb-16">
         {!isEmpty && (
           <div className="mb-8">
             <h1
