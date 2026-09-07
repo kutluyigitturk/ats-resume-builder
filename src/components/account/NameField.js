@@ -76,12 +76,15 @@ export default function NameField({ name, onSaved }) {
           pair - centring the pair pushes the name off the circle by half the
           button's width. The button hangs off the heading's right edge
           instead, and the padding keeps it on screen for a long name. */}
-      <div className="flex w-full justify-center px-11">
+      <div className="flex h-[46px] w-full items-center justify-center px-11">
         <div className="group/name relative flex max-w-full min-w-0 items-center">
           {/* No size, weight or family of its own: the identity block sets
               36px/600 on the wrapper, the way the reference does, so the
               heading inherits and the two stay in step. */}
-          <h1 className="min-w-0 truncate" style={{ color: name ? "#0a0a0a" : "#737373" }}>
+          <h1
+            className="min-w-0 truncate underline-offset-4 group-hover/name:underline"
+            style={{ color: name ? "#0a0a0a" : "#737373" }}
+          >
             {name || "Add your name"}
           </h1>
 

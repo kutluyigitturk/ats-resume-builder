@@ -29,8 +29,9 @@ const BORDER = "#e5e5e5";
 const MUTED = "#f5f5f5";
 const GROUND = "#ffffff";
 
+// 32px, sitting on the avatar's bottom edge - the reference's own size.
 const BADGE =
-  "flex h-9 w-9 cursor-pointer items-center justify-center rounded-full text-white ring-2 transition-colors disabled:cursor-not-allowed disabled:opacity-60";
+  "flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-white transition-colors disabled:cursor-not-allowed disabled:opacity-60";
 
 const TOOL =
   "flex h-9 items-center gap-1.5 rounded-lg border px-3 text-[12.5px] font-medium text-slate-600 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50";
@@ -248,10 +249,9 @@ export default function AvatarEditor({ name, email, version, onVersionChange }) 
           disabled={busy}
           aria-label={src ? "Change photo" : "Add a photo"}
           title={src ? "Change photo" : "Add a photo"}
-          className={`${BADGE} absolute -bottom-1 left-0 bg-blue-600 hover:bg-blue-700`}
-          style={{ "--tw-ring-color": GROUND }}
+          className={`${BADGE} absolute bottom-0 left-0 bg-blue-600 hover:bg-blue-700`}
         >
-          <PencilIcon size={15} />
+          <PencilIcon size={14} />
         </button>
 
         {/* Only when there is something to remove: a live-looking control
@@ -263,10 +263,9 @@ export default function AvatarEditor({ name, email, version, onVersionChange }) 
             disabled={busy}
             aria-label="Remove photo"
             title="Remove photo"
-            className={`${BADGE} absolute right-0 -bottom-1 bg-red-500 hover:bg-red-600`}
-            style={{ "--tw-ring-color": GROUND }}
+            className={`${BADGE} absolute right-0 bottom-0 bg-red-500 hover:bg-red-600`}
           >
-            <XIcon size={16} />
+            <XIcon size={14} />
           </button>
         )}
       </div>

@@ -3,7 +3,7 @@
 // the colour-per-address idea still earns its keep anywhere avatars appear in
 // a list - it is just not what a page about one person needs.
 const NEUTRAL_BG = "#f5f5f5";
-const NEUTRAL_FG = "#525252";
+const NEUTRAL_FG = "#737373";
 const TONES = ["#0099f2", "#4338ca", "#0f766e", "#15803d", "#b45309", "#be123c", "#7e22ce"];
 
 export function initialsOf(name, email) {
@@ -75,7 +75,7 @@ export default function Avatar({
         height: size,
         background: coloured ? toneFor(email) : NEUTRAL_BG,
         color: coloured ? "#fff" : NEUTRAL_FG,
-        fontSize: Math.round(size * 0.4),
+        fontSize: Math.round(size * 0.31),
         letterSpacing: "0.01em",
       }}
     >

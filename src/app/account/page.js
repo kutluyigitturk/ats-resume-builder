@@ -84,38 +84,43 @@ function Sidebar() {
 
   return (
     <section
-      className="flex w-full shrink-0 flex-col border-b px-4 lg:w-[272px] lg:border-r lg:border-b-0"
+      className="flex w-full flex-col border-b px-4 lg:w-auto lg:min-w-max lg:shrink-0 lg:border-r lg:border-b-0"
       style={{ borderColor: BORDER, background: "#fff" }}
     >
-      <nav className="flex flex-row gap-x-2 px-1 lg:mt-8 lg:flex-col lg:gap-x-0">
-        <SidebarLink href="/account" icon={<HomeSolidIcon size={24} />} label="My Account" active />
-        <SidebarLink href="/dashboard" icon={<FileSolidIcon size={24} />} label="My Resumes" />
+      <nav className="flex w-full flex-1 flex-col px-1">
+        <div className="flex flex-row gap-x-2 lg:mt-8 lg:shrink-0 lg:flex-col lg:gap-x-0">
+          <SidebarLink
+            href="/account"
+            icon={<HomeSolidIcon size={24} />}
+            label="My Account"
+            active
+          />
+          <SidebarLink href="/dashboard" icon={<FileSolidIcon size={24} />} label="My Resumes" />
+        </div>
+
+        <div className="mt-4 flex flex-row gap-x-2 lg:mt-auto lg:mb-4 lg:shrink-0 lg:flex-col lg:gap-x-0">
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className={foot}
+            style={{ color: INK }}
+          >
+            <span className="mr-2 flex h-6 w-6 items-center justify-center">
+              <LogOutIcon size={22} />
+            </span>
+            {loggingOut ? "Logging out…" : "Log out"}
+          </button>
+
+          <button type="button" disabled className={`${foot} gap-2`} style={{ color: "#f87171" }}>
+            <span className="mr-2 flex h-6 w-6 items-center justify-center">
+              <UserXIcon size={22} />
+            </span>
+            Delete Account
+            <Soon />
+          </button>
+        </div>
       </nav>
-
-      {/* Pinned to the bottom, and the two are held apart on purpose: an
-          action with no undo should not sit under the one people use daily. */}
-      <div className="mt-4 flex flex-row gap-x-2 px-1 pb-4 lg:mt-auto lg:flex-col lg:gap-x-0">
-        <button
-          type="button"
-          onClick={handleLogout}
-          disabled={loggingOut}
-          className={foot}
-          style={{ color: INK }}
-        >
-          <span className="mr-2 flex h-6 w-6 items-center justify-center">
-            <LogOutIcon size={22} />
-          </span>
-          {loggingOut ? "Logging out…" : "Log out"}
-        </button>
-
-        <button type="button" disabled className={`${foot} gap-2 text-red-600`}>
-          <span className="mr-2 flex h-6 w-6 items-center justify-center">
-            <UserXIcon size={22} />
-          </span>
-          Delete Account
-          <Soon />
-        </button>
-      </div>
     </section>
   );
 }
@@ -151,14 +156,17 @@ function InfoCard({ icon, label, children, action }) {
 // A filled band, not more white: 45px tall, the same neutral-100 as the active
 // nav pill, separated by the same hairline as everything else.
 function CardAction({ href, label }) {
-  const base = "flex h-[45px] w-full items-center justify-center gap-2 border-t text-[14px]";
+  // 45px: a 44px button plus the hairline above it, the way the reference
+  // stacks a h-11 control inside the band.
+  const base =
+    "flex h-[45px] w-full items-center justify-center gap-2 border-t px-6 text-[14px] leading-[21px] font-medium";
   const style = { borderColor: BORDER, background: MUTED };
 
   if (href) {
     return (
       <Link
         href={href}
-        className={`${base} font-medium text-blue-700 transition-[filter] hover:brightness-95`}
+        className={`${base} text-blue-700 underline-offset-4 hover:underline`}
         style={style}
       >
         {label}
@@ -170,7 +178,7 @@ function CardAction({ href, label }) {
     <button
       type="button"
       disabled
-      className={`${base} cursor-not-allowed font-medium`}
+      className={`${base} cursor-not-allowed`}
       style={{ ...style, color: MUTED_FG }}
     >
       {label}
@@ -203,10 +211,10 @@ export default function AccountPage() {
         <UserMenu />
       </Navbar>
 
-      {/* No max-width: the reference runs edge to edge, and a centred column
-          is what made our cards read narrow beside it. The navbar keeps its
-          own width - it is deliberately not part of this match. */}
-      <div className="flex w-full flex-col pt-20 lg:min-h-screen lg:flex-row">
+      {/* max-w-screen-2xl, centred - the reference's own `main`. Not full
+          bleed: that was my reading of a screenshot, and the DOM says
+          otherwise. The navbar keeps its own width, outside this match. */}
+      <div className="mx-auto flex w-full max-w-[1536px] flex-col pt-20 lg:min-h-screen lg:flex-row">
         <Sidebar />
 
         <section className="min-w-0 flex-1 px-4 pt-6 sm:px-8 lg:px-[60px] lg:pt-10">
