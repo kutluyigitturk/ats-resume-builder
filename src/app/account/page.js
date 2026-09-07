@@ -55,7 +55,7 @@ function SidebarLink({ href, icon, label, active = false }) {
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className="my-1 flex h-11 items-center rounded-xl px-4 text-[16px] transition-colors"
+      className="my-1 flex h-11 items-center rounded-xl px-4 text-[16px] transition-colors hover:text-blue-700"
       style={{
         background: active ? MUTED : "transparent",
         color: active ? "var(--color-blue-700)" : MUTED_FG,
@@ -79,8 +79,10 @@ function Sidebar() {
     router.refresh();
   }
 
+  // The reference fades these rather than tinting them: Log out to 40% of the
+  // ink, Delete Account to 80% of its red.
   const foot =
-    "flex h-10 cursor-pointer items-center px-6 text-[16px] whitespace-nowrap transition-opacity hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-60";
+    "group flex h-10 cursor-pointer items-center px-6 text-[16px] whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-60";
 
   return (
     <section
@@ -103,7 +105,7 @@ function Sidebar() {
             type="button"
             onClick={handleLogout}
             disabled={loggingOut}
-            className={foot}
+            className={`${foot} hover:text-[#0a0a0a]/40`}
             style={{ color: INK }}
           >
             <span className="mr-2 flex h-6 w-6 items-center justify-center">
@@ -112,7 +114,12 @@ function Sidebar() {
             {loggingOut ? "Logging out…" : "Log out"}
           </button>
 
-          <button type="button" disabled className={`${foot} gap-2`} style={{ color: "#f87171" }}>
+          <button
+            type="button"
+            disabled
+            className={`${foot} gap-2 hover:text-[#f87171]/80`}
+            style={{ color: "#f87171" }}
+          >
             <span className="mr-2 flex h-6 w-6 items-center justify-center">
               <UserXIcon size={22} />
             </span>
