@@ -77,7 +77,7 @@ export default function NameField({ name, onSaved }) {
           button's width. The button hangs off the heading's right edge
           instead, and the padding keeps it on screen for a long name. */}
       <div className="flex w-full justify-center px-11">
-        <div className="relative flex max-w-full min-w-0 items-center">
+        <div className="group/name relative flex max-w-full min-w-0 items-center">
           {/* No size, weight or family of its own: the identity block sets
               36px/600 on the wrapper, the way the reference does, so the
               heading inherits and the two stay in step. */}
@@ -87,7 +87,10 @@ export default function NameField({ name, onSaved }) {
 
           {/* A real button beside the heading rather than a click handler on
               it: this is an action, and it has to be announced as one. */}
-          <span className="group absolute left-full ml-1.5 flex">
+          {/* Hidden until the name is hovered, the way the reference does it -
+              a control that is always visible beside a heading competes with
+              it. Focus brings it back, so the keyboard still reaches it. */}
+          <span className="group absolute left-full ml-1.5 flex opacity-0 transition-opacity duration-150 group-hover/name:opacity-100 focus-within:opacity-100">
             <button
               type="button"
               onClick={start}

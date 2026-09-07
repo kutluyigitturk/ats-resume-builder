@@ -11,13 +11,13 @@ import NameField from "@/components/account/NameField";
 import { useSessionUser } from "@/components/SessionUser";
 import {
   CheckIcon,
-  CreditCardIcon,
-  DollarSignIcon,
-  FileTextIcon,
-  HomeIcon,
-  LockIcon,
+  CreditCardSolidIcon,
+  DollarSolidIcon,
+  FileSolidIcon,
+  HomeSolidIcon,
+  LockSolidIcon,
   LogOutIcon,
-  MailIcon,
+  MailSolidIcon,
   UserXIcon,
 } from "@/icons";
 
@@ -88,8 +88,8 @@ function Sidebar() {
       style={{ borderColor: BORDER, background: "#fff" }}
     >
       <nav className="flex flex-row gap-x-2 px-1 lg:mt-8 lg:flex-col lg:gap-x-0">
-        <SidebarLink href="/account" icon={<HomeIcon size={22} />} label="My Account" active />
-        <SidebarLink href="/dashboard" icon={<FileTextIcon size={22} />} label="My Resumes" />
+        <SidebarLink href="/account" icon={<HomeSolidIcon size={24} />} label="My Account" active />
+        <SidebarLink href="/dashboard" icon={<FileSolidIcon size={24} />} label="My Resumes" />
       </nav>
 
       {/* Pinned to the bottom, and the two are held apart on purpose: an
@@ -203,7 +203,10 @@ export default function AccountPage() {
         <UserMenu />
       </Navbar>
 
-      <div className="mx-auto flex w-full max-w-[1280px] flex-col pt-20 lg:min-h-screen lg:flex-row">
+      {/* No max-width: the reference runs edge to edge, and a centred column
+          is what made our cards read narrow beside it. The navbar keeps its
+          own width - it is deliberately not part of this match. */}
+      <div className="flex w-full flex-col pt-20 lg:min-h-screen lg:flex-row">
         <Sidebar />
 
         <section className="min-w-0 flex-1 px-4 pt-6 sm:px-8 lg:px-[60px] lg:pt-10">
@@ -234,7 +237,7 @@ export default function AccountPage() {
           {/* Cards */}
           <section className="mb-7 grid grid-cols-1 gap-6 pt-6 md:grid-cols-2">
             <InfoCard
-              icon={<MailIcon size={30} />}
+              icon={<MailSolidIcon size={30} />}
               label="Email"
               action={<CardAction label="Change Email" />}
             >
@@ -253,7 +256,7 @@ export default function AccountPage() {
             </InfoCard>
 
             <InfoCard
-              icon={<LockIcon size={30} />}
+              icon={<LockSolidIcon size={30} />}
               label="Password"
               action={<CardAction label="Change Password" />}
             >
@@ -263,7 +266,7 @@ export default function AccountPage() {
             </InfoCard>
 
             <InfoCard
-              icon={<DollarSignIcon size={30} />}
+              icon={<DollarSolidIcon size={30} />}
               label="Plan"
               action={<CardAction href="/pricing" label="Change Plan" />}
             >
@@ -279,7 +282,7 @@ export default function AccountPage() {
             </InfoCard>
 
             <InfoCard
-              icon={<CreditCardIcon size={30} />}
+              icon={<CreditCardSolidIcon size={30} />}
               label="Payment Method"
               action={<CardAction label="Add Payment Method" />}
             >

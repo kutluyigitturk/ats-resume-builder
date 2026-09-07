@@ -1,5 +1,9 @@
-// Deep enough for white text to sit on comfortably, and close enough together
-// that the set reads as one family instead of a random assortment.
+// The reference sets initials in dark grey on a neutral disc rather than a
+// colour per person, so that is what this does now. toneFor is kept because
+// the colour-per-address idea still earns its keep anywhere avatars appear in
+// a list - it is just not what a page about one person needs.
+const NEUTRAL_BG = "#f5f5f5";
+const NEUTRAL_FG = "#525252";
 const TONES = ["#0099f2", "#4338ca", "#0f766e", "#15803d", "#b45309", "#be123c", "#7e22ce"];
 
 export function initialsOf(name, email) {
@@ -33,7 +37,14 @@ export function toneFor(email) {
 // One stored image serves every size. It is 3:4, and the circle shows its top
 // square - which is where a portrait keeps the face, so no second crop and no
 // second file are needed.
-export default function Avatar({ name, email, size = 32, src = null, className = "" }) {
+export default function Avatar({
+  name,
+  email,
+  size = 32,
+  src = null,
+  tone = "neutral",
+  className = "",
+}) {
   const shared = `inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full select-none ${className}`;
 
   if (src) {
@@ -53,14 +64,17 @@ export default function Avatar({ name, email, size = 32, src = null, className =
     );
   }
 
+  const coloured = tone === "colour";
+
   return (
     <span
       aria-hidden="true"
-      className={`${shared} font-semibold text-white`}
+      className={`${shared} font-semibold`}
       style={{
         width: size,
         height: size,
-        background: toneFor(email),
+        background: coloured ? toneFor(email) : NEUTRAL_BG,
+        color: coloured ? "#fff" : NEUTRAL_FG,
         fontSize: Math.round(size * 0.4),
         letterSpacing: "0.01em",
       }}
