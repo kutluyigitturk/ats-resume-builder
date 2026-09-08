@@ -3,13 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Modal from "@/components/ui/Modal";
-import { AlertTriangleIcon, PencilIcon, XIcon } from "@/icons";
+import { AlertTriangleSolidIcon, PencilIcon, PencilSolidIcon, XIcon } from "@/icons";
 
 // The signup route's ceiling. Anything lower here and a name accepted at
 // signup could never be saved again from this page.
 const MAX_LENGTH = 80;
-
-const BORDER = "#e5e5e5";
 
 export default function NameField({ name, onSaved }) {
   const router = useRouter();
@@ -70,6 +68,15 @@ export default function NameField({ name, onSaved }) {
     }
   }
 
+  // Colour has to stay in classes: an inline colour outranks every focus rule,
+  // so the ring would never appear.
+  const inputRing = error
+    ? "border-red-500 focus:border-red-600 focus:ring-red-600"
+    : "border-[#e5e5e5] focus:border-neutral-800 focus:ring-neutral-800";
+
+  const button =
+    "flex h-10 cursor-pointer items-center rounded-full px-5 text-[13px] font-semibold tracking-wide uppercase transition-colors disabled:cursor-not-allowed";
+
   return (
     <>
       {/* The name is centred on the avatar above it, not the name-and-pencil
@@ -78,9 +85,6 @@ export default function NameField({ name, onSaved }) {
           instead, and the padding keeps it on screen for a long name. */}
       <div className="flex h-[46px] w-full items-center justify-center px-11">
         <div className="group/name relative flex max-w-full min-w-0 items-center">
-          {/* No size, weight or family of its own: the identity block sets
-              36px/600 on the wrapper, the way the reference does, so the
-              heading inherits and the two stay in step. */}
           {/* 24px/600, read off the reference's own inspector. The block
               around it carries 36px, which is what the reference sets on the
               wrapper - but the name itself overrides that, and copying only
@@ -115,9 +119,13 @@ export default function NameField({ name, onSaved }) {
 
           {/* Centred under the name, not under the pencil, and carrying the
               caret that points back at what it is labelling. */}
+          {/* The delay is on the hover state only, so the tip waits out a
+              pointer merely crossing the name but leaves the moment the
+              pointer does - and a keyboard focus, which is deliberate, shows
+              it at once. */}
           <span
             role="tooltip"
-            className="pointer-events-none absolute top-full left-1/2 z-10 mt-2 -translate-x-1/2 rounded-lg bg-slate-800 px-3 py-1.5 text-[13px] font-medium whitespace-nowrap text-white opacity-0 transition-opacity duration-150 group-hover/name:opacity-100 group-focus-within/name:opacity-100"
+            className="pointer-events-none absolute top-full left-1/2 z-10 mt-2 -translate-x-1/2 rounded-lg bg-slate-800 px-3 py-1.5 text-[13px] font-medium whitespace-nowrap text-white opacity-0 transition-opacity delay-0 duration-150 group-hover/name:opacity-100 group-hover/name:delay-[1200ms] group-focus-within/name:opacity-100"
           >
             <span
               aria-hidden="true"
@@ -136,37 +144,41 @@ export default function NameField({ name, onSaved }) {
           initialFocusRef={inputRef}
           backdropClass="backdrop:bg-black/20 backdrop:backdrop-blur-sm"
         >
-          <div
-            className="mx-4 w-full max-w-[420px] rounded-2xl border p-6 shadow-2xl"
-            style={{ background: "#fff", borderColor: BORDER }}
-          >
+          {/* 420px so the note breaks where the reference breaks it - measured:
+              "…The new name" needs 311px, and the icon, its gap and the 32px
+              padding account for the rest. */}
+          {/* The identity block sets 36px/600/40px on itself so the name can
+              inherit it, and a <dialog> still inherits from its DOM parent even
+              while it sits in the top layer - without this reset the label came
+              out semibold on a 40px line. */}
+          <div className="mx-4 w-full max-w-[420px] rounded-2xl bg-white p-8 text-[15px] leading-normal font-normal shadow-[0_12px_40px_rgba(0,0,0,0.14)]">
             <div className="flex items-start justify-between gap-4">
               <h3
                 id="change-name-title"
-                className="flex items-center gap-2.5 text-base font-bold text-slate-900"
+                className="flex items-center gap-3 text-[20px] leading-7 font-bold text-[#0a0a0a]"
               >
-                <span className="text-blue-600">
-                  <PencilIcon size={16} />
+                <span className="shrink-0 text-blue-600">
+                  <PencilSolidIcon size={20} />
                 </span>
-                Change name
+                Change Name
               </h3>
 
+              {/* Colour only. A panel appearing behind a 20px glyph is more
+                  movement than closing a dialog deserves, and the reference
+                  does not draw one either. */}
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 disabled={saving}
                 aria-label="Close"
-                className="-mt-1 -mr-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-0.5 flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded text-neutral-600 transition-colors hover:text-neutral-900 focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <XIcon size={17} />
+                <XIcon size={20} />
               </button>
             </div>
 
-            <label
-              htmlFor="account-name"
-              className="mt-5 block text-[13px] font-medium text-slate-600"
-            >
-              Full name
+            <label htmlFor="account-name" className="mt-5 block text-[14px] text-[#404040]">
+              Full Name
             </label>
             <input
               id="account-name"
@@ -184,31 +196,31 @@ export default function NameField({ name, onSaved }) {
                   save();
                 }
               }}
-              className="mt-1.5 w-full rounded-xl border px-3.5 py-2.5 text-[15px] text-slate-900 outline-none focus:border-blue-700 focus:ring-2 focus:ring-blue-700/15 disabled:opacity-60"
-              style={{ borderColor: BORDER }}
+              className={`mt-2 h-10 w-full rounded-lg border px-3.5 text-[15px] text-[#0a0a0a] outline-none focus:ring-1 disabled:opacity-60 ${inputRing}`}
             />
 
             {error ? (
-              <p id="account-name-error" role="alert" className="mt-2 text-[13px] text-red-600">
+              <p id="account-name-error" role="alert" className="mt-3 text-[13px] text-red-600">
                 {error}
               </p>
             ) : (
-              <p id="account-name-note" className="mt-2.5 flex gap-2 text-[12.5px] text-slate-500">
-                <span className="mt-px shrink-0 text-slate-400">
-                  <AlertTriangleIcon size={14} />
+              <p
+                id="account-name-note"
+                className="mt-3 flex items-center gap-3 text-[14px] leading-5 text-[#525252]"
+              >
+                <span className="shrink-0 text-neutral-500">
+                  <AlertTriangleSolidIcon size={20} />
                 </span>
-                Nothing else to do — this updates everywhere your name appears, including new
-                resumes.
+                No additional action is required. The new name will be updated automatically.
               </p>
             )}
 
-            <div className="mt-6 flex justify-end gap-2">
+            <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
                 disabled={saving}
-                className="cursor-pointer rounded-xl border px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-                style={{ borderColor: BORDER }}
+                className={`${button} bg-[#f5f5f5] text-[#171717] hover:bg-[#e5e5e5] disabled:opacity-60`}
               >
                 Cancel
               </button>
@@ -216,7 +228,7 @@ export default function NameField({ name, onSaved }) {
                 type="button"
                 onClick={save}
                 disabled={saving || !canSave}
-                className="cursor-pointer rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-45"
+                className={`${button} bg-blue-700 text-white hover:bg-blue-800 disabled:opacity-45`}
               >
                 {saving ? "Saving…" : "Save"}
               </button>
