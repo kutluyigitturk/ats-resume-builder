@@ -19,6 +19,7 @@ export default function Modal({
   initialFocusRef,
 }) {
   const ref = useRef(null);
+  const pressed = useRef(null);
 
   useEffect(() => {
     const dialog = ref.current;
@@ -52,15 +53,28 @@ export default function Modal({
 
   // A click that lands on the dialog element itself came from the backdrop:
   // everything visible is inside the card, which stops its own clicks.
-  function handleBackdrop(event) {
-    if (event.target === ref.current) onClose();
+  //
+  // But a click reports the nearest ancestor shared by the press and the
+  // release, so selecting text in an input and letting go of the button
+  // outside the card also reported the dialog - and dismissed a form the user
+  // was in the middle of filling in. Both ends of the gesture have to land on
+  // the backdrop, which is what pressing outside the card actually looks like.
+  function handlePointerDown(event) {
+    pressed.current = event.target;
+  }
+
+  function handlePointerUp(event) {
+    const fromBackdrop = pressed.current === ref.current && event.target === ref.current;
+    pressed.current = null;
+    if (fromBackdrop) onClose();
   }
 
   return (
     <dialog
       ref={ref}
       aria-labelledby={labelledBy}
-      onClick={handleBackdrop}
+      onPointerDown={handlePointerDown}
+      onPointerUp={handlePointerUp}
       // The dialog is the centring box itself, exactly as the old
       // `fixed inset-0 flex` wrapper was. Wrapping the children in another div
       // would make w-full resolve against a shrink-wrapped parent and quietly
