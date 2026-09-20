@@ -83,11 +83,16 @@ export const cvStyles = {
     justifyContent: "space-between",
     fontWeight: "bold",
     fontSize: "10.5pt",
+    // Without the gutter a long position title touches the date; without the
+    // nowrap a range like "September 2021 - Present" breaks over two lines and
+    // makes the header one line taller than the same header in the PDF.
+    gap: "12px",
   },
 
   itemDate: {
     fontWeight: "normal",
     color: "#555",
+    whiteSpace: "nowrap",
   },
 
   itemSubtitle: {

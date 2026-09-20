@@ -4,6 +4,7 @@ import {
   formatDateRange as _formatDateRange,
   getVisibleReferences,
   resolveFontFamily,
+  bodyRelativeSize,
 } from "./cvHelpers";
 import { defaultStyleSettings } from "@/data/styleDefaults";
 
@@ -63,6 +64,13 @@ function buildDynamicCss(settings, templateId) {
   const bodyFont = resolveFontFamily(settings.secondaryFont);
   const headingSize = `${settings.headingSize}pt`;
   const bodySize = `${settings.bodySize}pt`;
+  // Derived from Body Size rather than pinned, so the stepper scales the whole
+  // document instead of half of it. See bodyRelativeSize for the offsets.
+  const headerSize = bodyRelativeSize(settings.bodySize, "itemHeader");
+  const refTitleSize = bodyRelativeSize(settings.bodySize, "referenceTitle");
+  const contactSize = bodyRelativeSize(settings.bodySize, "contact");
+  const metaSize = bodyRelativeSize(settings.bodySize, "meta");
+  const credentialSize = bodyRelativeSize(settings.bodySize, "credentialLink");
   const lineHeight = settings.lineSpacing;
   const marginTB = `${settings.marginTopBottom}mm`;
   const marginLR = `${settings.marginLeftRight}mm`;
@@ -109,7 +117,7 @@ function buildDynamicCss(settings, templateId) {
 
     .cv-contact {
       text-align: center;
-      font-size: 9pt;
+      font-size: ${contactSize};
       color: #555;
       margin-bottom: 16px;
       word-break: break-word;
@@ -150,7 +158,7 @@ function buildDynamicCss(settings, templateId) {
       display: flex;
       justify-content: space-between;
       font-weight: bold;
-      font-size: 10.5pt;
+      font-size: ${headerSize};
       gap: 12px;
       font-family: ${headingFont};
     }
@@ -170,7 +178,7 @@ function buildDynamicCss(settings, templateId) {
     }
 
     .item-meta {
-      font-size: 9.5pt;
+      font-size: ${metaSize};
       color: #555;
       margin-bottom: 4px;
       word-break: break-word;
@@ -208,7 +216,7 @@ function buildDynamicCss(settings, templateId) {
 
     .reference-title {
       font-weight: bold;
-      font-size: 10.5pt;
+      font-size: ${refTitleSize};
       font-family: ${headingFont};
     }
 
@@ -223,11 +231,9 @@ function buildDynamicCss(settings, templateId) {
     .mb-8 { margin-bottom: 8px; }
 
     .credential-link {
-      font-size: 9pt;
+      font-size: ${credentialSize};
       color: #2563eb;
       text-decoration: none;
-      margin-top: 2px;
-      display: inline-block;
       font-style: normal;
     }
 
@@ -236,7 +242,7 @@ function buildDynamicCss(settings, templateId) {
     }
 
     .cert-description {
-      font-size: 9.5pt;
+      font-size: ${metaSize};
       color: #555;
       margin-top: 2px;
     }
@@ -248,7 +254,7 @@ function buildDynamicCss(settings, templateId) {
     }
 
     ${
-      settings.keepItemsTogether
+      settings.keepItemsTogether === true
         ? `
     .mb-block,
     .mb-10,
@@ -277,20 +283,23 @@ export function buildPdfHtml(
   templateId = "classic",
   pdfName = "Resume"
 ) {
-  const settings = styleSettings || defaultStyleSettings;
+  // A partial object - a resume saved before an option existed - left every
+  // missing key undefined and printed "undefinedpt" into the CSS. The preview
+  // merges over the defaults on read; this is the same reconciliation.
+  const settings = { ...defaultStyleSettings, ...(styleSettings || {}) };
   const dynamicCss = buildDynamicCss(settings, templateId);
   const t = cv.sectionTitles || {};
 
-  const name = escapeHtml(cv.name || "");
-  const title = escapeHtml(cv.title || "");
+  const name = hasValue(cv.name) ? escapeHtml(cv.name) : "";
+  const title = hasValue(cv.title) ? escapeHtml(cv.title) : "";
   const contactParts = [cv.phone, cv.email, cv.location].filter(hasValue).map(escapeHtml);
   if (hasValue(cv.linkedin))
     contactParts.push(
-      `<a href="${escapeHtml(cv.linkedin.startsWith("http") ? cv.linkedin : "https://" + cv.linkedin)}" style="color:#333;text-decoration:none;">${escapeHtml(t.linkedinLabel || "LinkedIn")}</a>`
+      `<a href="${escapeHtml(cv.linkedin.startsWith("http") ? cv.linkedin : "https://" + cv.linkedin)}" style="color:#555;text-decoration:none;">${escapeHtml(t.linkedinLabel || "LinkedIn")}</a>`
     );
   if (hasValue(cv.website))
     contactParts.push(
-      `<a href="${escapeHtml(cv.website.startsWith("http") ? cv.website : "https://" + cv.website)}" style="color:#333;text-decoration:none;">${escapeHtml(t.portfolioLabel || "Portfolio")}</a>`
+      `<a href="${escapeHtml(cv.website.startsWith("http") ? cv.website : "https://" + cv.website)}" style="color:#555;text-decoration:none;">${escapeHtml(t.portfolioLabel || "Portfolio")}</a>`
     );
   const contact = contactParts.join(" | ");
   const hasContact =

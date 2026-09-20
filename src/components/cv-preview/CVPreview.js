@@ -7,6 +7,7 @@ import {
   formatDateRange,
   getVisibleReferences,
   resolveFontFamily,
+  bodyRelativeSize,
 } from "@/lib/cvHelpers";
 import { defaultStyleSettings } from "@/data/styleDefaults";
 import { MailIcon, PhoneIcon, MapPinIcon, LinkedInIcon, LinkIcon } from "@/icons";
@@ -71,6 +72,14 @@ function buildResolvedStyles(settings, templateId) {
   const sectionGap = `${settings.betweenSections}pt`;
   const titleGap = `${settings.betweenTitleContent}pt`;
   const blockGap = `${settings.betweenContentBlocks}pt`;
+  // Derived from Body Size rather than pinned, so the stepper scales the whole
+  // document instead of half of it. Shared with the PDF builder so the two
+  // cannot drift.
+  const headerSize = bodyRelativeSize(settings.bodySize, "itemHeader");
+  const refTitleSize = bodyRelativeSize(settings.bodySize, "referenceTitle");
+  const contactSize = bodyRelativeSize(settings.bodySize, "contact");
+  const metaSize = bodyRelativeSize(settings.bodySize, "meta");
+  const credentialSize = bodyRelativeSize(settings.bodySize, "credentialLink");
 
   const isProfessional = templateId === "professional";
   const sectionTitleExtra = isProfessional ? { letterSpacing: "1px" } : {};
@@ -85,7 +94,7 @@ function buildResolvedStyles(settings, templateId) {
     },
     name: { ...cvStyles.name, fontFamily: headingFont },
     title: { ...cvStyles.title, fontFamily: bodyFont },
-    contact: { ...cvStyles.contact, fontFamily: bodyFont },
+    contact: { ...cvStyles.contact, fontFamily: bodyFont, fontSize: contactSize },
     divider: cvStyles.divider,
     sectionTitle: {
       ...cvStyles.sectionTitle,
@@ -103,9 +112,9 @@ function buildResolvedStyles(settings, templateId) {
       ...sectionTitleExtra,
     },
     summary: { ...cvStyles.summary, fontFamily: bodyFont, fontSize: bodySize },
-    itemHeader: { ...cvStyles.itemHeader, fontFamily: headingFont },
+    itemHeader: { ...cvStyles.itemHeader, fontFamily: headingFont, fontSize: headerSize },
     itemDate: { ...cvStyles.itemDate, fontFamily: bodyFont },
-    itemSubtitle: { ...cvStyles.itemSubtitle, fontFamily: bodyFont },
+    itemSubtitle: { ...cvStyles.itemSubtitle, fontFamily: bodyFont, fontSize: bodySize },
     bulletList: {
       ...cvStyles.bulletList,
       fontFamily: bodyFont,
@@ -113,16 +122,17 @@ function buildResolvedStyles(settings, templateId) {
       ...(isProfessional ? { paddingLeft: "30px" } : {}),
     },
     bulletItem: cvStyles.bulletItem,
-    referenceTitle: { ...cvStyles.referenceTitle, fontFamily: headingFont },
-    referenceContact: { ...cvStyles.referenceContact, fontFamily: bodyFont },
+    referenceTitle: { ...cvStyles.referenceTitle, fontFamily: headingFont, fontSize: refTitleSize },
+    referenceContact: { ...cvStyles.referenceContact, fontFamily: bodyFont, fontSize: bodySize },
     blockGap,
+    metaSize,
+    credentialSize,
   };
 }
 
 /* ─── Constants ──────────────────────────────────── */
 
 const PAGE_GAP_PX = 30;
-const PAGE_HEIGHT_BUFFER = 10;
 
 /* ─── Section block builders ─────────────────────── */
 
@@ -289,8 +299,9 @@ function buildEducationBlocks(cv, styles, isFirst) {
             <p
               style={{
                 fontFamily: styles.page.fontFamily,
-                fontSize: "9.5pt",
+                fontSize: styles.metaSize,
                 color: "#555",
+                marginBottom: "4px",
               }}
             >
               {edu.additionalInfo}
@@ -351,7 +362,7 @@ function buildSkillsBlocks(cv, styles, isFirst, hideReferences, templateId) {
               fontFamily: styles.page.fontFamily,
               fontSize: styles.page.fontSize,
               position: "relative",
-              marginBottom: "4px",
+              marginBottom: "2px",
             }}
           >
             <span style={{ position: "absolute", left: "4px" }}>•</span>
@@ -404,7 +415,7 @@ function buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether) {
               <p
                 style={{
                   fontFamily: styles.page.fontFamily,
-                  fontSize: "9.5pt",
+                  fontSize: styles.metaSize,
                   color: "#555",
                   marginBottom: "4px",
                 }}
@@ -442,7 +453,7 @@ function buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether) {
               <p
                 style={{
                   fontFamily: styles.page.fontFamily,
-                  fontSize: "9.5pt",
+                  fontSize: styles.metaSize,
                   color: "#555",
                   marginBottom: "4px",
                 }}
@@ -616,7 +627,7 @@ function buildCertificationsBlocks(cv, styles, isFirst, templateId) {
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
-                    fontSize: "9pt",
+                    fontSize: styles.credentialSize,
                     color: "#2563eb",
                     textDecoration: "none",
                     fontStyle: "normal",
@@ -632,7 +643,7 @@ function buildCertificationsBlocks(cv, styles, isFirst, templateId) {
             <p
               style={{
                 fontFamily: styles.page.fontFamily,
-                fontSize: "9.5pt",
+                fontSize: styles.metaSize,
                 color: "#555",
                 marginTop: "2px",
               }}
@@ -674,7 +685,7 @@ function buildLanguagesBlocks(cv, styles, isFirst) {
             fontFamily: styles.page.fontFamily,
             fontSize: styles.page.fontSize,
             position: "relative",
-            marginBottom: "4px",
+            marginBottom: "2px",
           }}
         >
           <span style={{ position: "absolute", left: "4px" }}>•</span>
@@ -914,7 +925,15 @@ function buildBlocks(
 // is no use as a break list. Element bottoms are collected too, so a break can
 // also land cleanly between two bullets rather than inside one.
 function collectBreakOffsets(el) {
-  const top = el.getBoundingClientRect().top;
+  // getClientRects reports painted geometry, so a CSS transform on an ancestor
+  // scales every number; offsetTop and offsetHeight, which the budget and the
+  // block heights come from, do not. The dashboard cards and the template
+  // modal mount this component inside a permanent scale(), so the two were
+  // being compared in different units there. Dividing brings the offsets back
+  // into layout space.
+  const box = el.getBoundingClientRect();
+  const top = box.top;
+  const scale = el.offsetHeight > 0 ? box.height / el.offsetHeight : 1;
   const offsets = [];
   const range = document.createRange();
 
@@ -926,13 +945,13 @@ function collectBreakOffsets(el) {
     range.selectNodeContents(node);
 
     for (const rect of range.getClientRects()) {
-      if (rect.height > 0) offsets.push(rect.bottom - top);
+      if (rect.height > 0) offsets.push((rect.bottom - top) / scale);
     }
   }
 
   for (const child of el.querySelectorAll("*")) {
     const rect = child.getBoundingClientRect();
-    if (rect.height > 0) offsets.push(rect.bottom - top);
+    if (rect.height > 0) offsets.push((rect.bottom - top) / scale);
   }
 
   return [...new Set(offsets.map((o) => Math.round(o)))].sort((a, b) => a - b);
@@ -1124,7 +1143,9 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
         // order must not iterate undefined and blank the whole preview.
         settings.sectionOrder || defaultStyleSettings.sectionOrder,
         templateId,
-        settings.keepItemsTogether
+        // Strict, the way pdfHtmlBuilder reads it: a resume stored with a
+        // truthy non-boolean must not group items on one side only.
+        settings.keepItemsTogether === true
       ),
     [
       cv,
@@ -1157,7 +1178,10 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
       types.push(blockEls[i].dataset.blockType || "content");
     }
 
-    const budget = pageContentHeight - PAGE_HEIGHT_BUFFER;
+    // The PDF gets exactly 297mm minus the margins, because @page hands the box
+    // to Chrome untouched. Holding anything back here paginates the preview
+    // against a shorter page than the file the user actually sends.
+    const budget = pageContentHeight;
 
     // Only a block that cannot fit on a page will ever be sliced, so the line
     // boxes are only worth collecting for those.
