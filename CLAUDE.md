@@ -15,6 +15,8 @@ Next.js App Router, JavaScript (not TypeScript), Tailwind v4, deployed on Vercel
 - Six pre-existing `react-hooks/set-state-in-effect` errors are known and out of scope
   (`dashboard/page.js`, `TemplateModal.js`, `CVPreview.js`, `useLocalStorage.js`).
   Do not "fix" them as a side effect of unrelated work.
+- Project design tokens are authoritative. Style suggestions from any skill must adapt
+  to them, never replace them.
 
 ## Stack
 
