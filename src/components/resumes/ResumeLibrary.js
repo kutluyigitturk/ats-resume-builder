@@ -93,12 +93,7 @@ function MiniCVPreview({ resumeId }) {
               overflow: "hidden",
             }}
           >
-            <CVPreview
-              cv={cvData}
-              hideReferences={false}
-              styleSettings={style}
-              templateId={tplId}
-            />
+            <CVPreview cv={cvData} styleSettings={style} templateId={tplId} />
           </div>
         </div>
       </div>
@@ -882,12 +877,16 @@ export default function ResumeLibrary({ variant = "page" }) {
         )}
       </div>
 
-      <TemplateModal
-        isOpen={showCreateModal}
-        onClose={handleCloseCreateModal}
-        mode="create"
-        onCreate={handleCreate}
-      />
+      {/* Mounted only while open, the same as the builder's copy: it renders a
+          CVPreview per template, on top of one per resume card already here. */}
+      {showCreateModal && (
+        <TemplateModal
+          isOpen
+          onClose={handleCloseCreateModal}
+          mode="create"
+          onCreate={handleCreate}
+        />
+      )}
       {showAIModal && <AIRequiredModal onClose={() => setShowAIModal(false)} />}
       {purgeTarget && (
         <PurgeModal

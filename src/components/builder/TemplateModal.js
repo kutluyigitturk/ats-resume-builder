@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import Modal from "@/components/ui/Modal";
 import { templates } from "@/data/templates";
 import { defaultStyleSettings } from "@/data/styleDefaults";
@@ -10,7 +10,7 @@ import CVPreview from "@/components/cv-preview/CVPreview";
 
 /* ─── Mini Preview ───────────────────────────────── */
 
-function MiniPreview({ cv, hideReferences, styleSettings, isSelected, templateId }) {
+function MiniPreview({ cv, styleSettings, isSelected, templateId }) {
   return (
     <div
       className={`relative overflow-hidden rounded-lg transition-shadow duration-200 ${
@@ -38,12 +38,7 @@ function MiniPreview({ cv, hideReferences, styleSettings, isSelected, templateId
           pointerEvents: "none",
         }}
       >
-        <CVPreview
-          cv={cv}
-          hideReferences={hideReferences}
-          styleSettings={styleSettings}
-          templateId={templateId}
-        />
+        <CVPreview cv={cv} styleSettings={styleSettings} templateId={templateId} />
       </div>
     </div>
   );
@@ -61,15 +56,7 @@ function Badge({ text }) {
 
 /* ─── Template Card ──────────────────────────────── */
 
-function TemplateCard({
-  template,
-  isSelected,
-  isDefault,
-  onSelect,
-  cv,
-  hideReferences,
-  styleSettings,
-}) {
+function TemplateCard({ template, isSelected, isDefault, onSelect, cv, styleSettings }) {
   return (
     <button
       type="button"
@@ -120,7 +107,6 @@ function TemplateCard({
       <div className="px-4 pb-3">
         <MiniPreview
           cv={cv}
-          hideReferences={hideReferences}
           styleSettings={{
             ...styleSettings,
             primaryFont: template.defaultPrimaryFont,
@@ -159,7 +145,6 @@ export default function TemplateModal({
   currentTemplateId,
   onApply,
   cv,
-  hideReferences,
   styleSettings,
   mode = "switch",
   onCreate,
@@ -209,6 +194,16 @@ export default function TemplateModal({
     };
   }, [isOpen]);
 
+  // The previews inside paginate an A4 page by measuring themselves, and a
+  // closed <dialog> is display:none - so mounting them with the modal makes
+  // every one of them read a zero-height page and stack into a single clipped
+  // column. They mount from here instead, once the dialog is actually on
+  // screen. Resetting on close keeps the next open honest.
+  // Both callers mount this only while it is open, so closing unmounts the
+  // component and the flag resets with it.
+  const [measurable, setMeasurable] = useState(false);
+  const handleOpened = useCallback(() => setMeasurable(true), []);
+
   const handleApply = () => {
     if (isCreateMode && onCreate) {
       const finalName = resumeName.trim() || "Untitled Resume";
@@ -225,6 +220,7 @@ export default function TemplateModal({
       onClose={onClose}
       labelledBy="template-modal-title"
       backdropClass="backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+      onOpened={handleOpened}
     >
       <div className="relative z-10 mx-4 flex max-h-[96vh] w-full max-w-[1100px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         {/* Header */}
@@ -278,18 +274,18 @@ export default function TemplateModal({
         {/* Template Grid */}
         <div className="flex-1 overflow-y-auto px-7 py-6">
           <div className="grid grid-cols-2 gap-6">
-            {templates.map((template) => (
-              <TemplateCard
-                key={template.id}
-                template={template}
-                isSelected={selectedId === template.id}
-                isDefault={!isCreateMode && currentTemplateId === template.id}
-                onSelect={setSelectedId}
-                cv={previewCv}
-                hideReferences={hideReferences || false}
-                styleSettings={previewStyle}
-              />
-            ))}
+            {measurable &&
+              templates.map((template) => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  isSelected={selectedId === template.id}
+                  isDefault={!isCreateMode && currentTemplateId === template.id}
+                  onSelect={setSelectedId}
+                  cv={previewCv}
+                  styleSettings={previewStyle}
+                />
+              ))}
           </div>
         </div>
 

@@ -315,7 +315,7 @@ function buildEducationBlocks(cv, styles, isFirst) {
   return blocks;
 }
 
-function buildSkillsBlocks(cv, styles, isFirst, hideReferences, templateId) {
+function buildSkillsBlocks(cv, styles, isFirst, templateId) {
   const visible = (cv.skills || []).filter((s) => hasValue(s.category) || hasValue(s.items));
   if (visible.length === 0) return [];
 
@@ -700,9 +700,9 @@ function buildLanguagesBlocks(cv, styles, isFirst) {
   return blocks;
 }
 
-function buildReferencesBlocks(cv, styles, isFirst, hideReferences) {
+function buildReferencesBlocks(cv, styles, isFirst) {
   const visibleRefs = getVisibleReferences(cv.references || []);
-  if (!hideReferences && visibleRefs.length === 0) return [];
+  if (visibleRefs.length === 0) return [];
 
   const titleStyle = isFirst ? styles.sectionTitleFirst : styles.sectionTitle;
   const blocks = [
@@ -713,43 +713,25 @@ function buildReferencesBlocks(cv, styles, isFirst, hideReferences) {
     },
   ];
 
-  if (hideReferences) {
+  visibleRefs.forEach((ref, i) => {
     blocks.push({
-      key: "ref-upon-request",
-      type: "content",
+      key: `ref-${ref.id ?? i}`,
+      type: "item",
       element: (
-        <p
-          style={{
-            fontFamily: styles.page.fontFamily,
-            fontSize: styles.page.fontSize,
-            fontStyle: "italic",
-          }}
-        >
-          Available upon request
-        </p>
+        <div style={{ marginBottom: "8px" }}>
+          <div style={styles.referenceTitle}>
+            {ref.name}
+            {hasValue(ref.company) ? ` — ${ref.company}` : ""}
+          </div>
+          <div style={styles.referenceContact}>
+            {ref.phone}
+            {hasValue(ref.phone) && hasValue(ref.email) ? " | " : ""}
+            {ref.email}
+          </div>
+        </div>
       ),
     });
-  } else {
-    visibleRefs.forEach((ref, i) => {
-      blocks.push({
-        key: `ref-${ref.id ?? i}`,
-        type: "item",
-        element: (
-          <div style={{ marginBottom: "8px" }}>
-            <div style={styles.referenceTitle}>
-              {ref.name}
-              {hasValue(ref.company) ? ` — ${ref.company}` : ""}
-            </div>
-            <div style={styles.referenceContact}>
-              {ref.phone}
-              {hasValue(ref.phone) && hasValue(ref.email) ? " | " : ""}
-              {ref.email}
-            </div>
-          </div>
-        ),
-      });
-    });
-  }
+  });
 
   return blocks;
 }
@@ -758,32 +740,23 @@ function buildReferencesBlocks(cv, styles, isFirst, hideReferences) {
 
 const sectionBuilders = {
   summary: (cv, styles, isFirst) => buildSummaryBlocks(cv, styles, isFirst),
-  experience: (cv, styles, isFirst, hideReferences, templateId, keepTogether) =>
+  experience: (cv, styles, isFirst, templateId, keepTogether) =>
     buildExperienceBlocks(cv, styles, isFirst, templateId, keepTogether),
   education: (cv, styles, isFirst) => buildEducationBlocks(cv, styles, isFirst),
-  skills: (cv, styles, isFirst, hideReferences, templateId) =>
-    buildSkillsBlocks(cv, styles, isFirst, hideReferences, templateId),
-  projects: (cv, styles, isFirst, hideReferences, templateId, keepTogether) =>
+  skills: (cv, styles, isFirst, templateId) => buildSkillsBlocks(cv, styles, isFirst, templateId),
+  projects: (cv, styles, isFirst, templateId, keepTogether) =>
     buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether),
-  volunteering: (cv, styles, isFirst, hideReferences, templateId, keepTogether) =>
+  volunteering: (cv, styles, isFirst, templateId, keepTogether) =>
     buildVolunteeringBlocks(cv, styles, isFirst, keepTogether),
-  certifications: (cv, styles, isFirst, hideReferences, templateId) =>
+  certifications: (cv, styles, isFirst, templateId) =>
     buildCertificationsBlocks(cv, styles, isFirst, templateId),
   languages: (cv, styles, isFirst) => buildLanguagesBlocks(cv, styles, isFirst),
-  references: (cv, styles, isFirst, hideReferences) =>
-    buildReferencesBlocks(cv, styles, isFirst, hideReferences),
+  references: (cv, styles, isFirst) => buildReferencesBlocks(cv, styles, isFirst),
 };
 
 /* ─── Block builder (order-aware) ────────────────── */
 
-function buildBlocks(
-  cv,
-  hideReferences,
-  styles,
-  sectionOrder,
-  templateId = "classic",
-  keepTogether = false
-) {
+function buildBlocks(cv, styles, sectionOrder, templateId = "classic", keepTogether = false) {
   const blocks = [];
 
   if (hasValue(cv.name) || hasValue(cv.title) || hasContactInfo(cv)) {
@@ -899,14 +872,7 @@ function buildBlocks(
     const builder = sectionBuilders[sectionId];
     if (!builder) continue;
 
-    const sectionBlocks = builder(
-      cv,
-      styles,
-      isFirstSection,
-      hideReferences,
-      templateId,
-      keepTogether
-    );
+    const sectionBlocks = builder(cv, styles, isFirstSection, templateId, keepTogether);
     if (sectionBlocks.length > 0) {
       blocks.push(...sectionBlocks);
       isFirstSection = false;
@@ -1099,7 +1065,7 @@ function paginateBlocks(heights, types, maxPageHeight, breakpoints = {}) {
 
 /* ─── Main component ─────────────────────────────── */
 
-export default function CVPreview({ cv, hideReferences, styleSettings, templateId = "classic" }) {
+export default function CVPreview({ cv, styleSettings, templateId = "classic" }) {
   const measureRef = useRef(null);
   const rulerRef = useRef(null);
   const [pageGroups, setPageGroups] = useState(null);
@@ -1141,7 +1107,6 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
     () =>
       buildBlocks(
         cv,
-        hideReferences,
         resolvedStyles,
         // Same fallback pdfHtmlBuilder already has: a resume stored without an
         // order must not iterate undefined and blank the whole preview.
@@ -1151,14 +1116,7 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
         // truthy non-boolean must not group items on one side only.
         settings.keepItemsTogether === true
       ),
-    [
-      cv,
-      hideReferences,
-      resolvedStyles,
-      settings.sectionOrder,
-      templateId,
-      settings.keepItemsTogether,
-    ]
+    [cv, resolvedStyles, settings.sectionOrder, templateId, settings.keepItemsTogether]
   );
 
   useLayoutEffect(() => {

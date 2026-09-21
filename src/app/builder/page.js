@@ -94,12 +94,6 @@ function BuilderInner() {
 
   const { panelWidth, handleMouseDown } = useResizablePanel();
 
-  // Every other preference survives a reload; this one used to reset, so a
-  // resume printed without references had them back the next morning.
-  const hideReferencesStorageKey = resumeId
-    ? `cv-${resumeId}-hideReferences`
-    : "cv-builder-hideReferences";
-  const [hideReferences, setHideReferences] = useLocalStorage(hideReferencesStorageKey, false);
   const [zoom, setZoom] = useState(100);
   const [builderMode, setBuilderMode] = useState("editor");
   const [completenessOpen, setCompletenessOpen] = useState(false);
@@ -109,7 +103,7 @@ function BuilderInner() {
   const templateStorageKey = resumeId ? `cv-${resumeId}-templateId` : "cv-builder-templateId";
   const [templateId, setTemplateId] = useLocalStorage(templateStorageKey, defaultTemplateId);
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
-  const pdfExport = usePdfExport(cv, hideReferences, styleSettings, templateId, resumeId);
+  const pdfExport = usePdfExport(cv, styleSettings, templateId, resumeId);
 
   const openSectionsKey = resumeId ? `cv-${resumeId}-openSections` : "cv-builder-openSections";
   const [openSections, setOpenSections] = useLocalStorage(openSectionsKey, {
@@ -241,8 +235,6 @@ function BuilderInner() {
 
                 <ReferencesForm
                   references={cv.references}
-                  hideReferences={hideReferences}
-                  setHideReferences={setHideReferences}
                   {...cvData}
                   isOpen={openSections.references}
                   onToggle={() => toggleSection("references")}
@@ -301,12 +293,7 @@ function BuilderInner() {
 
         <div className="flex items-start justify-center px-8 pb-8">
           <div style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}>
-            <CVPreview
-              cv={cv}
-              hideReferences={hideReferences}
-              styleSettings={styleSettings}
-              templateId={templateId}
-            />
+            <CVPreview cv={cv} styleSettings={styleSettings} templateId={templateId} />
           </div>
         </div>
       </div>
@@ -317,31 +304,34 @@ function BuilderInner() {
         />
       )}
 
-      <TemplateModal
-        isOpen={templateModalOpen}
-        onClose={() => setTemplateModalOpen(false)}
-        currentTemplateId={templateId}
-        onApply={(newTemplateId) => {
-          const previous = getTemplate(templateId);
-          const tpl = getTemplate(newTemplateId);
-          setTemplateId(newTemplateId);
+      {/* Mounted only while open. It holds three more CVPreview instances, and
+          leaving them in the tree re-rendered four resumes on every keystroke. */}
+      {templateModalOpen && (
+        <TemplateModal
+          isOpen
+          onClose={() => setTemplateModalOpen(false)}
+          currentTemplateId={templateId}
+          onApply={(newTemplateId) => {
+            const previous = getTemplate(templateId);
+            const tpl = getTemplate(newTemplateId);
+            setTemplateId(newTemplateId);
 
-          // Only carry the new template's fonts over if the current ones are
-          // still the outgoing template's defaults. A font the user chose is
-          // not ours to reset, and there is no undo for style settings.
-          if (styleSettings.primaryFont === previous.defaultPrimaryFont) {
-            updateStyle("primaryFont", tpl.defaultPrimaryFont);
-          }
-          if (styleSettings.secondaryFont === previous.defaultSecondaryFont) {
-            updateStyle("secondaryFont", tpl.defaultSecondaryFont);
-          }
+            // Only carry the new template's fonts over if the current ones are
+            // still the outgoing template's defaults. A font the user chose is
+            // not ours to reset, and there is no undo for style settings.
+            if (styleSettings.primaryFont === previous.defaultPrimaryFont) {
+              updateStyle("primaryFont", tpl.defaultPrimaryFont);
+            }
+            if (styleSettings.secondaryFont === previous.defaultSecondaryFont) {
+              updateStyle("secondaryFont", tpl.defaultSecondaryFont);
+            }
 
-          if (resumeId) updateResumeTemplateId(resumeId, newTemplateId);
-        }}
-        cv={cv}
-        hideReferences={hideReferences}
-        styleSettings={styleSettings}
-      />
+            if (resumeId) updateResumeTemplateId(resumeId, newTemplateId);
+          }}
+          cv={cv}
+          styleSettings={styleSettings}
+        />
+      )}
     </div>
   );
 }

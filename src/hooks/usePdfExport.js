@@ -6,7 +6,7 @@ import { buildPdfHtml } from "@/lib/pdfHtmlBuilder";
 import { renameResume } from "@/lib/resumeManager";
 
 // Handles PDF name editing, generation and download
-export default function usePdfExport(cv, hideReferences, styleSettings, templateId, resumeId) {
+export default function usePdfExport(cv, styleSettings, templateId, resumeId) {
   const [downloading, setDownloading] = useState(false);
   const [exportError, setExportError] = useState(null);
   const [sessionExpired, setSessionExpired] = useState(false);
@@ -29,7 +29,7 @@ export default function usePdfExport(cv, hideReferences, styleSettings, template
     setDownloading(true);
 
     try {
-      const html = buildPdfHtml(cv, hideReferences, styleSettings, templateId, pdfName);
+      const html = buildPdfHtml(cv, styleSettings, templateId, pdfName);
 
       const response = await fetch("/api/generate-pdf", {
         method: "POST",

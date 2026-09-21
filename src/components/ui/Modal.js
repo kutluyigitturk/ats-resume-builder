@@ -17,6 +17,7 @@ export default function Modal({
   children,
   backdropClass,
   initialFocusRef,
+  onOpened,
 }) {
   const ref = useRef(null);
   const pressed = useRef(null);
@@ -28,6 +29,12 @@ export default function Modal({
     if (open && !dialog.open) {
       dialog.showModal();
 
+      // Only now does the dialog have a size. Anything inside that measures
+      // itself - a scaled A4 preview, say - reads zero until this point,
+      // because a closed <dialog> is display:none. Callers that need to
+      // measure mount their content from here instead of at first render.
+      onOpened?.();
+
       // showModal lands on the first sequentially focusable element, which is
       // not always the one the dialog is about - a read-only identity row
       // sitting above a password field, for instance. React does not render
@@ -37,7 +44,7 @@ export default function Modal({
     } else if (!open && dialog.open) {
       dialog.close();
     }
-  }, [open, initialFocusRef]);
+  }, [open, initialFocusRef, onOpened]);
 
   useEffect(() => {
     const dialog = ref.current;

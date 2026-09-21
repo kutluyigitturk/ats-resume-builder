@@ -41,6 +41,9 @@ export function pdfNameKey(id) {
 export function openSectionsKey(id) {
   return `cv-${id}-openSections`;
 }
+// The "Available upon request" switch was removed, but resumes saved while it
+// existed still hold this row. Kept so deleting a resume still clears it; it is
+// not copied on duplicate and nothing writes it any more.
 export function hideReferencesKey(id) {
   return `cv-${id}-hideReferences`;
 }
@@ -237,12 +240,10 @@ export function duplicateResume(id) {
   saveResumes(list);
 
   // Copy all data
-  [cvDataKey, styleKey, templateKey, pdfNameKey, openSectionsKey, hideReferencesKey].forEach(
-    (keyFn) => {
-      const data = readJSON(keyFn(id));
-      if (data !== null) writeJSON(keyFn(newId), data);
-    }
-  );
+  [cvDataKey, styleKey, templateKey, pdfNameKey, openSectionsKey].forEach((keyFn) => {
+    const data = readJSON(keyFn(id));
+    if (data !== null) writeJSON(keyFn(newId), data);
+  });
 
   // Set the new name for pdfName
   writeJSON(pdfNameKey(newId), newName);

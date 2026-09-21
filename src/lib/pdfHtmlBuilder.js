@@ -276,13 +276,7 @@ function buildDynamicCss(settings, templateId) {
   `;
 }
 
-export function buildPdfHtml(
-  cv,
-  hideReferences,
-  styleSettings = null,
-  templateId = "classic",
-  pdfName = "Resume"
-) {
+export function buildPdfHtml(cv, styleSettings = null, templateId = "classic", pdfName = "Resume") {
   // A partial object - a resume saved before an option existed - left every
   // missing key undefined and printed "undefinedpt" into the CSS. The preview
   // merges over the defaults on read; this is the same reconciliation.
@@ -334,7 +328,7 @@ export function buildPdfHtml(
     volunteering: () => buildVolunteeringHtml(cv.volunteering || [], keepTogether, t),
     certifications: () => buildCertificationsHtml(cv.certifications || [], templateId, t),
     languages: () => buildLanguagesHtml(cv.languages || [], t),
-    references: () => buildReferencesHtml(visibleReferences, hideReferences, t),
+    references: () => buildReferencesHtml(visibleReferences, t),
   };
 
   const orderedSections = sectionOrder
@@ -686,17 +680,10 @@ function buildLanguagesHtml(languages, t = {}) {
   `;
 }
 
-function buildReferencesHtml(visibleReferences, hideReferences, t = {}) {
-  if (!hideReferences && visibleReferences.length === 0) return "";
+function buildReferencesHtml(visibleReferences, t = {}) {
+  if (visibleReferences.length === 0) return "";
 
   const sectionTitle = `<div class="cv-section-title">${escapeHtml(t.references || "References")}</div>`;
-
-  if (hideReferences) {
-    return `
-      ${sectionTitle}
-      <div class="mb-10"><em>Available upon request</em></div>
-    `;
-  }
 
   const items = visibleReferences
     .map((ref) => {
