@@ -7,6 +7,7 @@ import {
   bodyRelativeSize,
 } from "./cvHelpers";
 import { defaultStyleSettings, resolveDocumentLocale } from "@/data/styleDefaults";
+import { templateSupports } from "@/data/templates";
 
 function joinContact(fields, separator = " | ") {
   return fields.filter(hasValue).map(escapeHtml).join(separator);
@@ -523,7 +524,7 @@ function buildProjectsHtml(projects, templateId, keepTogether, t = {}) {
               <span class="item-date">${formatDateRange(project.startDate, project.endDate)}</span>
             </div>
             ${
-              templateId === "advanced" && hasValue(project.url)
+              templateSupports(templateId, "projectUrl") && hasValue(project.url)
                 ? `<div class="item-meta">${escapeHtml(project.url)}</div>`
                 : ""
             }
@@ -547,7 +548,7 @@ function buildProjectsHtml(projects, templateId, keepTogether, t = {}) {
               <span class="item-date">${formatDateRange(project.startDate, project.endDate)}</span>
             </div>
             ${
-              templateId === "advanced" && hasValue(project.url)
+              templateSupports(templateId, "projectUrl") && hasValue(project.url)
                 ? `<div class="item-meta">${escapeHtml(project.url)}</div>`
                 : ""
             }
@@ -631,20 +632,23 @@ function buildCertificationsHtml(certifications, templateId, t = {}) {
             <span class="item-date">${formatDateRange(item.dateAcquired, item.expirationDate)}</span>
           </div>
           ${
-            hasValue(item.institution) || (templateId === "advanced" && hasValue(item.url))
+            hasValue(item.institution) ||
+            (templateSupports(templateId, "certificationUrl") && hasValue(item.url))
               ? `<div class="item-subtitle">${escapeHtml(item.institution || "")}${
-                  hasValue(item.institution) && templateId === "advanced" && hasValue(item.url)
+                  hasValue(item.institution) &&
+                  templateSupports(templateId, "certificationUrl") &&
+                  hasValue(item.url)
                     ? " – "
                     : ""
                 }${
-                  templateId === "advanced" && hasValue(item.url)
+                  templateSupports(templateId, "certificationUrl") && hasValue(item.url)
                     ? `<a class="credential-link" href="${escapeHtml(item.url)}" target="_blank">View Credentials</a>`
                     : ""
                 }</div>`
               : ""
           }
           ${
-            templateId === "advanced" && hasValue(item.description)
+            templateSupports(templateId, "certificationDescription") && hasValue(item.description)
               ? `<div class="cert-description">${escapeHtml(item.description)}</div>`
               : ""
           }

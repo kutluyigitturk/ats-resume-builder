@@ -10,6 +10,7 @@ import {
   bodyRelativeSize,
 } from "@/lib/cvHelpers";
 import { defaultStyleSettings, resolveDocumentLocale } from "@/data/styleDefaults";
+import { templateSupports } from "@/data/templates";
 import { MailIcon, PhoneIcon, MapPinIcon, LinkedInIcon, LinkIcon } from "@/icons";
 
 /* ─── Helpers ────────────────────────────────────── */
@@ -411,7 +412,7 @@ function buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether) {
               </span>
             </div>
 
-            {templateId === "advanced" && hasValue(project.url) && (
+            {templateSupports(templateId, "projectUrl") && hasValue(project.url) && (
               <p
                 style={{
                   fontFamily: styles.page.fontFamily,
@@ -449,7 +450,7 @@ function buildProjectsBlocks(cv, styles, isFirst, templateId, keepTogether) {
               </span>
             </div>
 
-            {templateId === "advanced" && hasValue(project.url) && (
+            {templateSupports(templateId, "projectUrl") && hasValue(project.url) && (
               <p
                 style={{
                   fontFamily: styles.page.fontFamily,
@@ -614,14 +615,15 @@ function buildCertificationsBlocks(cv, styles, isFirst, templateId) {
             </span>
           </div>
 
-          {(hasValue(item.institution) || (templateId === "advanced" && hasValue(item.url))) && (
+          {(hasValue(item.institution) ||
+            (templateSupports(templateId, "certificationUrl") && hasValue(item.url))) && (
             <p style={styles.itemSubtitle}>
               {item.institution}
               {hasValue(item.institution) &&
-                templateId === "advanced" &&
+                templateSupports(templateId, "certificationUrl") &&
                 hasValue(item.url) &&
                 " – "}
-              {templateId === "advanced" && hasValue(item.url) && (
+              {templateSupports(templateId, "certificationUrl") && hasValue(item.url) && (
                 <a
                   href={item.url}
                   target="_blank"
@@ -639,18 +641,19 @@ function buildCertificationsBlocks(cv, styles, isFirst, templateId) {
             </p>
           )}
 
-          {templateId === "advanced" && hasValue(item.description) && (
-            <p
-              style={{
-                fontFamily: styles.page.fontFamily,
-                fontSize: styles.metaSize,
-                color: "#555",
-                marginTop: "2px",
-              }}
-            >
-              {item.description}
-            </p>
-          )}
+          {templateSupports(templateId, "certificationDescription") &&
+            hasValue(item.description) && (
+              <p
+                style={{
+                  fontFamily: styles.page.fontFamily,
+                  fontSize: styles.metaSize,
+                  color: "#555",
+                  marginTop: "2px",
+                }}
+              >
+                {item.description}
+              </p>
+            )}
         </div>
       ),
     });

@@ -5,6 +5,7 @@ import FormInput from "@/components/ui/FormInput";
 import AddButton from "@/components/ui/AddButton";
 import ReorderableCard from "@/components/ui/ReorderableCard";
 import sectionTips from "@/data/sectionTips";
+import { fieldIsVisible } from "@/lib/templateFeatures";
 import DateInput from "@/components/ui/DateInput";
 import { labelStyle, inputStyle } from "@/lib/constants";
 import { CertificationIcon } from "@/icons";
@@ -71,7 +72,10 @@ export default function CertificationsForm({
                 onChange={(v) => updateItem("certifications", cert.id, "expirationDate", v)}
               />
             </div>
-            {templateId === "advanced" && (
+            {/* Same rule as Projects: a filled field stays reachable even when
+                this template does not print it. */}
+            {(fieldIsVisible(templateId, { certifications }, "certificationUrl") ||
+              fieldIsVisible(templateId, { certifications }, "certificationDescription")) && (
               <>
                 <div className="mb-3">
                   <FormInput

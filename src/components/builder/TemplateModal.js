@@ -2,11 +2,13 @@
 
 import { useCallback, useState, useEffect, useRef } from "react";
 import Modal from "@/components/ui/Modal";
-import { templates } from "@/data/templates";
+import { getTemplate, templates } from "@/data/templates";
+import { droppedFields } from "@/lib/templateFeatures";
 import { defaultStyleSettings } from "@/data/styleDefaults";
 import initialCV from "@/data/initialCV";
 import sampleCV from "@/data/sampleCV";
 import CVPreview from "@/components/cv-preview/CVPreview";
+import { AlertTriangleIcon } from "@/icons";
 
 /* ─── Mini Preview ───────────────────────────────── */
 
@@ -204,6 +206,11 @@ export default function TemplateModal({
   const [measurable, setMeasurable] = useState(false);
   const handleOpened = useCallback(() => setMeasurable(true), []);
 
+  // Relative, not absolute: what this resume would stop showing by moving from
+  // the template it is on to the one selected. Computed before the switch, so
+  // the user reads it while they can still change their mind.
+  const dropped = isCreateMode ? [] : droppedFields(cv, currentTemplateId, selectedId);
+
   const handleApply = () => {
     if (isCreateMode && onCreate) {
       const finalName = resumeName.trim() || "Untitled Resume";
@@ -288,6 +295,35 @@ export default function TemplateModal({
               ))}
           </div>
         </div>
+
+        {/* Says what is lost before the switch, not after. Named fields with
+            counts rather than a general caution - a warning that cannot be
+            acted on is a warning that gets clicked through. */}
+        {dropped.length > 0 && (
+          <div
+            role="status"
+            className="flex items-start gap-3 border-t border-amber-200 bg-amber-50 px-7 py-4"
+          >
+            <span className="mt-0.5 shrink-0 text-amber-600">
+              <AlertTriangleIcon size={18} />
+            </span>
+            <div className="text-sm text-amber-900">
+              <p className="font-semibold">{getTemplate(selectedId).name} does not print these:</p>
+              <ul className="mt-1 list-disc pl-5">
+                {dropped.map((field) => (
+                  <li key={field.feature}>
+                    {field.label} — filled in {field.count}{" "}
+                    {field.count === 1 ? "entry" : "entries"}
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-1.5">
+                Your text is kept and stays editable. Switch back to{" "}
+                {getTemplate(currentTemplateId).name} to print it again.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 border-t border-slate-100 px-7 py-4">

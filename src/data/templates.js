@@ -1,5 +1,12 @@
 // Template definitions registry
-// Each template defines its id, display name, description, badges, and feature flags
+// Each template defines its id, display name, description, badges, and feature flags.
+//
+// The flags are not decoration: both renderers and both editor forms read them
+// through templateSupports(), so this file is the single place that decides
+// which fields a template prints. They describe the code as it is - only
+// Advanced renders these three - rather than an intention. Turning one on makes
+// every resume already using that template print new lines on its next export,
+// which is a visible change to finished documents, not a bug fix.
 
 export const templates = [
   {
@@ -12,6 +19,7 @@ export const templates = [
     features: {
       projectUrl: false,
       certificationUrl: false,
+      certificationDescription: false,
     },
   },
   {
@@ -24,6 +32,7 @@ export const templates = [
     features: {
       projectUrl: true,
       certificationUrl: true,
+      certificationDescription: true,
     },
   },
   {
@@ -34,8 +43,9 @@ export const templates = [
     defaultPrimaryFont: "Times New Roman",
     defaultSecondaryFont: "Arial",
     features: {
-      projectUrl: true,
-      certificationUrl: true,
+      projectUrl: false,
+      certificationUrl: false,
+      certificationDescription: false,
     },
   },
 ];
@@ -44,4 +54,9 @@ export const defaultTemplateId = "classic";
 
 export function getTemplate(id) {
   return templates.find((t) => t.id === id) || templates[0];
+}
+
+/** Whether a template prints a given optional field. */
+export function templateSupports(templateId, feature) {
+  return getTemplate(templateId).features?.[feature] === true;
 }

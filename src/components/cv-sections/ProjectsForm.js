@@ -6,6 +6,7 @@ import AddButton from "@/components/ui/AddButton";
 import ReorderableCard from "@/components/ui/ReorderableCard";
 import BulletListEditor from "@/components/ui/BulletListEditor";
 import sectionTips from "@/data/sectionTips";
+import { fieldIsVisible } from "@/lib/templateFeatures";
 import DateInput from "@/components/ui/DateInput";
 import { FolderIcon } from "@/icons";
 
@@ -69,7 +70,9 @@ export default function ProjectsForm({
               />
             </div>
 
-            {templateId === "advanced" && (
+            {/* Shown when the template prints it, or when it already holds something -
+                a field that vanishes with its data is how the data gets lost. */}
+            {fieldIsVisible(templateId, { projects }, "projectUrl") && (
               <div className="mb-3">
                 <FormInput
                   label="Project URL"
