@@ -1,5 +1,6 @@
 "use client";
 
+import DocumentLocaleSelect from "@/components/layout-style/DocumentLocaleSelect";
 import FontSelect from "@/components/layout-style/FontSelect";
 import StepperControl from "@/components/layout-style/StepperControl";
 import { styleControls } from "@/data/styleDefaults";
@@ -18,6 +19,11 @@ export default function FormattingSection({ styleSettings, updateStyle }) {
 
       {/* Controls */}
       <div className="px-5 py-4">
+        <DocumentLocaleSelect
+          value={styleSettings.documentLocale}
+          onChange={(v) => updateStyle("documentLocale", v)}
+        />
+
         <FontSelect
           label="Primary Font (Headings)"
           value={styleSettings.primaryFont}

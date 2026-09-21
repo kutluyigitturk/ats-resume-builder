@@ -1,6 +1,6 @@
 import { createId } from "@/lib/createId";
 import initialCV from "@/data/initialCV";
-import { defaultStyleSettings } from "@/data/styleDefaults";
+import { defaultStyleSettings, preferredDocumentLocale } from "@/data/styleDefaults";
 import { defaultTemplateId, getTemplate } from "@/data/templates";
 
 const REGISTRY_KEY = "cv-builder-resumes";
@@ -128,6 +128,9 @@ export function createResume(name = "Untitled Resume", chosenTemplateId) {
     ...defaultStyleSettings,
     primaryFont: tpl.defaultPrimaryFont,
     secondaryFont: tpl.defaultSecondaryFont,
+    // Only the starting value. A language switcher added later changes what new
+    // resumes start with, never what a finished one already carries.
+    documentLocale: preferredDocumentLocale(),
   };
   writeJSON(cvDataKey(id), initialCV);
   writeJSON(styleKey(id), initialStyle);
@@ -152,6 +155,9 @@ export function createResumeWithData(name = "Untitled Resume", chosenTemplateId,
     ...defaultStyleSettings,
     primaryFont: tpl.defaultPrimaryFont,
     secondaryFont: tpl.defaultSecondaryFont,
+    // Only the starting value. A language switcher added later changes what new
+    // resumes start with, never what a finished one already carries.
+    documentLocale: preferredDocumentLocale(),
   };
 
   // Merge provided data with initialCV to ensure all fields exist

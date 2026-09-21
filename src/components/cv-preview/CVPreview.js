@@ -9,7 +9,7 @@ import {
   resolveFontFamily,
   bodyRelativeSize,
 } from "@/lib/cvHelpers";
-import { defaultStyleSettings } from "@/data/styleDefaults";
+import { defaultStyleSettings, resolveDocumentLocale } from "@/data/styleDefaults";
 import { MailIcon, PhoneIcon, MapPinIcon, LinkedInIcon, LinkIcon } from "@/icons";
 
 /* ─── Helpers ────────────────────────────────────── */
@@ -1132,6 +1132,10 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
   );
 
   const rulerHeight = `${297 - 2 * settings.marginTopBottom}mm`;
+  // Both the measure layer and the rendered pages carry it: text-transform
+  // resolves per language, so measuring under one language and painting under
+  // another would put the page break in a different place than the PDF does.
+  const documentLocale = resolveDocumentLocale(settings.documentLocale);
 
   const blocks = useMemo(
     () =>
@@ -1217,6 +1221,7 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
       <div
         ref={measureRef}
         aria-hidden="true"
+        lang={documentLocale}
         style={{
           ...pageBaseStyle,
           position: "absolute",
@@ -1246,6 +1251,7 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
             <div
               key={pageIndex}
               className="bg-white"
+              lang={documentLocale}
               style={{
                 ...pageBaseStyle,
                 height: "297mm",
@@ -1280,6 +1286,7 @@ export default function CVPreview({ cv, hideReferences, styleSettings, templateI
       ) : (
         <div
           className="bg-white"
+          lang={documentLocale}
           style={{
             ...pageBaseStyle,
             minHeight: "297mm",

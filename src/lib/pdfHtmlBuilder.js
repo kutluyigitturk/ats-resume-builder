@@ -6,7 +6,7 @@ import {
   resolveFontFamily,
   bodyRelativeSize,
 } from "./cvHelpers";
-import { defaultStyleSettings } from "@/data/styleDefaults";
+import { defaultStyleSettings, resolveDocumentLocale } from "@/data/styleDefaults";
 
 function joinContact(fields, separator = " | ") {
   return fields.filter(hasValue).map(escapeHtml).join(separator);
@@ -288,6 +288,9 @@ export function buildPdfHtml(
   // merges over the defaults on read; this is the same reconciliation.
   const settings = { ...defaultStyleSettings, ...(styleSettings || {}) };
   const dynamicCss = buildDynamicCss(settings, templateId);
+  // Decides how the professional template uppercases the name and title, and
+  // travels into the file as its declared language.
+  const documentLocale = resolveDocumentLocale(settings.documentLocale);
   const t = cv.sectionTitles || {};
 
   const name = hasValue(cv.name) ? escapeHtml(cv.name) : "";
@@ -344,7 +347,7 @@ export function buildPdfHtml(
     .replace('class="cv-section-title"', 'class="cv-section-title cv-section-title-first"');
 
   return `<!DOCTYPE html>
-<html>
+<html lang="${documentLocale}">
 <head>
   <meta charset="UTF-8">
   <title>${escapeHtml(pdfName)}</title>

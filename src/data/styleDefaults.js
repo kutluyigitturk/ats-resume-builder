@@ -85,6 +85,44 @@ export const sectionDefinitions = [
 
 export const defaultSectionOrder = sectionDefinitions.map((s) => s.id);
 
+// The document's own language - not the interface language. A Turkish user
+// writes an English resume and still wants their name cased with Turkish rules,
+// because a name carries its own orthography: "Elif" uppercases to ELİF in
+// Turkish and ELIF in English, and the wrong letter reaches the text layer an
+// ATS reads. Today this decides two things and nothing else: how the
+// professional template uppercases the name and title, and the lang attribute
+// on the exported file. Section headings stay English until the interface is
+// translatable.
+export const documentLocales = [
+  { id: "en", label: "English" },
+  { id: "tr", label: "Türkçe" },
+];
+
+// localStorage is the user's to edit, so a stored locale is a request, not a
+// fact - and this one lands in an HTML attribute.
+export function resolveDocumentLocale(value) {
+  return documentLocales.some((l) => l.id === value) ? value : "en";
+}
+
+// Only ever the starting value for a new resume. Once a resume carries a
+// locale it keeps it, so a language switcher added later cannot rewrite a
+// finished document.
+export function preferredDocumentLocale() {
+  if (typeof navigator === "undefined") return "en";
+
+  const supported = documentLocales.map((l) => l.id);
+  const tags = navigator.languages?.length ? navigator.languages : [navigator.language];
+
+  for (const tag of tags) {
+    const base = String(tag || "")
+      .toLowerCase()
+      .split("-")[0];
+    if (supported.includes(base)) return base;
+  }
+
+  return "en";
+}
+
 // Default style values matching current cvStyles base
 export const defaultStyleSettings = {
   primaryFont: "Inter",
@@ -103,4 +141,7 @@ export const defaultStyleSettings = {
   betweenContentBlocks: 10,
   // Pagination
   keepItemsTogether: false,
+  // Reconciled on read, so a resume saved before this existed renders exactly
+  // as it did before.
+  documentLocale: "en",
 };
